@@ -7,6 +7,7 @@ import java.nio.file.Files;
 public class FileFinderSupport {
   private File projectLocalPath;
   private File targetClassLocalPath;
+  private File localPathResourceDirectory;
 
   public FileFinderSupport(String pathFile){
     this.projectLocalPath = new File(pathFile);
@@ -64,12 +65,17 @@ public class FileFinderSupport {
     if (!resourceDirectory.exists()){
       try {
         Files.createDirectories(resourceDirectory.toPath());
+        this.localPathResourceDirectory = resourceDirectory;
         return true;
       } catch (IOException e) {
         e.printStackTrace();
       }
     }
     return false;
+  }
+
+  public boolean deleteResourceDirectory(){
+    return this.localPathResourceDirectory.delete();
   }
 
 }

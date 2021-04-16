@@ -31,6 +31,8 @@ public class ObjectSerializerSupporterTest {
         fileFinderSupport.getResourceDirectoryPath(pomFileInstrumentation.getPomFileDirectory()));
 
     Assert.assertTrue(new File(System.getProperty("user.dir")+File.separator+"src/test/resources/validProject/src/main/java/ObjectSerializerSupporter.java").exists());
+    objectSerializerSupporter.deleteObjectSerializerSupporterClass(fileFinderSupport.getTargetClassLocalPath().getPath());
+    fileFinderSupport.deleteResourceDirectory();
   }
 
   @Test
@@ -51,17 +53,8 @@ public class ObjectSerializerSupporterTest {
         fileFinderSupport.getResourceDirectoryPath(pomFileInstrumentation.getPomFileDirectory()));
 
     Assert.assertTrue(new File(System.getProperty("user.dir")+File.separator+"src/test/resources/validProject/src/main/java/org/ObjectSerializerSupporter.java").exists());
-  }
-
-  @After
-  public void removeResourceDirectory(){
-    new File(System.getProperty("user.dir")+File.separator+"src/test/resources/validProject/src/main/resources").delete();
-  }
-
-  @After
-  public void removeObjectSerializerSupporter(){
-    new File(System.getProperty("user.dir")+File.separator+"src/test/resources/validProject/src/main/java/ObjectSerializerSupporter.java").delete();
-    new File(System.getProperty("user.dir")+File.separator+"src/test/resources/validProject/src/main/java/org/ObjectSerializerSupporter.java").delete();
+    objectSerializerSupporter.deleteObjectSerializerSupporterClass(fileFinderSupport.getTargetClassLocalPath().getPath());
+    fileFinderSupport.deleteResourceDirectory();
   }
 
 }

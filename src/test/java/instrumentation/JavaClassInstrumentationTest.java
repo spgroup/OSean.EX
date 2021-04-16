@@ -2,10 +2,8 @@ package instrumentation;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Collections;
 import org.file.FileFinderSupport;
 import org.file.ObjectSerializerSupporter;
 import org.instrumentation.JavaClassIntrumentation;
@@ -39,6 +37,7 @@ public class JavaClassInstrumentationTest {
     Assert.assertTrue(new String(Files.readAllBytes(Paths.get(System.getProperty("user.dir")+File.separator+"src/test/resources/validProject/src/main/java/org/Person.java"))).contains("import org.ObjectSerializerSupporter;"));
     Assert.assertTrue(javaClassIntrumentation.undoTransformations(new File(fileFinderSupport.getTargetClassLocalPath()+File.separator+"Person.java")));
     objectSerializerSupporter.deleteObjectSerializerSupporterClass(fileFinderSupport.getTargetClassLocalPath().getPath());
+    fileFinderSupport.deleteResourceDirectory();
   }
 
   @Test
@@ -63,39 +62,7 @@ public class JavaClassInstrumentationTest {
     Assert.assertFalse(new String(Files.readAllBytes(Paths.get(System.getProperty("user.dir")+File.separator+"src/test/resources/validProject/src/main/java/PersonTwo.java"))).contains("serializeWithXtreamOut(this);"));
     javaClassIntrumentation.undoTransformations(new File(fileFinderSupport.getTargetClassLocalPath()+File.separator+"PersonTwo.java"));
     objectSerializerSupporter.deleteObjectSerializerSupporterClass(fileFinderSupport.getTargetClassLocalPath().getPath());
+    fileFinderSupport.deleteResourceDirectory();
   }
 
-  @After
-  public void removeResourceDirectory(){
-    new File(System.getProperty("user.dir")+File.separator+"src/test/resources/validProject/src/main/resources").delete();
-  }
-
-  //@After
-  public void removeObjectSerializerSupporter(){
-    new File(System.getProperty("user.dir")+File.separator+"src/test/resources/validProject/src/main/java/ObjectSerializerSupporter.java").delete();
-    new File(System.getProperty("user.dir")+File.separator+"src/test/resources/validProject/src/main/java/org/ObjectSerializerSupporter.java").delete();
-  }
-
-  @After
-  public void undoChangesOnFileWithInstrumentation() throws IOException {
-    String assistant = "public class PersonTwo {\n"
-        + "  private String name;\n"
-        + "  private String surname;\n"
-        + "  \n"
-        + "  public PersonTwo(String name,  String surname){\n"
-        + "    this.name=name;\n"
-        + "    this.surname=surname;\n"
-        + "  }\n"
-        + "  \n"
-        + "  public String getName(){\n"
-        + "    return this.name;\n"
-        + "  }\n"
-        + "  public String getFullName(){\n"
-        + "    return name + \" \" + surname;\n"
-        + "  }\n"
-        + "}\n";
-    Files.write( Paths.get(System.getProperty("user.dir")+File.separator+"src/test/resources/validProject/src/main/java/PersonTwo.java"),
-        Collections.singleton(assistant), StandardCharsets.UTF_8);
-    new File(System.getProperty("user.dir")+File.separator+"src/test/resources/validProject/src/main/java/PersonTwo.java");
-  }
 }
