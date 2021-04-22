@@ -48,6 +48,8 @@ public class RunObjectSerialization {
             objectSerializerSupporter.getFullSerializerSupporterClass());
         javaClassIntrumentation.runTransformation(new File(
             fileFinderSupport.getTargetClassLocalPath() + File.separator + args[1]));
+        runTestabilityTransformations(new File(
+            fileFinderSupport.getTargetClassLocalPath() + File.separator + args[1]));
 
         Process process = Runtime.getRuntime()
             .exec("mvn clean test", null,
@@ -97,6 +99,18 @@ public class RunObjectSerialization {
   private static String getObjectClassPathOnTargetProject(JavaClassIntrumentation javaClassIntrumentation) {
     return javaClassIntrumentation.getPackageName() + File.separator
         + "ObjectSerializerSupporter";
+  }
+
+  private static boolean runTestabilityTransformations(File file){
+    try {
+      Process processTestability = Runtime.getRuntime().exec("java -jar "+System.getProperty("user.dir")+File.separator+"src"+
+          File.separator+"main"+File.separator+"resources"+File.separator+"testability-transformations.jar" + " " +
+          file.toPath().toString());
+      return true;
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+    return false;
   }
 
 }
