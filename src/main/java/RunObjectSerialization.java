@@ -1,9 +1,6 @@
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.List;
 import javax.xml.transform.TransformerException;
 import org.file.FileFinderSupport;
@@ -11,6 +8,8 @@ import org.file.ObjectSerializerSupporter;
 import org.file.SerializedObjectAccessOutputClass;
 import org.instrumentation.JavaClassIntrumentation;
 import org.instrumentation.PomFileInstrumentation;
+import org.util.JarManager;
+import org.util.ProcessManager;
 
 public class RunObjectSerialization {
 
@@ -19,6 +18,7 @@ public class RunObjectSerialization {
    * The first input is the local path of the project under analysis
    * The second input is the class holding the method that the instrumentation will be applied
    * The third input is the method where the instrumentation will be applied
+   * The fourth input is the project name
    */
   public static void main(String[] args)
       throws IOException, InterruptedException, TransformerException {
@@ -52,24 +52,20 @@ public class RunObjectSerialization {
         Process process = Runtime.getRuntime()
             .exec("mvn clean test", null,
                 new File(fileFinderSupport.getProjectLocalPath().getPath()));
-        System.out.println("Creating Serialized Objects: final status - " + process.waitFor());
+        System.out.println("Creating Serialized Objects: final status - " + (process.waitFor() == 0 ? true : false));
 
         SerializedObjectAccessOutputClass serializedObjectAccessOutputClass = new SerializedObjectAccessOutputClass();
 
         Process process4 = Runtime.getRuntime()
             .exec("mvn clean compile assembly:single", null, new File(pomDirectory.getPath()));
         System.out.println(
-            "Generating jar file with serialized objects: final status - " + process4.waitFor());
+            "Generating jar file with serialized objects: final status - " + (process4.waitFor() == 0 ? true : false));
 
+        String generatedJarFile = JarManager.getJarFile(pomFileInstrumentation);
         Process process2 = Runtime.getRuntime()
-            .exec("java -cp " + findJarFile(
-                new File(pomFileInstrumentation.getPomFileDirectory() + File.separator + "target"))
-                + " " + javaClassIntrumentation.getPackageName() + File.separator
-                + "ObjectSerializerSupporter", null, new File(pomDirectory.getPath()));
-        List<String> aux = getListOfMethodsAssociatedToSerializedObjects(process2);
-        System.out.println(
-            "Generating method list associated to serialized objects: final status - " + process2
-                .waitFor());
+            .exec("java -cp " + generatedJarFile
+                + " " + getObjectClassPathOnTargetProject(javaClassIntrumentation), null, new File(pomDirectory.getPath()));
+        List<String> aux = ProcessManager.getListOfMethodsAssociatedToSerializedObjects(process2);
 
         serializedObjectAccessOutputClass
             .getOutputClass(aux, fileFinderSupport.getTargetClassLocalPath().getPath(),
@@ -82,43 +78,25 @@ public class RunObjectSerialization {
         Process process3 = Runtime.getRuntime()
             .exec("mvn clean compile assembly:single", null, new File(pomDirectory.getPath()));
         System.out.println(
-            "Generating jar file with serialized objects: final status - " + process3.waitFor());
+            "Generating jar file with serialized objects: final status - " + (process3.waitFor() == 0 ? true : false));
+
+        fileFinderSupport.deleteResourceDirectory();
+        serializedObjectAccessOutputClass.deleteOldClassSupporter();
+        JarManager.saveGeneratedJarFile(generatedJarFile, args[0].split(args[3])[0]+File.separator+"GeneratedJars"+File.separator+args[3], "generated.jar");
       }else{
         System.out.println("Please inform all three inputs required to run the serialization process");
-        System.out.println("First: local project path");
-        System.out.println("Second: class holding the target method");
-        System.out.println("Third: target method");
+        System.out.println("1º: local project path");
+        System.out.println("2º: class holding the target method");
+        System.out.println("3º: target method");
+        System.out.println("4º: project name");
       }
     }
 
   }
 
-  private static List<String> getListOfMethodsAssociatedToSerializedObjects(Process process2) throws IOException {
-    BufferedReader stdInput = new BufferedReader(new
-        InputStreamReader(process2.getInputStream()));
-    String s = null;
-    List<String> aux = new ArrayList<>();
-    while ((s = stdInput.readLine()) != null) {
-      aux.add("\n" + s);
-    }
-    return aux;
-  }
-
-  private static String findJarFile(File targetDirectory){
-    File[] list = targetDirectory.listFiles();
-    if(list!=null)
-      for (File fil : list) {
-        if (fil.isDirectory()){
-          String aux = findJarFile(fil);
-          if (aux!=null){
-            return aux;
-          }
-        }
-        else if (fil.getName().contains("jar-with-dependencies")){
-          return fil.getAbsolutePath();
-        }
-      }
-    return null;
+  private static String getObjectClassPathOnTargetProject(JavaClassIntrumentation javaClassIntrumentation) {
+    return javaClassIntrumentation.getPackageName() + File.separator
+        + "ObjectSerializerSupporter";
   }
 
 }
