@@ -75,7 +75,19 @@ public class FileFinderSupport {
   }
 
   public boolean deleteResourceDirectory(){
-    return this.localPathResourceDirectory.delete();
+    try {
+      String[] entries = this.localPathResourceDirectory.list();
+      for (String s : entries) {
+        File currentFile = new File(this.localPathResourceDirectory.getPath(), s);
+        currentFile.delete();
+      }
+      this.localPathResourceDirectory.delete();
+      return true;
+    }catch (Exception e){
+      e.printStackTrace();
+    }
+    return false;
+
   }
 
 }
