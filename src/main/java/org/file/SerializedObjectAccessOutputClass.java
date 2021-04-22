@@ -17,6 +17,7 @@ public class SerializedObjectAccessOutputClass {
         + "import com.thoughtworks.xstream.XStream;\n"
         + "import java.io.ByteArrayOutputStream;\n"
         + "import java.io.IOException;\n"
+        + "import java.io.File;\n"
         + "import java.io.InputStream;\n"
         + "\npublic class SerializedObjectSupporter {\n"
         + "\n\tprivate String readFileContents(InputStream file) throws IOException {\n"

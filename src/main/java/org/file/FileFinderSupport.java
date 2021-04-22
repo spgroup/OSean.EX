@@ -57,7 +57,8 @@ public class FileFinderSupport {
   }
 
   public String getResourceDirectoryPath(File localPomDirectory){
-    return localPomDirectory+File.separator+"src"+File.separator+"main"+File.separator+"resources";
+    return localPomDirectory+File.separator+"src"+File.separator+"main"+File.separator+"resources"
+        +File.separator+"serializedObjects";
   }
 
   public boolean createNewDirectory(File localPomDirectory){

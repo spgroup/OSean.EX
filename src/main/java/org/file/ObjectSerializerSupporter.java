@@ -112,7 +112,7 @@ public class ObjectSerializerSupporter {
         + "      if (serializedObject!= null && serializedObject.getClass().getName() != null && !serializedObject.getClass().getCanonicalName().contains(\"EmptyList\")) {\n"
         + "        String aux = String\n"
         + "            .format(\"\\tpublic %s deserializeObject%s() throws IOException {\\n\"\n"
-        + "                    +\"\\t\\tjava.io.InputStream s = SerializedObjectSupporter.class.getClassLoader().getResourceAsStream(\\\"%s\\\");\\n\"\n"
+        + "                    +\"\\t\\tjava.io.InputStream s = SerializedObjectSupporter.class.getClassLoader().getResourceAsStream(\\\"serializedObjects\\\"+File.separator+\\\"%s\\\");\\n\"\n"
         + "                    + \"\\t\\treturn (%s) deserializeAny(readFileContents(s));\\n\" +\n"
         + "                    \"\\t}\", serializedObject.getClass().getCanonicalName(),\n"
         + "                file.getName().replace(\".xml\", \"\"), file.getName(),\n"
