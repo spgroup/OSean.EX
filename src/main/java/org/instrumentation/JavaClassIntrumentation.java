@@ -19,11 +19,13 @@ import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.TryStatement;
+import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 public class JavaClassIntrumentation {
@@ -205,10 +207,12 @@ public class JavaClassIntrumentation {
     catchClause.setBody(bodyCatch);
 
     List<ASTNode> parameters = nodeMethod.parameters();
-    ThisExpression expression = ast.newThisExpression();
 
-    body.statements().add(ast.newExpressionStatement(getMethodInvocation("serializeWithXtreamOut",
-        expression, ast)));
+    if (!isMethodStatic(nodeMethod)){
+      ThisExpression expression = ast.newThisExpression();
+      body.statements().add(ast.newExpressionStatement(getMethodInvocation("serializeWithXtreamOut",
+          expression, ast)));
+    }
 
     for(ASTNode parameter: parameters){
       SingleVariableDeclaration aux = (SingleVariableDeclaration) parameter;
@@ -222,6 +226,15 @@ public class JavaClassIntrumentation {
     nodeMethod.getBody().statements().add(0, result);
 
     return nodeMethod;
+  }
+
+  private boolean isMethodStatic(MethodDeclaration methodDeclaration){
+    for (Object modifier: methodDeclaration.modifiers()){
+      if (modifier instanceof Modifier && ((Modifier) modifier).isStatic()){
+        return true;
+      }
+    }
+    return false;
   }
 
   private boolean removeAstNode(MethodDeclaration nodeMethod) {
