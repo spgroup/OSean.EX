@@ -5,9 +5,11 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.file.Path;
 import java.util.List;
 
 public class SerializedObjectAccessOutputClass {
+  private Path outputClassPath;
 
   public boolean getOutputClass(List<String> serializedObjectMethods, String pomFileDirectory, String packageName){
     String classText = ""
@@ -44,12 +46,12 @@ public class SerializedObjectAccessOutputClass {
         + "\n";
     try {
       String classTextFinal = "\n}";
-      deleteOldClassSupporter(pomFileDirectory);
       saveFile(pomFileDirectory, classText);
       for (String oneMethod : serializedObjectMethods) {
         saveFile(pomFileDirectory, oneMethod);
       }
       saveFile(pomFileDirectory, classTextFinal);
+      this.outputClassPath = new File(pomFileDirectory+File.separator+"SerializedObjectSupporter.java").toPath();
       return true;
     }catch (Exception e){
       e.printStackTrace();
@@ -70,10 +72,11 @@ public class SerializedObjectAccessOutputClass {
     return false;
   }
 
-  private void deleteOldClassSupporter(String fileDirectory) {
-    if (new File(fileDirectory +File.separator+"SerializedObjectSupporter.java").exists()) {
-      new File(fileDirectory +File.separator+"SerializedObjectSupporter.java").delete();
+  public boolean deleteOldClassSupporter() {
+    if (this.outputClassPath.toFile().exists()){
+      return this.outputClassPath.toFile().delete();
     }
+    return false;
   }
 
 }
