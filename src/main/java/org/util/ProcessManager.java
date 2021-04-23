@@ -19,10 +19,6 @@ public class ProcessManager extends Thread {
     this.outputs = new ArrayList<>();
   }
 
-  public List<String> getOutputs() {
-    return this.outputs;
-  }
-
   public void run() {
     try {
       InputStreamReader isr = new InputStreamReader(is);
@@ -36,21 +32,20 @@ public class ProcessManager extends Thread {
     }
   }
 
-  public static List<String> getListOfMethodsAssociatedToSerializedObjects(Process process2)
+  public static void computeProcessOutput(Process process, String outputMessage)
       throws IOException, InterruptedException {
 
     ProcessManager errorGobbler = new
-        ProcessManager(process2.getErrorStream(), "ERROR");
+        ProcessManager(process.getErrorStream(), "ERROR");
 
     ProcessManager outputGobbler = new
-        ProcessManager(process2.getInputStream(), "OUTPUT");
+        ProcessManager(process.getInputStream(), "OUTPUT");
 
     errorGobbler.start();
     outputGobbler.start();
 
     System.out.println(
-        "Generating method list associated to serialized objects: final status - "+ (process2.waitFor() == 0 ? true : false));
+        outputMessage + " : " +(process.waitFor() == 0 ? "SUCCESSFUL" : "UNSUCCESSFUL"));
 
-    return outputGobbler.getOutputs();
   }
 }

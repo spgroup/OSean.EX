@@ -74,7 +74,7 @@ public class SerializedObjectAccessOutputClass {
   }
 
   public boolean deleteOldClassSupporter() {
-    if (this.outputClassPath.toFile().exists()){
+    if (this.outputClassPath != null && this.outputClassPath.toFile().exists()){
       return this.outputClassPath.toFile().delete();
     }
     return false;
