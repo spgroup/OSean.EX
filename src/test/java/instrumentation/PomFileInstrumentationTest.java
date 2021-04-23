@@ -50,7 +50,7 @@ public class PomFileInstrumentationTest {
   }
 
   @Test
-  public void expectTrueFalseForAddingChangesOnPom() throws IOException, TransformerException {
+  public void expectTrueForAddingChangesOnPom() throws IOException, TransformerException {
     updatePomFile("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
         + "<project xmlns=\"http://maven.apache.org/POM/4.0.0\"\n"
         + "  xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n"
@@ -72,6 +72,41 @@ public class PomFileInstrumentationTest {
     Assert.assertTrue(pomFileInstrumentation.addRequiredDependenciesOnPOM());
     Assert.assertTrue(pomFileInstrumentation.addResourcesForGeneratedJar());
     Assert.assertTrue(pomFileInstrumentation.addPluginForJarWithAllDependencies());
+  }
+
+  @Test
+  public void expectTrueForAddingChangesOnPomTwo() throws IOException, TransformerException {
+    updatePomFile("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+        + "<project xmlns=\"http://maven.apache.org/POM/4.0.0\"\n"
+        + "  xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n"
+        + "  xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd\">\n"
+        + "  <modelVersion>4.0.0</modelVersion>\n"
+        + "\n"
+        + "  <groupId>projectId</groupId>\n"
+        + "  <artifactId>project</artifactId>\n"
+        + "  <version>1.0</version>\n"
+        + "\n"
+        + "  <properties>\n"
+        + "    <maven.compiler.source>8</maven.compiler.source>\n"
+        + "    <maven.compiler.target>8</maven.compiler.target>\n"
+        + "  </properties>\n"
+        + "  <dependencies>"
+        + "     <dependency>\n"
+        + "          <groupId>org.apache.commons</groupId>\n"
+        + "          <artifactId>commons-compress</artifactId>\n"
+        + "          <version>1.0</version>\n"
+        + "     </dependency>"
+        + "     <dependency>"
+        + "          <groupId>com.thoughtworks.xstream</groupId>"
+        + "          <artifactId>xstream</artifactId>"
+        + "          <version>1.4.15</version>"
+        + "     </dependency>"
+        + "  </dependencies>"
+        + "\n"
+        + "</project>");
+
+    PomFileInstrumentation pomFileInstrumentation = new PomFileInstrumentation(new File("src/test/resources/project").getPath());
+    Assert.assertTrue(pomFileInstrumentation.addRequiredDependenciesOnPOM());
   }
 
   @Test

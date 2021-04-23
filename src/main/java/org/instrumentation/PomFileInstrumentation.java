@@ -59,16 +59,12 @@ public class PomFileInstrumentation {
           Node plugins = getPluginsNode(document);
           build.appendChild(plugins);
           root.appendChild(build);
-          //saveChangesOnPomFiles(document);
-          //return true;
           addedDependency = true;
         }else{
           for (int temp = 0; temp < nListBuild.getLength(); temp++) {
             Node build = nListBuild.item(temp);
             Node plugins = getPluginsNode(document);
             build.appendChild(plugins);
-            //saveChangesOnPomFiles(document);
-            //return true;
             addedDependency = true;
           }
         }
@@ -76,7 +72,7 @@ public class PomFileInstrumentation {
         for (int temp = 0; temp < nList.getLength(); temp++) {
           Node node = nList.item(temp);
           Node plugin = getPluginNode(document);
-          if (!isDependencyAlreadyAvailable(document.getElementsByTagName("plugin"), plugin)){
+          if (!isNodeAlreadyAvailable(document.getElementsByTagName("plugin"), plugin)){
             node.appendChild(plugin);
             saveChangesOnPomFiles(document);
             addedDependency = true;
@@ -149,7 +145,7 @@ public class PomFileInstrumentation {
 
   }
 
-  private boolean isDependencyAlreadyAvailable(NodeList nodeList, Node newDependency){
+  private boolean isNodeAlreadyAvailable(NodeList nodeList, Node newDependency){
     for (int temp = 0; temp < nodeList.getLength(); temp++) {
       Node node = nodeList.item(temp);
       if(node.getFirstChild() != null && node.getFirstChild().getFirstChild() != null &&
@@ -157,6 +153,23 @@ public class PomFileInstrumentation {
         return true;
       }else if(node.getFirstChild() != null && node.getFirstChild().getNextSibling() != null && node.getFirstChild().getNextSibling().getFirstChild() != null &&
           node.getFirstChild().getNextSibling().getFirstChild().getTextContent().equals(newDependency.getFirstChild().getFirstChild().getTextContent())){
+        return true;
+      }
+    }
+    return false;
+  }
+
+  private boolean isDependencyAlreadyAvailable(NodeList nodeList, Node newDependency){
+    for (int temp = 0; temp < nodeList.getLength(); temp++) {
+      Node node = nodeList.item(temp);
+      //check if the groupId is already declared on the target dependency
+      if(node.getFirstChild().getNextSibling().getFirstChild() != null && newDependency.getFirstChild().getFirstChild() != null &&
+          node.getFirstChild().getNextSibling().getFirstChild().getTextContent().
+              equals(newDependency.getFirstChild().getFirstChild().getTextContent())
+      //check if the artifactID is also declared on the target dependency
+      && (node.getFirstChild().getNextSibling().getNextSibling().getNextSibling().getFirstChild() != null &&
+         node.getFirstChild().getNextSibling().getNextSibling().getNextSibling().getFirstChild().getTextContent().
+             equals(newDependency.getFirstChild().getNextSibling().getFirstChild().getTextContent()))) {
         return true;
       }
     }
@@ -233,7 +246,7 @@ public class PomFileInstrumentation {
           Node node = nList.item(temp);
           Node resource = getResourceNode(document);
 
-          if (!isDependencyAlreadyAvailable(document.getElementsByTagName("resource"), resource)) {
+          if (!isNodeAlreadyAvailable(document.getElementsByTagName("resource"), resource)) {
             node.appendChild(resource);
             addedResource = true;
           }
