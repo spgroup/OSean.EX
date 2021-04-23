@@ -25,11 +25,12 @@ public class FileFinderSupportTest {
   public void expectCreateResourceDirectoryForProjectWithPomFile() throws TransformerException {
     FileFinderSupport fileFinderSupport = new FileFinderSupport("src/test/resources/project");
     Assert.assertTrue(fileFinderSupport.createNewDirectory(fileFinderSupport.findFile("Assistant.java", fileFinderSupport.getProjectLocalPath())));
-    Assert.assertEquals(true, new File(System.getProperty("user.dir")+File.separator+"src/test/resources/project/src/main/resources").exists());
+    Assert.assertEquals(true, new File(System.getProperty("user.dir")+File.separator+"src/test/resources/project/src/main/resources/").exists());
   }
 
   @After
   public void removeResourceDirectory(){
+    new File(System.getProperty("user.dir")+File.separator+"src/test/resources/project/src/main/resources/serializedObjects").delete();
     new File(System.getProperty("user.dir")+File.separator+"src/test/resources/project/src/main/resources").delete();
   }
 
