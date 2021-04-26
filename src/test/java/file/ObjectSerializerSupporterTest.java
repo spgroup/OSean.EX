@@ -5,9 +5,7 @@ import java.io.IOException;
 import java.nio.file.Paths;
 import org.file.FileFinderSupport;
 import org.file.ObjectSerializerSupporter;
-import org.instrumentation.JavaClassIntrumentation;
 import org.instrumentation.PomFileInstrumentation;
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
 

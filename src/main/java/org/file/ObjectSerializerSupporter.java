@@ -170,6 +170,7 @@ public class ObjectSerializerSupporter {
         PrintWriter out = new PrintWriter(bw))
     {
       out.println(contents);
+      out.close();
       return true;
     } catch (IOException e) {
       e.printStackTrace();

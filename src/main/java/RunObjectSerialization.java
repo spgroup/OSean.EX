@@ -8,7 +8,7 @@ import javax.xml.transform.TransformerException;
 import org.file.FileFinderSupport;
 import org.file.ObjectSerializerSupporter;
 import org.file.SerializedObjectAccessOutputClass;
-import org.instrumentation.JavaClassIntrumentation;
+import org.instrumentation.ObjectSerializerClassIntrumentation;
 import org.instrumentation.PomFileInstrumentation;
 import org.util.JarManager;
 import org.util.ProcessManager;
@@ -47,9 +47,9 @@ public class RunObjectSerialization {
                 fileFinderSupport
                     .getResourceDirectoryPath(pomFileInstrumentation.getPomFileDirectory()));
 
-        JavaClassIntrumentation javaClassIntrumentation = new JavaClassIntrumentation(args[2],
+        ObjectSerializerClassIntrumentation objectSerializerClassIntrumentation = new ObjectSerializerClassIntrumentation(args[2],
             objectSerializerSupporter.getFullSerializerSupporterClass());
-        javaClassIntrumentation.runTransformation(new File(
+        objectSerializerClassIntrumentation.runTransformation(new File(
             fileFinderSupport.getTargetClassLocalPath() + File.separator + args[1]));
         runTestabilityTransformations(new File(
             fileFinderSupport.getTargetClassLocalPath() + File.separator + args[1]));
@@ -68,18 +68,18 @@ public class RunObjectSerialization {
         String generatedJarFile = JarManager.getJarFile(pomFileInstrumentation);
         Process process2 = Runtime.getRuntime()
             .exec("java -cp " + generatedJarFile
-                + " " + getObjectClassPathOnTargetProject(javaClassIntrumentation), null, new File(pomDirectory.getPath()));
+                + " " + getObjectClassPathOnTargetProject(objectSerializerClassIntrumentation), null, new File(pomDirectory.getPath()));
         ProcessManager.computeProcessOutput(process2, "Generating method list associated to serialized objects");
         List<String> aux = getMethodList(fileFinderSupport
             .getResourceDirectoryPath(pomFileInstrumentation.getPomFileDirectory()));
 
+        objectSerializerClassIntrumentation.undoTransformations(new File(
+            fileFinderSupport.getTargetClassLocalPath() + File.separator + args[1]));
+        objectSerializerSupporter.deleteObjectSerializerSupporterClass(fileFinderSupport.getTargetClassLocalPath().getPath());
+
         serializedObjectAccessOutputClass
             .getOutputClass(aux, fileFinderSupport.getTargetClassLocalPath().getPath(),
                 objectSerializerSupporter.getFullSerializerSupporterClass());
-
-        javaClassIntrumentation.undoTransformations(new File(
-            fileFinderSupport.getTargetClassLocalPath() + File.separator + args[1]));
-        objectSerializerSupporter.deleteObjectSerializerSupporterClass(fileFinderSupport.getTargetClassLocalPath().getPath());
 
         Process process3 = Runtime.getRuntime()
             .exec("mvn clean compile assembly:single", null, new File(pomDirectory.getPath()));
@@ -116,8 +116,9 @@ public class RunObjectSerialization {
     return methods;
   }
 
-  private static String getObjectClassPathOnTargetProject(JavaClassIntrumentation javaClassIntrumentation) {
-    return javaClassIntrumentation.getPackageName() + File.separator
+  private static String getObjectClassPathOnTargetProject(
+      ObjectSerializerClassIntrumentation objectSerializerClassIntrumentation) {
+    return objectSerializerClassIntrumentation.getPackageName() + File.separator
         + "ObjectSerializerSupporter";
   }
 

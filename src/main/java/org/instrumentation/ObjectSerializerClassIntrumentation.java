@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.ArrayUtils;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -22,17 +21,14 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
-import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.TryStatement;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
-public class JavaClassIntrumentation {
-  private String packageName;
-  private String targetMethod;
+public class ObjectSerializerClassIntrumentation {
+  protected String packageName;
+  protected String targetMethod;
 
-  public JavaClassIntrumentation(String targetMethod, String packageName){
+  public ObjectSerializerClassIntrumentation(String targetMethod, String packageName){
     this.packageName = packageName;
     this.targetMethod = targetMethod;
   }
@@ -45,16 +41,14 @@ public class JavaClassIntrumentation {
     return targetMethod;
   }
 
-  public final boolean undoTransformations(File file){
+  public boolean undoTransformations(File file){
     try{
       final CompilationUnit cu = getCompilationUnitForFile(file);
 
       undoChanges(cu);
-      removeImport(cu);
+      removeImport(cu, "ObjectSerializerSupporter");
 
-      FileWriter fooWriter = new FileWriter(file, false); // true to append
-      fooWriter.write(cu.toString());
-      fooWriter.close();
+      saveTransformations(file, cu);
       return true;
     }catch (Exception e){
       e.printStackTrace();
@@ -62,12 +56,12 @@ public class JavaClassIntrumentation {
     return false;
   }
 
-  private boolean removeImport(CompilationUnit cu){
+  public boolean removeImport(CompilationUnit cu, String importedClass){
     try{
       int i = 0;
       for (Object importDeclaration: cu.imports()){
         if(importDeclaration instanceof ImportDeclaration &&
-            ((ImportDeclaration) importDeclaration).getName().toString().contains("ObjectSerializerSupporter")){
+            ((ImportDeclaration) importDeclaration).getName().toString().contains(importedClass)){
           cu.imports().remove(i);
           return true;
         }
@@ -79,21 +73,27 @@ public class JavaClassIntrumentation {
     return false;
   }
 
-  public final boolean runTransformation(File file) throws IOException {
+  protected void createNewImportDeclaration(CompilationUnit cu, String serializedObjectSupporter) {
+    AST ast = cu.getAST();
+    ImportDeclaration id = ast.newImportDeclaration();
+    String classToImport = getClassPathToImport(serializedObjectSupporter);
+    id.setName(ast.newName(classToImport.split("\\.")));
+    cu.imports().add(id);
+  }
+
+  protected String getClassPathToImport(String className) {
+    return this.packageName.equals("") ? className
+        : this.packageName + "."+className;
+  }
+
+  public boolean runTransformation(File file) throws IOException {
     try {
       final CompilationUnit cu = getCompilationUnitForFile(file);
 
       transform(cu);
-      AST ast = cu.getAST();
-      ImportDeclaration id = ast.newImportDeclaration();
-      String classToImport = this.packageName.equals("") ? "ObjectSerializerSupporter"
-          : this.packageName + ".ObjectSerializerSupporter";
-      id.setName(ast.newName(classToImport.split("\\.")));
-      cu.imports().add(id);
+      createNewImportDeclaration(cu, "ObjectSerializerSupporter");
 
-      FileWriter fooWriter = new FileWriter(file, false); // true to append
-      fooWriter.write(cu.toString());
-      fooWriter.close();
+      saveTransformations(file, cu);
 
       return true;
     }catch (Exception e){
@@ -103,7 +103,13 @@ public class JavaClassIntrumentation {
     return false;
   }
 
-  private CompilationUnit getCompilationUnitForFile(File file) throws IOException {
+  protected void saveTransformations(File file, CompilationUnit cu) throws IOException {
+    FileWriter fooWriter = new FileWriter(file, false); // true to append
+    fooWriter.write(cu.toString());
+    fooWriter.close();
+  }
+
+  protected CompilationUnit getCompilationUnitForFile(File file) throws IOException {
     final String str = FileUtils.readFileToString(file);
     org.eclipse.jface.text.Document document = new org.eclipse.jface.text.Document(str);
 
@@ -118,7 +124,7 @@ public class JavaClassIntrumentation {
     return (CompilationUnit) parser.createAST(null);
   }
 
-  private void transform(final CompilationUnit cu) {
+  protected void transform(final CompilationUnit cu) {
 
     cu.accept(new ASTVisitor() {
 
@@ -143,7 +149,7 @@ public class JavaClassIntrumentation {
 
   }
 
-  private void undoChanges(final CompilationUnit cu) {
+  protected void undoChanges(final CompilationUnit cu) {
 
     cu.accept(new ASTVisitor() {
 
