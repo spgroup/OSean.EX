@@ -9,8 +9,6 @@ import org.instrumentation.PomFileInstrumentation;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
-import org.xml.sax.SAXException;
-import org.xml.sax.SAXParseException;
 
 public class PomFileInstrumentationTest {
 
@@ -291,6 +289,54 @@ public class PomFileInstrumentationTest {
         + "\n"
         + "<build>\n"
         + "   <plugins>\n"
+        + "   </plugins>\n"
+        + "</build>\n"
+        + "</project>");
+
+    PomFileInstrumentation pomFileInstrumentation = new PomFileInstrumentation(new File("src/test/resources/project").getPath());
+    Assert.assertTrue(pomFileInstrumentation.addPluginForJarWithAllDependencies());
+  }
+
+  @Test
+  public void expectTrueForAddingPluginForJarGenerationWithSameArtifactID() throws IOException, TransformerException {
+    updatePomFile("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+        + "<project xmlns=\"http://maven.apache.org/POM/4.0.0\"\n"
+        + "  xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n"
+        + "  xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd\">\n"
+        + "  <modelVersion>4.0.0</modelVersion>\n"
+        + "\n"
+        + "  <groupId>projectId</groupId>\n"
+        + "  <artifactId>project</artifactId>\n"
+        + "  <version>1.0</version>\n"
+        + "\n"
+        + "  <properties>\n"
+        + "    <maven.compiler.source>8</maven.compiler.source>\n"
+        + "    <maven.compiler.target>8</maven.compiler.target>\n"
+        + "  </properties>\n"
+        + "\n"
+        + "<build>\n"
+        + "   <plugins>\n"
+        + "       <plugin>\n"
+        + "        <artifactId>maven-assembly-plugin</artifactId>\n"
+        + "        <version>2.2</version>\n"
+        + "        <executions>\n"
+        + "          <execution>\n"
+        + "            <id>generate-distribution</id>\n"
+        + "            <phase>package</phase>\n"
+        + "            <goals>\n"
+        + "              <goal>single</goal>\n"
+        + "            </goals>\n"
+        + "          </execution>\n"
+        + "        </executions>\n"
+        + "        <configuration>\n"
+        + "          <descriptors>\n"
+        + "            <descriptor>${basedir}/src/assembly/default.xml</descriptor>\n"
+        + "          </descriptors>\n"
+        + "          <attach>${attach-distribution}</attach>\n"
+        + "          <appendAssemblyId>true</appendAssemblyId>\n"
+        + "          <tarLongFileMode>gnu</tarLongFileMode>\n"
+        + "        </configuration>\n"
+        + "      </plugin>\n"
         + "   </plugins>\n"
         + "</build>\n"
         + "</project>");
