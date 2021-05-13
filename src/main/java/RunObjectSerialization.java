@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 import javax.xml.transform.TransformerException;
+import org.Transformations;
 import org.file.FileFinderSupport;
 import org.file.ObjectSerializerSupporter;
 import org.file.SerializedObjectAccessOutputClass;
@@ -58,7 +59,7 @@ public class RunObjectSerialization {
             fileFinderSupport.getTargetClassLocalPath() + File.separator + args[1]));
 
         Process process = Runtime.getRuntime()
-            .exec("mvn clean test", null,
+            .exec("mvn clean test -Dmaven.test.failure.ignore=true", null,
                 new File(fileFinderSupport.getProjectLocalPath().getPath()));
         ProcessManager.computeProcessOutput(process, "Creating Serialized Objects");
 
@@ -80,11 +81,13 @@ public class RunObjectSerialization {
             fileFinderSupport.getTargetClassLocalPath() + File.separator + args[1]));
         objectSerializerSupporter.deleteObjectSerializerSupporterClass(fileFinderSupport.getTargetClassLocalPath().getPath());
 
-        serializedObjectAccessOutputClass
-            .getOutputClass(aux, fileFinderSupport.getTargetClassLocalPath().getPath(),
-                objectSerializerSupporter.getFullSerializerSupporterClass());
-        serializedObjectAccessClassIntrumentation.addSupporterClassAsField(new File(
-            fileFinderSupport.getTargetClassLocalPath() + File.separator + args[1]));
+        if (aux.size() > 0){
+          serializedObjectAccessOutputClass
+              .getOutputClass(aux, fileFinderSupport.getTargetClassLocalPath().getPath(),
+                  objectSerializerSupporter.getFullSerializerSupporterClass());
+          serializedObjectAccessClassIntrumentation.addSupporterClassAsField(new File(
+              fileFinderSupport.getTargetClassLocalPath() + File.separator + args[1]));
+        }
 
         Process process3 = Runtime.getRuntime()
             .exec("mvn clean compile assembly:single", null, new File(pomDirectory.getPath()));
@@ -130,15 +133,15 @@ public class RunObjectSerialization {
   }
 
   private static boolean runTestabilityTransformations(File file){
+    System.out.print("Applying Testability Transformations : ");
     try {
-      Process processTestability = Runtime.getRuntime().exec("java -jar "+System.getProperty("user.dir")+File.separator+"src"+
-          File.separator+"main"+File.separator+"resources"+File.separator+"testability-transformations.jar" + " " +
-          file.toPath().toString());
-      ProcessManager.computeProcessOutput(processTestability, "Applying Testability Transformations");
+      Transformations.main(new String[]{new String(file.getPath())});
+      System.out.println("SUCCESSFUL");
       return true;
-    } catch (IOException | InterruptedException e) {
+    } catch (IOException e) {
       e.printStackTrace();
     }
+    System.out.println("UNSUCCESSFUL");
     return false;
   }
 
