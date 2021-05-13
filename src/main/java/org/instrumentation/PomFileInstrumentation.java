@@ -159,10 +159,14 @@ public class PomFileInstrumentation {
   private boolean isNodeAlreadyAvailable(NodeList nodeList, Node newDependency, NodeList descriptorRefs){
     for (int temp = 0; temp < nodeList.getLength(); temp++) {
       Node node = nodeList.item(temp);
-    if(node.getFirstChild() != null && node.getFirstChild().getNextSibling() != null && node.getFirstChild().getNextSibling().getFirstChild() != null &&
-          node.getFirstChild().getNextSibling().getFirstChild().getTextContent().equals(newDependency.getFirstChild().getFirstChild().getTextContent())
-      && (isNodeForJarWithDependenciesAvailable(descriptorRefs, newDependency))){
-        return true;
+      if(node.getFirstChild() != null && node.getFirstChild().getNextSibling() != null && node.getFirstChild().getNextSibling().getFirstChild() != null &&
+            node.getFirstChild().getNextSibling().getFirstChild().getTextContent().equals(newDependency.getFirstChild().getFirstChild().getTextContent())
+        && (isNodeForJarWithDependenciesAvailable(descriptorRefs, newDependency))){
+          return true;
+      }else if (node.getFirstChild() != null && node.getFirstChild().getNextSibling() != null && node.getFirstChild().getNextSibling().getFirstChild() != null &&
+          node.getFirstChild().getNextSibling().getFirstChild().getTextContent().equals(newDependency.getFirstChild().getFirstChild().getTextContent())){
+          nodeList.item(temp).getParentNode().removeChild(node);
+          return false;
       }
     }
     return false;

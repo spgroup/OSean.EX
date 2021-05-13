@@ -73,6 +73,66 @@ public class PomFileInstrumentationTest {
   }
 
   @Test
+  public void expectTrueForReplacingPluginOnPom() throws IOException, TransformerException {
+    updatePomFile("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+        + "<project xmlns=\"http://maven.apache.org/POM/4.0.0\"\n"
+        + "  xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n"
+        + "  xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd\">\n"
+        + "  <modelVersion>4.0.0</modelVersion>\n"
+        + "\n"
+        + "  <groupId>projectId</groupId>\n"
+        + "  <artifactId>project</artifactId>\n"
+        + "  <version>1.0</version>\n"
+        + "\n"
+        + "  <properties>\n"
+        + "    <maven.compiler.source>8</maven.compiler.source>\n"
+        + "    <maven.compiler.target>8</maven.compiler.target>\n"
+        + "  </properties>\n"
+        + "\n"
+        + " <build>\n"
+        + "   <plugins>\n"
+        + "       <plugin>\n"
+        + "\t\t\t\t<artifactId>maven-assembly-plugin</artifactId>\n"
+        + "\t\t\t\t<version>2.3</version>\n"
+        + "\t\t\t\t<configuration>\n"
+        + "\t\t\t\t\t<appendAssemblyId>false</appendAssemblyId>\n"
+        + "\t\t\t\t\t<outputDirectory>${project.build.directory}/releases/</outputDirectory>\n"
+        + "\t\t\t\t\t<descriptors>\n"
+        + "\t\t\t\t\t\t<descriptor>${basedir}/src/main/assemblies/plugin.xml</descriptor>\n"
+        + "\t\t\t\t\t</descriptors>\n"
+        + "\t\t\t\t</configuration>\n"
+        + "\t\t\t\t<executions>\n"
+        + "\t\t\t\t\t<execution>\n"
+        + "\t\t\t\t\t\t<phase>package</phase>\n"
+        + "\t\t\t\t\t\t<goals>\n"
+        + "\t\t\t\t\t\t\t<goal>single</goal>\n"
+        + "\t\t\t\t\t\t</goals>\n"
+        + "\t\t\t\t\t</execution>\n"
+        + "\t\t\t\t</executions>\n"
+        + "\t\t\t</plugin>\n"
+        + "<plugin>\n"
+        + "\t\t\t\t<groupId>org.apache.maven.plugins</groupId>\n"
+        + "\t\t\t\t<artifactId>maven-gpg-plugin</artifactId>\n"
+        + "\t\t\t\t<version>1.4</version>\n"
+        + "\t\t\t\t<executions>\n"
+        + "\t\t\t\t\t<execution>\n"
+        + "\t\t\t\t\t\t<id>sign-artifacts</id>\n"
+        + "\t\t\t\t\t\t<phase>verify</phase>\n"
+        + "\t\t\t\t\t\t<goals>\n"
+        + "\t\t\t\t\t\t\t<goal>sign</goal>\n"
+        + "\t\t\t\t\t\t</goals>\n"
+        + "\t\t\t\t\t</execution>\n"
+        + "\t\t\t\t</executions>\n"
+        + "\t\t\t</plugin>"
+        + "   </plugins>\n"
+        + " </build>\n"
+        + "</project>");
+
+    PomFileInstrumentation pomFileInstrumentation = new PomFileInstrumentation(new File("src/test/resources/project").getPath());
+    Assert.assertTrue(pomFileInstrumentation.addPluginForJarWithAllDependencies());
+  }
+
+  @Test
   public void expectTrueForAddingChangesOnPomTwo() throws IOException, TransformerException {
     updatePomFile("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
         + "<project xmlns=\"http://maven.apache.org/POM/4.0.0\"\n"
