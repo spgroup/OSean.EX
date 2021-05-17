@@ -56,6 +56,12 @@
             <artifactId>guava</artifactId>
             <version>r05</version>
         </dependency>
+        <dependency>
+            <groupId>org.eclipse.jgit</groupId>
+            <artifactId>org.eclipse.jgit</artifactId>
+            <version>5.11.1.202105131744-r</version>
+        </dependency>
+
 
     </dependencies>
 

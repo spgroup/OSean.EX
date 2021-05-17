@@ -6,12 +6,14 @@ import java.util.List;
 import java.util.Scanner;
 import javax.xml.transform.TransformerException;
 import org.Transformations;
+import org.eclipse.jgit.api.errors.GitAPIException;
 import org.file.FileFinderSupport;
 import org.file.ObjectSerializerSupporter;
 import org.file.SerializedObjectAccessOutputClass;
 import org.instrumentation.ObjectSerializerClassIntrumentation;
 import org.instrumentation.PomFileInstrumentation;
 import org.instrumentation.SerializedObjectAccessClassIntrumentation;
+import org.util.GitProjectActions;
 import org.util.JarManager;
 import org.util.ProcessManager;
 
@@ -27,7 +29,8 @@ public class RunObjectSerialization {
    */
   public static void main(String[] args)
       throws IOException, InterruptedException, TransformerException {
-    if (args.length > 4){
+    if (args.length > 4) {
+      GitProjectActions gitProjectActions = new GitProjectActions(args[0]);
       FileFinderSupport fileFinderSupport = new FileFinderSupport(args[0]);
       File pomDirectory = fileFinderSupport.findFile(args[1], fileFinderSupport.getProjectLocalPath());
 
@@ -98,6 +101,7 @@ public class RunObjectSerialization {
         serializedObjectAccessClassIntrumentation.undoTransformations(new File(
           fileFinderSupport.getTargetClassLocalPath() + File.separator + args[1]));
         JarManager.saveGeneratedJarFile(generatedJarFile, args[0].split(args[3])[0]+File.separator+"GeneratedJars"+File.separator+args[3], (args.length > 4 ? args[4] : "generated-jar")+".jar");
+        gitProjectActions.undoCurrentChanges();
       }else{
         System.out.println("Please inform all three inputs required to run the serialization process");
         System.out.println("1º: local project path");
