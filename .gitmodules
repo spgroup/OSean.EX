@@ -1,0 +1,3 @@
+[submodule "src/test/resources/toy-project"]
+	path = src/test/resources/toy-project
+	url = https://github.com/leusonmario/toy-project

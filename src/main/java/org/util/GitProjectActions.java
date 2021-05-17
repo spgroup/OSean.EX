@@ -14,9 +14,14 @@ public class GitProjectActions {
 
   public GitProjectActions(String repositoryGit) throws IOException {
     this.repository = new FileRepositoryBuilder()
-        .setGitDir(new File(repositoryGit+"/.git"))
+        .setGitDir(new File(repositoryGit+File.separator+".git"))
         .build();
     this.git = new Git(this.repository);
+  }
+
+  public GitProjectActions(Repository repository){
+    this.repository = repository;
+    this.git = new Git(repository);
   }
 
   public boolean undoCurrentChanges() {
