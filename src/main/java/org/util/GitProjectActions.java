@@ -2,15 +2,12 @@ package org.util;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
 import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.api.ListBranchCommand;
-import org.eclipse.jgit.api.ListBranchCommand.ListMode;
 import org.eclipse.jgit.api.ResetCommand.ResetType;
 import org.eclipse.jgit.api.errors.GitAPIException;
-import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
+import org.eclipse.jgit.submodule.SubmoduleWalk;
 
 public class GitProjectActions {
   private Repository repository;
@@ -18,9 +15,7 @@ public class GitProjectActions {
   private String lastSHA;
 
   public GitProjectActions(String repositoryGit) throws IOException {
-    this.repository = new FileRepositoryBuilder()
-        .setGitDir(new File(repositoryGit+File.separator+".git"))
-        .build();
+    this.repository = this.getDefaultRepository(repositoryGit);
     this.git = new Git(this.repository);
     this.lastSHA = getCurrentSHA();
   }
@@ -75,6 +70,7 @@ public class GitProjectActions {
 
   public String getCurrentSHA(){
     try {
+      //return this.repository.getAllRefs().get("HEAD").getObjectId().getName();
       return this.git.log().setMaxCount(1).call().iterator().next().getName();
     } catch (GitAPIException e) {
       e.printStackTrace();
@@ -94,4 +90,30 @@ public class GitProjectActions {
     return this.repository;
   }
 
+  private Repository getDefaultRepository(String projectPath){
+    try {
+      String relativeProjectPath = projectPath.split(System.getProperty("user.dir")).length > 1 ? projectPath.split(System.getProperty("user.dir"))[1] : projectPath;
+      Repository repository = SubmoduleWalk.getSubmoduleRepository(getMainRepository(), relativeProjectPath);
+      if (repository != null){
+        return repository;
+      }else{
+        return new FileRepositoryBuilder()
+            .setGitDir(new File(projectPath + File.separator + ".git"))
+            .build();
+      }
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+    return null;
+  }
+
+  private Repository getMainRepository() throws IOException {
+    FileRepositoryBuilder builder = new FileRepositoryBuilder();
+    return builder.setGitDir(new File(System.getProperty("user.dir")+File.separator+".git"))
+        .readEnvironment()
+        .findGitDir()
+        .build();
+  }
+
 }
+
