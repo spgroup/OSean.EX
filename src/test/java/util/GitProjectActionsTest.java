@@ -13,11 +13,11 @@ import org.junit.Test;
 import org.util.GitProjectActions;
 
 public class GitProjectActionsTest {
-  private static String projectPath = "src"+File.separator+"test"+File.separator+"resources"+
+  public static String projectPath = "src"+File.separator+"test"+File.separator+"resources"+
       File.separator+"toy-project";
-  private static String pomPath = projectPath+File.separator+"pom.xml";
+  public static String pomPath = projectPath+File.separator+"pom.xml";
 
-  private Repository getMainRepository() throws IOException {
+  public static Repository getMainRepository() throws IOException {
     FileRepositoryBuilder builder = new FileRepositoryBuilder();
     return builder.setGitDir(new File(System.getProperty("user.dir")+File.separator+".git"))
         .readEnvironment()
@@ -55,6 +55,36 @@ public class GitProjectActionsTest {
     Repository subRepo = SubmoduleWalk.getSubmoduleRepository(getMainRepository(), projectPath);
     GitProjectActions gitProjectActions = new GitProjectActions(subRepo);
     Assert.assertFalse(gitProjectActions.undoCurrentChanges());
+  }
+
+  @Test
+  public void expectTrueForLastCommitSHA() throws IOException {
+    Repository subRepo = SubmoduleWalk.getSubmoduleRepository(getMainRepository(), projectPath);
+    GitProjectActions gitProjectActions = new GitProjectActions(subRepo);
+    gitProjectActions.checkoutCommit("c8dec98");
+    Assert.assertFalse(gitProjectActions.undoCurrentChanges());
+    Assert.assertEquals("c8dec98410cf141494b9fb26513ba89c689a33c5", gitProjectActions.getCurrentSHA());
+    gitProjectActions.checkoutPreviousSHA();
+  }
+
+  @Test
+  public void expectFalseForLastCommitSHA() throws IOException {
+    Repository subRepo = SubmoduleWalk.getSubmoduleRepository(getMainRepository(), projectPath);
+    GitProjectActions gitProjectActions = new GitProjectActions(subRepo);
+    Assert.assertNotEquals("c8dec98410cf141494b9fb26513ba89c689a33c55", gitProjectActions.getCurrentSHA());
+    gitProjectActions.checkoutPreviousSHA();
+  }
+
+  @Test
+  public void expectTrueForLastCommitSHAAfterCheckingOut() throws IOException {
+    Repository subRepo = SubmoduleWalk.getSubmoduleRepository(getMainRepository(), projectPath);
+    GitProjectActions gitProjectActions = new GitProjectActions(subRepo);
+    gitProjectActions.checkoutCommit("ab930a716c8f426fee2a45cecf2881de9a514c1c");
+    String lastSHA = gitProjectActions.getLastSHA();
+    Assert.assertEquals("ab930a716c8f426fee2a45cecf2881de9a514c1c", gitProjectActions.getCurrentSHA());
+    gitProjectActions.checkoutPreviousSHA();
+    Assert.assertEquals(lastSHA, gitProjectActions.getCurrentSHA());
+    gitProjectActions.checkoutPreviousSHA();
   }
 
   private boolean appendTextOnFile(String fileName){
