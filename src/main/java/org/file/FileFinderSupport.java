@@ -3,6 +3,7 @@ package org.file;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import org.apache.commons.io.FileUtils;
 
 public class FileFinderSupport {
   private File projectLocalPath;
@@ -77,12 +78,7 @@ public class FileFinderSupport {
 
   public boolean deleteResourceDirectory(){
     try {
-      String[] entries = this.localPathResourceDirectory.list();
-      for (String s : entries) {
-        File currentFile = new File(this.localPathResourceDirectory.getPath(), s);
-        currentFile.delete();
-      }
-      this.localPathResourceDirectory.delete();
+      FileUtils.deleteDirectory(new File(this.localPathResourceDirectory.getPath()));
       return true;
     }catch (Exception e){
       e.printStackTrace();

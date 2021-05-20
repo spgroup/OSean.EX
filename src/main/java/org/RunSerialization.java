@@ -1,8 +1,11 @@
 package org;
 
 import java.io.IOException;
+import java.util.List;
 import javax.xml.transform.TransformerException;
 import org.serialization.ObjectSerializer;
+import org.util.InputHandler;
+import org.util.input.MergeScenarioUnderAnalysis;
 
 public class RunSerialization {
 
@@ -21,9 +24,10 @@ public class RunSerialization {
    */
   public static void runAnalysis(String[] args)
       throws IOException, InterruptedException, TransformerException {
-    if (args.length > 3) {
+    List<MergeScenarioUnderAnalysis> mergeScenarioUnderAnalyses = InputHandler.splitInputInMergeScenarios(args);
+    if (mergeScenarioUnderAnalyses.size() > 0) {
       ObjectSerializer objectSerializer = new ObjectSerializer();
-      objectSerializer.startSerialization(args[0], args[1], args[2], args[3]);
+      objectSerializer.startSerialization(mergeScenarioUnderAnalyses);
     }else{
         System.out.println("Please inform all three inputs required to run the serialization process");
         System.out.println("1º: local project path");
