@@ -111,7 +111,8 @@ public class ObjectSerializerTest {
 
     try {
       FileWriter csvWriter = new FileWriter(inputFile);
-      csvWriter.append(String.join(",", "/home/leusonmario/Documentos/PHD/Research/projects/GeneratedJars2/OSean.EX/src/test/resources/toy-project",
+      csvWriter.append(String.join(",", System.getProperty("user.dir")+File.separator+"src"+
+              File.separator+"test"+File.separator+"resources"+File.separator+"toy-project",
         "Person.java","getName","toy-project","85077377978f98e31e637c121b5987e01725f5fd", "5215c5d623a131ac94284be5c3c42c2124618e99"));
       csvWriter.flush();
       csvWriter.close();
