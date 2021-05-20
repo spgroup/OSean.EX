@@ -106,10 +106,10 @@ public class ObjectSerializer {
         List<String> aux = getMethodList(fileFinderSupport
             .getResourceDirectoryPath(pomFileInstrumentation.getPomFileDirectory()));
 
-        objectSerializerClassIntrumentation.undoTransformations(new File(
-            fileFinderSupport.getTargetClassLocalPath() + File.separator + mergeScenarioUnderAnalysis.getTargetClass()));
-        objectSerializerSupporter.deleteObjectSerializerSupporterClass(
-            fileFinderSupport.getTargetClassLocalPath().getPath());
+        assert objectSerializerClassIntrumentation.undoTransformations(new File(
+            fileFinderSupport.getTargetClassLocalPath() + File.separator + mergeScenarioUnderAnalysis.getTargetClass())) == true;
+        assert objectSerializerSupporter.deleteObjectSerializerSupporterClass(
+            fileFinderSupport.getTargetClassLocalPath().getPath()) == true;
 
         if (aux.size() > 0) {
           serializedObjectAccessOutputClass
