@@ -24,18 +24,27 @@ public class FileFinderSupport {
   }
 
   public File findFile(String name,File file){
+    File targetFile = searchForFileByName(name, file);
+    if (targetFile != null){
+      this.targetClassLocalPath = new File(targetFile.getPath().split(name)[0]);
+      return findPomDirectory(targetFile.getParentFile());
+    }
+    return targetFile;
+  }
+
+  public File searchForFileByName(String name,File file){
     File[] list = file.listFiles();
     if(list!=null)
       for (File fil : list) {
         if (fil.isDirectory()){
-          File aux = findFile(name,fil);
+          File aux = searchForFileByName(name,fil);
           if (aux!=null){
             return aux;
           }
-        }
-        else if (name.equalsIgnoreCase(fil.getName())){
-          this.targetClassLocalPath = new File(fil.getPath().split(name)[0]);
-          return findPomDirectory(fil.getParentFile());
+        }else{
+          if (name.equalsIgnoreCase(fil.getName())){
+            return fil;
+          }
         }
       }
     return null;

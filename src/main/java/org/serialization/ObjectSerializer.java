@@ -6,11 +6,10 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.xml.transform.TransformerException;
 import org.Transformations;
-import org.eclipse.jgit.lib.Repository;
-import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
-import org.eclipse.jgit.submodule.SubmoduleWalk;
 import org.file.FileFinderSupport;
 import org.file.ObjectSerializerSupporter;
 import org.file.SerializedObjectAccessOutputClass;
@@ -39,6 +38,9 @@ public class ObjectSerializer {
       if (pomDirectory != null) {
         PomFileInstrumentation pomFileInstrumentation = createAndRunPomFileInstrumentation(pomDirectory);
         fileFinderSupport.createNewDirectory(pomDirectory);
+
+        runTestabilityTransformations(new File(
+            fileFinderSupport.getTargetClassLocalPath() + File.separator + mergeScenarioUnderAnalysis.getTargetClass()));
 
         ObjectSerializerSupporter objectSerializerSupporter = createAndAddObjectSerializerSupporter(
             fileFinderSupport, pomFileInstrumentation);
@@ -103,8 +105,7 @@ public class ObjectSerializer {
         startProcess(fileFinderSupport, "java -cp " + generatedJarFile
             + " " + getObjectClassPathOnTargetProject(objectSerializerClassIntrumentation), "Generating method list associated to serialized objects");
 
-        List<String> aux = getMethodList(fileFinderSupport
-            .getResourceDirectoryPath(pomFileInstrumentation.getPomFileDirectory()));
+        List<String> methodList = getMethodList(fileFinderSupport, pomFileInstrumentation.getPomFileDirectory());
 
         objectSerializerClassIntrumentation.undoTransformations(new File(
             fileFinderSupport.getTargetClassLocalPath() + File.separator
@@ -112,9 +113,9 @@ public class ObjectSerializer {
         objectSerializerSupporter.deleteObjectSerializerSupporterClass(
             fileFinderSupport.getTargetClassLocalPath().getPath());
 
-        if (aux.size() > 0) {
+        if (methodList.size() > 0) {
           serializedObjectAccessOutputClass
-              .getOutputClass(aux, fileFinderSupport.getTargetClassLocalPath().getPath(),
+              .getOutputClass(methodList, fileFinderSupport.getTargetClassLocalPath().getPath(),
                   objectSerializerSupporter.getFullSerializerSupporterClass());
           serializedObjectAccessClassIntrumentation.addSupporterClassAsField(new File(
               fileFinderSupport.getTargetClassLocalPath() + File.separator + mergeScenarioUnderAnalysis.getTargetClass()));
@@ -172,20 +173,45 @@ public class ObjectSerializer {
     return objectSerializerSupporter;
   }
 
-  private List<String> getMethodList(String resourceDirectory){
+  private List<String> getMethodList(FileFinderSupport fileFinderSupport, File pom){
+    String resourceDirectory =  fileFinderSupport
+        .getResourceDirectoryPath(pom);
     List<String> methods = new ArrayList<>();
+    List<String> serializedObjectTypes = new ArrayList<>();
+
+    Pattern pattern = Pattern.compile("public [0-9a-zA-Z\\.]* deserialize", Pattern.CASE_INSENSITIVE);
+    Matcher matcher;
+
     if (new File(resourceDirectory+File.separator+"output-methods.txt").exists()){
       try {
         File file = new File(resourceDirectory+File.separator+"output-methods.txt");
         Scanner myReader = new Scanner(file);
         while (myReader.hasNextLine()) {
-          methods.add(myReader.nextLine());
+          String nextLine = myReader.nextLine();
+          matcher = pattern.matcher(nextLine);
+          if (matcher.find()) {
+            int index = matcher.group(0).lastIndexOf(".");
+            String objectType = matcher.group(0).substring(index+1).replace(" deserialize", "");
+            if (!serializedObjectTypes.contains(objectType))
+              serializedObjectTypes.add(objectType);
+          }
+          methods.add(nextLine);
         }
       }catch (Exception e){
         e.printStackTrace();
       }
     }
+    runTestabilityTransformationsForSerializedObjectClasses(fileFinderSupport, serializedObjectTypes);
     return methods;
+  }
+
+  private void runTestabilityTransformationsForSerializedObjectClasses(FileFinderSupport fileFinderSupport, List<String> serializedObjects){
+    for(String serializedObject: serializedObjects){
+      File serializedObjectFile = fileFinderSupport.searchForFileByName(serializedObject+".java", fileFinderSupport.getProjectLocalPath());
+      if (serializedObjectFile != null){
+        runTestabilityTransformations(serializedObjectFile);
+      }
+    }
   }
 
   private String getObjectClassPathOnTargetProject(

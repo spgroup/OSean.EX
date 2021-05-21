@@ -29,9 +29,9 @@ public class ObjectSerializerTest {
     ObjectSerializer objectSerializer = new ObjectSerializer();
     String[] args = {System.getProperty("user.dir")+File.separator+"src"+ File.separator+"test"+File.separator+"resources"+File.separator+"toy-project",
         "Person.java",
-        "getName",
+        "getOccupation",
         "toy-project",
-        "85077377978f98e31e637c121b5987e01725f5fd"
+        "7810b85dd711ac2648675dcfe5e65539aec1ea1d"
         };
     List<MergeScenarioUnderAnalysis> mergeScenarioUnderAnalyses = InputHandler.splitInputInMergeScenarios(args);
     objectSerializer.startSerialization(mergeScenarioUnderAnalyses);
@@ -39,7 +39,7 @@ public class ObjectSerializerTest {
         GitProjectActionsTest.projectPath);
     GitProjectActions gitProjectActions = new GitProjectActions(subRepo);
     Assert.assertTrue(gitProjectActions.checkoutCommit("main"));
-    Assert.assertTrue(new File(directoryForGeneratedJars+File.separator+"85077377978f98e31e637c121b5987e01725f5fd.jar").exists());
+    Assert.assertTrue(new File(directoryForGeneratedJars+File.separator+"7810b85dd711ac2648675dcfe5e65539aec1ea1d.jar").exists());
     deleteOldJar();
   }
 
