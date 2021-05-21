@@ -61,8 +61,16 @@
             <artifactId>org.eclipse.jgit</artifactId>
             <version>5.11.1.202105131744-r</version>
         </dependency>
-
-
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>1.7.30</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>1.7.30</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -72,7 +80,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>fully.qualified.MainClass</mainClass>
+                            <mainClass>org.RunSerialization</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>

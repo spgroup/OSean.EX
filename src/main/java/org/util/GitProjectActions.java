@@ -70,7 +70,6 @@ public class GitProjectActions {
 
   public String getCurrentSHA(){
     try {
-      //return this.repository.getAllRefs().get("HEAD").getObjectId().getName();
       return this.git.log().setMaxCount(1).call().iterator().next().getName();
     } catch (GitAPIException e) {
       e.printStackTrace();

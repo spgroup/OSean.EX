@@ -30,12 +30,11 @@ public class ObjectSerializer {
     for(MergeScenarioUnderAnalysis mergeScenarioUnderAnalysis: mergeScenarioUnderAnalyses){
       GitProjectActions gitProjectActions = new GitProjectActions(mergeScenarioUnderAnalysis.getLocalProjectPath());
 
-      assert gitProjectActions.checkoutCommit(mergeScenarioUnderAnalysis.getMergeScenarioCommits().get(0)) == true;
+      gitProjectActions.checkoutCommit(mergeScenarioUnderAnalysis.getMergeScenarioCommits().get(0));
+
       FileFinderSupport fileFinderSupport = new FileFinderSupport(mergeScenarioUnderAnalysis.getLocalProjectPath());
       File pomDirectory = fileFinderSupport
           .findFile(mergeScenarioUnderAnalysis.getTargetClass(), fileFinderSupport.getProjectLocalPath());
-      /*List<String> aux = new ArrayList<>();
-      aux.add(gitProjectActions.getCurrentSHA());*/
 
       if (pomDirectory != null) {
         PomFileInstrumentation pomFileInstrumentation = createAndRunPomFileInstrumentation(pomDirectory);
@@ -55,14 +54,15 @@ public class ObjectSerializer {
 
         objectSerializerSupporter.deleteObjectSerializerSupporterClass(fileFinderSupport.getTargetClassLocalPath().getPath());
 
-        assert gitProjectActions.undoCurrentChanges() == true;
-        assert gitProjectActions.checkoutPreviousSHA() == true;
+        gitProjectActions.undoCurrentChanges();
+        gitProjectActions.checkoutPreviousSHA();
 
         generateJarsForAllMergeScenarioCommits(gitProjectActions,
             pomDirectory, objectSerializerClassIntrumentation, fileFinderSupport,
             objectSerializerSupporter, serializedObjectAccessClassIntrumentation, mergeScenarioUnderAnalysis);
 
-        assert gitProjectActions.checkoutCommit(mergeScenarioUnderAnalysis.getMergeScenarioCommits().get(0)) == true;
+        gitProjectActions.undoCurrentChanges();
+        gitProjectActions.checkoutPreviousSHA();
 
         fileFinderSupport.deleteResourceDirectory();
       }
@@ -77,7 +77,7 @@ public class ObjectSerializer {
     try {
       for (String mergeScenarioCommit : mergeScenarioUnderAnalysis.getMergeScenarioCommits()) {
 
-        assert gitProjectActions.checkoutCommit(mergeScenarioCommit) == true;
+        gitProjectActions.checkoutCommit(mergeScenarioCommit);
 
         PomFileInstrumentation pomFileInstrumentation = createAndRunPomFileInstrumentation(
             pomDirectory);
@@ -106,10 +106,11 @@ public class ObjectSerializer {
         List<String> aux = getMethodList(fileFinderSupport
             .getResourceDirectoryPath(pomFileInstrumentation.getPomFileDirectory()));
 
-        assert objectSerializerClassIntrumentation.undoTransformations(new File(
-            fileFinderSupport.getTargetClassLocalPath() + File.separator + mergeScenarioUnderAnalysis.getTargetClass())) == true;
-        assert objectSerializerSupporter.deleteObjectSerializerSupporterClass(
-            fileFinderSupport.getTargetClassLocalPath().getPath()) == true;
+        objectSerializerClassIntrumentation.undoTransformations(new File(
+            fileFinderSupport.getTargetClassLocalPath() + File.separator
+                + mergeScenarioUnderAnalysis.getTargetClass()));
+        objectSerializerSupporter.deleteObjectSerializerSupporterClass(
+            fileFinderSupport.getTargetClassLocalPath().getPath());
 
         if (aux.size() > 0) {
           serializedObjectAccessOutputClass
@@ -123,13 +124,14 @@ public class ObjectSerializer {
 
         serializedObjectAccessOutputClass.deleteOldClassSupporter();
         serializedObjectAccessClassIntrumentation.undoTransformations(new File(
-            fileFinderSupport.getTargetClassLocalPath() + File.separator + mergeScenarioUnderAnalysis.getTargetClass()));
+            fileFinderSupport.getTargetClassLocalPath() + File.separator
+                + mergeScenarioUnderAnalysis.getTargetClass()));
         JarManager.saveGeneratedJarFile(generatedJarFile,
             mergeScenarioUnderAnalysis.getLocalProjectPath().split(mergeScenarioUnderAnalysis.getProjectName())[0] +
                 File.separator + "GeneratedJars" + File.separator + mergeScenarioUnderAnalysis.getProjectName(), mergeScenarioCommit + ".jar");
 
-        assert gitProjectActions.undoCurrentChanges() == true;
-        assert gitProjectActions.checkoutPreviousSHA() == true;
+        gitProjectActions.undoCurrentChanges();
+        gitProjectActions.checkoutPreviousSHA();
       }
       return true;
     }catch (Exception e){
