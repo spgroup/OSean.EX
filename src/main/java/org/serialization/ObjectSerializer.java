@@ -146,6 +146,7 @@ public class ObjectSerializer {
     PomFileInstrumentation pomFileInstrumentation = new PomFileInstrumentation(
         pomDirectory.getPath());
     pomFileInstrumentation.addRequiredDependenciesOnPOM();
+    pomFileInstrumentation.changeAnimalSnifferPluginIfAdded();
     pomFileInstrumentation.addResourcesForGeneratedJar();
     pomFileInstrumentation.addPluginForJarWithAllDependencies();
 

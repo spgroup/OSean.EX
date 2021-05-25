@@ -284,6 +284,73 @@ public class PomFileInstrumentation {
     return addedResource;
   }
 
+  public boolean changeAnimalSnifferPluginIfAdded() throws TransformerException {
+    Document document = getPomFileAsDocument();
+
+    if (document != null) {
+      document.getDocumentElement().normalize();
+      NodeList nodeList = document.getElementsByTagName("plugin");
+
+      for (int i = 0; i < nodeList.getLength(); i++) {
+        Node node = nodeList.item(i);
+        if (node.hasChildNodes()){
+          Node myNode = searchForTargetArtifactIdNode(node.getChildNodes());
+          if (myNode != null){
+            changeVersionOfTargetPluginNode(myNode.getChildNodes());
+            if (changeArtifactIdOfTargetPlugin(document, myNode)) return true;
+          }
+        }
+      }
+    }
+    saveChangesOnPomFiles(document);
+    return false;
+  }
+
+  private Node searchForTargetArtifactIdNode(NodeList nodeList) {
+
+    for (int i = 0; i < nodeList.getLength(); i++) {
+      Node currentNode = nodeList.item(i);
+      if (currentNode.getNodeName().equals("artifactId") &&
+          currentNode.getTextContent().equals("animal-sniffer-maven-plugin")) {
+        return currentNode.getParentNode();
+      }
+    }
+    return null;
+  }
+
+  private void changeVersionOfTargetPluginNode(NodeList nodeList) {
+
+    for (int i = 0; i < nodeList.getLength(); i++) {
+      Node currentNode = nodeList.item(i);
+      if (currentNode.getNodeName().equals("version") &&
+          !currentNode.getTextContent().equals("1.18")) {
+        currentNode.setTextContent("1.18");
+      }
+    }
+  }
+
+  private boolean changeArtifactIdOfTargetPlugin(Document document, Node parentNode) {
+
+    if (document != null) {
+      document.getDocumentElement().normalize();
+      NodeList nList = document.getElementsByTagName("artifactId");
+
+      if (nList.getLength() > 0) {
+        for (int temp = 0; temp < nList.getLength(); temp++) {
+          Node node = nList.item(temp);
+          if(node.getParentNode().getNodeName().equals("signature") &&
+              !node.getTextContent().equals("java18") &&
+              parentNode.getTextContent().equals(node.getParentNode().getParentNode().getParentNode().
+                  getParentNode().getParentNode().getTextContent())) {
+            node.setTextContent("java18");
+            return true;
+          }
+        }
+      }
+    }
+    return false;
+  }
+
   private Node getPluginsNode(Document document){
     Node plugins = document.createElement("plugins");
     Node plugin = getPluginNode(document);

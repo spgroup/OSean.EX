@@ -4,7 +4,12 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import javax.xml.transform.TransformerException;
+import org.file.FileFinderSupport;
+import org.file.ObjectSerializerSupporter;
+import org.instrumentation.ObjectSerializerClassIntrumentation;
 import org.instrumentation.PomFileInstrumentation;
 import org.junit.After;
 import org.junit.Assert;
@@ -510,6 +515,55 @@ public class PomFileInstrumentationTest {
 
     PomFileInstrumentation pomFileInstrumentation = new PomFileInstrumentation(new File("src/test/resources/project").getPath());
     Assert.assertFalse(pomFileInstrumentation.addResourcesForGeneratedJar());
+  }
+
+  @Test
+  public void expectTrueForInstrumentationOnDeclaredMethod() throws TransformerException, IOException {
+    updatePomFile("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+        + "<project xmlns=\"http://maven.apache.org/POM/4.0.0\"\n"
+        + "  xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n"
+        + "  xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd\">\n"
+        + "  <modelVersion>4.0.0</modelVersion>\n"
+        + "\n"
+        + "  <groupId>projectId</groupId>\n"
+        + "  <artifactId>project</artifactId>\n"
+        + "  <version>1.0</version>\n"
+        + "\n"
+        + "  <properties>\n"
+        + "    <maven.compiler.source>8</maven.compiler.source>\n"
+        + "    <maven.compiler.target>8</maven.compiler.target>\n"
+        + "  </properties>"
+        + "\n"
+        + "  <build>\n"
+        + "    <plugins>\n"
+        + "      <plugin>\n"
+        + "        <!-- this plugin allows us to ensure Java 5 API compatibility -->\n"
+        + "        <groupId>org.codehaus.mojo</groupId>\n"
+        + "        <artifactId>animal-sniffer-maven-plugin</artifactId>\n"
+        + "        <version>1.9</version>\n"
+        + "        <executions>\n"
+        + "          <execution>\n"
+        + "            <id>animal-sniffer</id>\n"
+        + "            <phase>compile</phase>\n"
+        + "            <goals>\n"
+        + "              <goal>check</goal>\n"
+        + "            </goals>\n"
+        + "            <configuration>\n"
+        + "              <signature>\n"
+        + "                <groupId>org.codehaus.mojo.signature</groupId>\n"
+        + "                <artifactId>java15</artifactId>\n"
+        + "                <version>1.0</version>\n"
+        + "              </signature>\n"
+        + "            </configuration>\n"
+        + "          </execution>\n"
+        + "        </executions>\n"
+        + "      </plugin>\n"
+        + "    </plugins>\n"
+        + "  </build>\n"
+        + "\n"
+        + "</project>");
+    PomFileInstrumentation pomFileInstrumentation = new PomFileInstrumentation(new File("src/test/resources/project").getPath());
+    Assert.assertTrue(pomFileInstrumentation.changeAnimalSnifferPluginIfAdded());
   }
 
   public String getPomWithBuildTagOn(){
