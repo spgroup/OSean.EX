@@ -52,7 +52,7 @@ public class ObjectSerializer {
         SerializedObjectAccessClassIntrumentation serializedObjectAccessClassIntrumentation = new SerializedObjectAccessClassIntrumentation(
             mergeScenarioUnderAnalysis.getTargetMethod(), objectSerializerSupporter.getFullSerializerSupporterClass());
 
-        startProcess(fileFinderSupport, "mvn clean test -Dmaven.test.failure.ignore=true", "Creating Serialized Objects");
+        startProcess(fileFinderSupport.getProjectLocalPath().getPath(), "mvn clean test -Dmaven.test.failure.ignore=true", "Creating Serialized Objects", true);
 
         objectSerializerSupporter.deleteObjectSerializerSupporterClass(fileFinderSupport.getTargetClassLocalPath().getPath());
 
@@ -98,12 +98,12 @@ public class ObjectSerializer {
             fileFinderSupport.getTargetClassLocalPath() + File.separator + mergeScenarioUnderAnalysis.getTargetClass()));
 
 
-        startProcess(fileFinderSupport, "mvn clean compile assembly:single", "Generating jar file with serialized objects");
+        startProcess(pomDirectory.getAbsolutePath(), "mvn clean compile assembly:single", "Generating jar file with serialized objects", false);
 
         String generatedJarFile = JarManager.getJarFile(pomFileInstrumentation);
 
-        startProcess(fileFinderSupport, "java -cp " + generatedJarFile
-            + " " + getObjectClassPathOnTargetProject(objectSerializerClassIntrumentation), "Generating method list associated to serialized objects");
+        startProcess(fileFinderSupport.getProjectLocalPath().getPath(), "java -cp " + generatedJarFile
+            + " " + getObjectClassPathOnTargetProject(objectSerializerClassIntrumentation), "Generating method list associated to serialized objects", false);
 
         List<String> methodList = getMethodList(fileFinderSupport, pomFileInstrumentation.getPomFileDirectory());
 
@@ -121,7 +121,7 @@ public class ObjectSerializer {
               fileFinderSupport.getTargetClassLocalPath() + File.separator + mergeScenarioUnderAnalysis.getTargetClass()));
         }
 
-        startProcess(fileFinderSupport, "mvn clean compile assembly:single", "Generating jar file with serialized objects");
+        startProcess(pomDirectory.getAbsolutePath(), "mvn clean compile assembly:single", "Generating jar file with serialized objects", false);
 
         serializedObjectAccessOutputClass.deleteOldClassSupporter();
         serializedObjectAccessClassIntrumentation.undoTransformations(new File(
@@ -234,12 +234,12 @@ public class ObjectSerializer {
     return false;
   }
 
-  private void startProcess(FileFinderSupport fileFinderSupport, String command, String message)
+  private void startProcess(String directoryPath, String command, String message, boolean isTestTask)
       throws IOException, InterruptedException {
     Process process = Runtime.getRuntime()
         .exec(command, null,
-            new File(fileFinderSupport.getProjectLocalPath().getPath()));
-    ProcessManager.computeProcessOutput(process, message);
+            new File(directoryPath));
+    ProcessManager.computeProcessOutput(process, message, isTestTask);
   }
 
 }

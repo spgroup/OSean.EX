@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class ProcessManager extends Thread {
 
@@ -32,7 +33,7 @@ public class ProcessManager extends Thread {
     }
   }
 
-  public static void computeProcessOutput(Process process, String outputMessage)
+  public static void computeProcessOutput(Process process, String outputMessage, boolean isTestTask)
       throws IOException, InterruptedException {
 
     ProcessManager errorGobbler = new
@@ -45,7 +46,20 @@ public class ProcessManager extends Thread {
     outputGobbler.start();
 
     System.out.println(
-        outputMessage + " : " +(process.waitFor() == 0 ? "SUCCESSFUL" : "UNSUCCESSFUL"));
+        outputMessage + " : " +(getProcessOutput(process, isTestTask)));
 
+  }
+
+  public static String getProcessOutput(Process process, boolean isTest) throws InterruptedException {
+    if (isTest){
+      if (!process.waitFor(1, TimeUnit.MINUTES)){
+        process.destroy();
+        return "FINISHED BY TIMEOUT";
+      }else{
+        return "SUCCESSFUL";
+      }
+    }else{
+      return process.waitFor() == 0 ? "SUCCESSFUL" : "UNSUCCESSFUL";
+    }
   }
 }
