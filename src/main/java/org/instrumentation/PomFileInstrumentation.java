@@ -297,12 +297,14 @@ public class PomFileInstrumentation {
           Node myNode = searchForTargetArtifactIdNode(node.getChildNodes());
           if (myNode != null){
             changeVersionOfTargetPluginNode(myNode.getChildNodes());
-            if (changeArtifactIdOfTargetPlugin(document, myNode)) return true;
+            if (changeArtifactIdOfTargetPlugin(document, myNode)) {
+              saveChangesOnPomFiles(document);
+              return true;
+            }
           }
         }
       }
     }
-    saveChangesOnPomFiles(document);
     return false;
   }
 
