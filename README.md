@@ -15,14 +15,18 @@ For that, you may use: ```mvn install:install-file -Dfile=${localRepositoryPath}
 
 * Running the tests: you may run: ```mvn clean test```
 
-* Generating object serializer executable file: you may run on terminal: ```mvn clean compile assembly:single```. As a result, the jar file ```ObjectSerialization-1.0-SNAPSHOT-jar-with-dependencies.jar``` is expected to be created on ```${localRepositoryPath}/target```. 
+* Generating object serializer executable file: you may run on terminal: ```mvn clean compile assembly:single```. As a result, the jar file ```ObjectSerialization-1.0-SNAPSHOT-jar-with-dependencies.jar``` is expected to be generated in ```${localRepositoryPath}/target```. 
 
 ## Serializing Objects
 Once you have the object serializer jar file, you can call it for a specific project. For that, you must inform:
 * local project path; 
 * target class name; 
 * target method name; 
-* project name. 
+* project name;
+* list of commits.
 
-For example, consider calling the object serializer for this project: ```java -cp ObjectSerialization-1.0-SNAPSHOT-jar-with-dependencies.jar org.RunSerialization "/home/lmps2/projects/toy-project" "Person.java" "addRelative" "toy-project"```.  
-As a result, a jar file will be generated on ```/home/lmps2/projects/GeneratedJars/toy-project``` using the current HEAD of the project given as input (```toy-project```). 
+For example, consider calling the object serializer for this project: ```java -cp ObjectSerialization-1.0-SNAPSHOT-jar-with-dependencies.jar org.RunSerialization "/home/lmps2/projects/toy-project" "Person.java" "addRelative" "toy-project" "abdc125" "abdc156"```.
+
+You may inform up to four (4) commit hashes.
+The first commit will be used to create the serialized objects; next, they will be deserialized in all commits previously informed.
+As a result, a jar file for each commit will be generated in ```/home/lmps2/projects/GeneratedJars/toy-project``` using each commit hash as the file name. 
