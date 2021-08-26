@@ -33,7 +33,7 @@ public class ProcessManager extends Thread {
     }
   }
 
-  public static void computeProcessOutput(Process process, String outputMessage, boolean isTestTask)
+  public static boolean computeProcessOutput(Process process, String outputMessage, boolean isTestTask)
       throws IOException, InterruptedException {
 
     ProcessManager errorGobbler = new
@@ -45,8 +45,14 @@ public class ProcessManager extends Thread {
     errorGobbler.start();
     outputGobbler.start();
 
+    String outputProcess = getProcessOutput(process, isTestTask);
     System.out.println(
-        outputMessage + " : " +(getProcessOutput(process, isTestTask)));
+        outputMessage + " : " + outputProcess);
+    if (!outputProcess.equals("UNSUCCESSFUL")){
+      return true;
+    }else{
+      return false;
+    }
 
   }
 

@@ -234,12 +234,12 @@ public class ObjectSerializer {
     return false;
   }
 
-  private void startProcess(String directoryPath, String command, String message, boolean isTestTask)
+  private boolean startProcess(String directoryPath, String command, String message, boolean isTestTask)
       throws IOException, InterruptedException {
     Process process = Runtime.getRuntime()
         .exec(command, null,
             new File(directoryPath));
-    ProcessManager.computeProcessOutput(process, message, isTestTask);
+    return ProcessManager.computeProcessOutput(process, message, isTestTask);
   }
 
 }
