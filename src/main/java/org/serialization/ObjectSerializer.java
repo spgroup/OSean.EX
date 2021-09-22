@@ -10,7 +10,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.xml.transform.TransformerException;
 import org.Transformations;
-import org.file.FileFinderSupport;
+import org.file.AssembyFileSupporter;
+import org.file.ResourceFileSupporter;
 import org.file.ObjectSerializerSupporter;
 import org.file.SerializedObjectAccessOutputClass;
 import org.instrumentation.ObjectSerializerClassIntrumentation;
@@ -31,49 +32,53 @@ public class ObjectSerializer {
 
       gitProjectActions.checkoutCommit(mergeScenarioUnderAnalysis.getMergeScenarioCommits().get(0));
 
-      FileFinderSupport fileFinderSupport = new FileFinderSupport(mergeScenarioUnderAnalysis.getLocalProjectPath());
-      File pomDirectory = fileFinderSupport
-          .findFile(mergeScenarioUnderAnalysis.getTargetClass(), fileFinderSupport.getProjectLocalPath());
+      ResourceFileSupporter resourceFileSupporter = new ResourceFileSupporter(mergeScenarioUnderAnalysis.getLocalProjectPath());
+      File pomDirectory = resourceFileSupporter
+          .findFile(mergeScenarioUnderAnalysis.getTargetClass(), resourceFileSupporter.getProjectLocalPath());
+
+      AssembyFileSupporter assembyFileSupporter = new AssembyFileSupporter(mergeScenarioUnderAnalysis.getLocalProjectPath());
 
       if (pomDirectory != null) {
         PomFileInstrumentation pomFileInstrumentation = createAndRunPomFileInstrumentation(pomDirectory);
-        fileFinderSupport.createNewDirectory(pomDirectory);
+        resourceFileSupporter.createNewDirectory(pomDirectory);
+        assembyFileSupporter.createNewDirectory(pomDirectory);
 
         runTestabilityTransformations(new File(
-            fileFinderSupport.getTargetClassLocalPath() + File.separator + mergeScenarioUnderAnalysis.getTargetClass()));
+            resourceFileSupporter.getTargetClassLocalPath() + File.separator + mergeScenarioUnderAnalysis.getTargetClass()));
 
         ObjectSerializerSupporter objectSerializerSupporter = createAndAddObjectSerializerSupporter(
-            fileFinderSupport, pomFileInstrumentation);
+            resourceFileSupporter, pomFileInstrumentation);
 
         ObjectSerializerClassIntrumentation objectSerializerClassIntrumentation = createAndRunObjectSerializerInstrumentation(
-            new File(fileFinderSupport.getTargetClassLocalPath() + File.separator + mergeScenarioUnderAnalysis.getTargetClass()),
+            new File(resourceFileSupporter.getTargetClassLocalPath() + File.separator + mergeScenarioUnderAnalysis.getTargetClass()),
             new ObjectSerializerClassIntrumentation(mergeScenarioUnderAnalysis.getTargetMethod(), objectSerializerSupporter.getFullSerializerSupporterClass()));
 
         SerializedObjectAccessClassIntrumentation serializedObjectAccessClassIntrumentation = new SerializedObjectAccessClassIntrumentation(
             mergeScenarioUnderAnalysis.getTargetMethod(), objectSerializerSupporter.getFullSerializerSupporterClass());
 
-        startProcess(fileFinderSupport.getProjectLocalPath().getPath(), "mvn clean test -Dmaven.test.failure.ignore=true", "Creating Serialized Objects", true);
+        startProcess(resourceFileSupporter.getProjectLocalPath().getPath(), "mvn clean test -Dmaven.test.failure.ignore=true", "Creating Serialized Objects", true);
 
-        objectSerializerSupporter.deleteObjectSerializerSupporterClass(fileFinderSupport.getTargetClassLocalPath().getPath());
+        objectSerializerSupporter.deleteObjectSerializerSupporterClass(resourceFileSupporter.getTargetClassLocalPath().getPath());
 
         gitProjectActions.undoCurrentChanges();
         gitProjectActions.checkoutPreviousSHA();
 
         generateJarsForAllMergeScenarioCommits(gitProjectActions,
-            pomDirectory, objectSerializerClassIntrumentation, fileFinderSupport,
+            pomDirectory, objectSerializerClassIntrumentation, resourceFileSupporter,
             objectSerializerSupporter, serializedObjectAccessClassIntrumentation, mergeScenarioUnderAnalysis);
 
         gitProjectActions.undoCurrentChanges();
         gitProjectActions.checkoutPreviousSHA();
 
-        fileFinderSupport.deleteResourceDirectory();
+        resourceFileSupporter.deleteResourceDirectory();
+        assembyFileSupporter.deleteResourceDirectory();
       }
     }
   }
 
   public boolean generateJarsForAllMergeScenarioCommits(GitProjectActions gitProjectActions,
       File pomDirectory, ObjectSerializerClassIntrumentation objectSerializerClassIntrumentation,
-      FileFinderSupport fileFinderSupport, ObjectSerializerSupporter objectSerializerSupporter,
+      ResourceFileSupporter resourceFileSupporter, ObjectSerializerSupporter objectSerializerSupporter,
       SerializedObjectAccessClassIntrumentation serializedObjectAccessClassIntrumentation, MergeScenarioUnderAnalysis mergeScenarioUnderAnalysis) {
 
     try {
@@ -85,47 +90,47 @@ public class ObjectSerializer {
             pomDirectory);
 
         runTestabilityTransformations(new File(
-            fileFinderSupport.getTargetClassLocalPath() + File.separator + mergeScenarioUnderAnalysis.getTargetClass()));
+            resourceFileSupporter.getTargetClassLocalPath() + File.separator + mergeScenarioUnderAnalysis.getTargetClass()));
 
         SerializedObjectAccessOutputClass serializedObjectAccessOutputClass = new SerializedObjectAccessOutputClass();
 
         objectSerializerSupporter
-            .getOutputClass(fileFinderSupport.getTargetClassLocalPath().getPath(),
-                fileFinderSupport
+            .getOutputClass(resourceFileSupporter.getTargetClassLocalPath().getPath(),
+                resourceFileSupporter
                     .getResourceDirectoryPath(pomFileInstrumentation.getPomFileDirectory()));
 
         objectSerializerClassIntrumentation.runTransformation(new File(
-            fileFinderSupport.getTargetClassLocalPath() + File.separator + mergeScenarioUnderAnalysis.getTargetClass()));
+            resourceFileSupporter.getTargetClassLocalPath() + File.separator + mergeScenarioUnderAnalysis.getTargetClass()));
 
 
-        startProcess(pomDirectory.getAbsolutePath(), "mvn clean compile assembly:single", "Generating jar file with serialized objects", false);
+        startProcess(pomDirectory.getAbsolutePath(), "mvn clean test -Dmaven.test.failure.ignore=true assembly:single", "Generating jar file with serialized objects", false);
 
         String generatedJarFile = JarManager.getJarFile(pomFileInstrumentation);
 
-        startProcess(fileFinderSupport.getProjectLocalPath().getPath(), "java -cp " + generatedJarFile
+        startProcess(resourceFileSupporter.getProjectLocalPath().getPath(), "java -cp " + generatedJarFile
             + " " + getObjectClassPathOnTargetProject(objectSerializerClassIntrumentation), "Generating method list associated to serialized objects", false);
 
-        List<String> methodList = getMethodList(fileFinderSupport, pomFileInstrumentation.getPomFileDirectory());
+        List<String> methodList = getMethodList(resourceFileSupporter, pomFileInstrumentation.getPomFileDirectory());
 
         objectSerializerClassIntrumentation.undoTransformations(new File(
-            fileFinderSupport.getTargetClassLocalPath() + File.separator
+            resourceFileSupporter.getTargetClassLocalPath() + File.separator
                 + mergeScenarioUnderAnalysis.getTargetClass()));
         objectSerializerSupporter.deleteObjectSerializerSupporterClass(
-            fileFinderSupport.getTargetClassLocalPath().getPath());
+            resourceFileSupporter.getTargetClassLocalPath().getPath());
 
         if (methodList.size() > 0) {
           serializedObjectAccessOutputClass
-              .getOutputClass(methodList, fileFinderSupport.getTargetClassLocalPath().getPath(),
+              .getOutputClass(methodList, resourceFileSupporter.getTargetClassLocalPath().getPath(),
                   objectSerializerSupporter.getFullSerializerSupporterClass());
           serializedObjectAccessClassIntrumentation.addSupporterClassAsField(new File(
-              fileFinderSupport.getTargetClassLocalPath() + File.separator + mergeScenarioUnderAnalysis.getTargetClass()));
+              resourceFileSupporter.getTargetClassLocalPath() + File.separator + mergeScenarioUnderAnalysis.getTargetClass()));
         }
 
-        startProcess(pomDirectory.getAbsolutePath(), "mvn clean compile assembly:single", "Generating jar file with serialized objects", false);
+        startProcess(pomDirectory.getAbsolutePath(), "mvn clean test -Dmaven.test.failure.ignore=true assembly:single", "Generating jar file with serialized objects", false);
 
         serializedObjectAccessOutputClass.deleteOldClassSupporter();
         serializedObjectAccessClassIntrumentation.undoTransformations(new File(
-            fileFinderSupport.getTargetClassLocalPath() + File.separator
+            resourceFileSupporter.getTargetClassLocalPath() + File.separator
                 + mergeScenarioUnderAnalysis.getTargetClass()));
         JarManager.saveGeneratedJarFile(generatedJarFile,
             mergeScenarioUnderAnalysis.getLocalProjectPath().split(mergeScenarioUnderAnalysis.getProjectName())[0] +
@@ -161,21 +166,21 @@ public class ObjectSerializer {
   }
 
   private ObjectSerializerSupporter createAndAddObjectSerializerSupporter(
-      FileFinderSupport fileFinderSupport, PomFileInstrumentation pomFileInstrumentation) {
+      ResourceFileSupporter resourceFileSupporter, PomFileInstrumentation pomFileInstrumentation) {
     ObjectSerializerSupporter objectSerializerSupporter = new ObjectSerializerSupporter(
-        Paths.get(fileFinderSupport.getProjectLocalPath().getPath() + File.separator + "src" +
+        Paths.get(resourceFileSupporter.getProjectLocalPath().getPath() + File.separator + "src" +
             File.separator + "main" + File.separator + "java")
-            .relativize(Paths.get(fileFinderSupport.
+            .relativize(Paths.get(resourceFileSupporter.
                 getTargetClassLocalPath().getPath())).toString().replace(File.separator, "."));
     objectSerializerSupporter
-        .getOutputClass(fileFinderSupport.getTargetClassLocalPath().getPath(),
-            fileFinderSupport
+        .getOutputClass(resourceFileSupporter.getTargetClassLocalPath().getPath(),
+            resourceFileSupporter
                 .getResourceDirectoryPath(pomFileInstrumentation.getPomFileDirectory()));
     return objectSerializerSupporter;
   }
 
-  private List<String> getMethodList(FileFinderSupport fileFinderSupport, File pom){
-    String resourceDirectory =  fileFinderSupport
+  private List<String> getMethodList(ResourceFileSupporter resourceFileSupporter, File pom){
+    String resourceDirectory =  resourceFileSupporter
         .getResourceDirectoryPath(pom);
     List<String> methods = new ArrayList<>();
     List<String> serializedObjectTypes = new ArrayList<>();
@@ -202,13 +207,14 @@ public class ObjectSerializer {
         e.printStackTrace();
       }
     }
-    runTestabilityTransformationsForSerializedObjectClasses(fileFinderSupport, serializedObjectTypes);
+    runTestabilityTransformationsForSerializedObjectClasses(resourceFileSupporter, serializedObjectTypes);
     return methods;
   }
 
-  private void runTestabilityTransformationsForSerializedObjectClasses(FileFinderSupport fileFinderSupport, List<String> serializedObjects){
+  private void runTestabilityTransformationsForSerializedObjectClasses(
+      ResourceFileSupporter resourceFileSupporter, List<String> serializedObjects){
     for(String serializedObject: serializedObjects){
-      File serializedObjectFile = fileFinderSupport.searchForFileByName(serializedObject+".java", fileFinderSupport.getProjectLocalPath());
+      File serializedObjectFile = resourceFileSupporter.searchForFileByName(serializedObject+".java", resourceFileSupporter.getProjectLocalPath());
       if (serializedObjectFile != null){
         runTestabilityTransformations(serializedObjectFile);
       }
