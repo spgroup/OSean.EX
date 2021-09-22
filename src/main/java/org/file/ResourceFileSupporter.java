@@ -5,12 +5,12 @@ import java.io.IOException;
 import java.nio.file.Files;
 import org.apache.commons.io.FileUtils;
 
-public class FileFinderSupport {
-  private File projectLocalPath;
-  private File targetClassLocalPath;
-  private File localPathResourceDirectory;
+public class ResourceFileSupporter {
+  protected File projectLocalPath;
+  protected File targetClassLocalPath;
+  protected File localPathResourceDirectory;
 
-  public FileFinderSupport(String pathFile){
+  public ResourceFileSupporter(String pathFile){
     this.projectLocalPath = new File(pathFile);
     this.targetClassLocalPath = new File(pathFile);
   }
@@ -50,7 +50,7 @@ public class FileFinderSupport {
     return null;
   }
 
-  private File findPomDirectory(File file){
+  protected File findPomDirectory(File file){
     File[] list = file.listFiles();
     String name = "pom.xml";
     File aux = new File(this.projectLocalPath.getPath()).getParentFile();
