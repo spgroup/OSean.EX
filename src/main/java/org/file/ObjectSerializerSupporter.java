@@ -1,10 +1,14 @@
 package org.file;
 
+import static org.eclipse.jgit.lib.ObjectChecker.object;
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Collections;
+import java.util.List;
 
 public class ObjectSerializerSupporter {
   private String fullSerializerSupporterClass;
@@ -89,8 +93,19 @@ public class ObjectSerializerSupporter {
         + "    }\n"
         + "  }\n"
         + "\n"
+        + " public static String getClassNameMethodSignature(Object object) {\n"
+        + "    if (object.getClass().getEnclosingClass() != null) {\n"
+        + "      if (object.getClass().getCanonicalName().equals(\"java.util.Arrays.ArrayList\") || object.getClass().getCanonicalName().equals(\"java.util.Collections.UnmodifiableRandomAccessList\")){\n"
+        + "        return java.util.List.class.getCanonicalName();\n"
+        + "      } else if (object.getClass().getCanonicalName().equals(\"java.util.Collections.SynchronizedSet\")){\n"
+        + "        return java.util.Collections.class.getCanonicalName();\n"
+        + "      }\n"
+        + "    }\n"
+        + "      return object.getClass().getCanonicalName();\n"
+        + "  }\n"
+        + "\n"
         + "  public static String getClassName(Object object){\n"
-        + "    if (object.getClass().getEnclosingClass() != null){\n"
+        + "    if (isThereEnclosingClass(object.getClass())){\n"
         + "      return object.getClass().getEnclosingClass().getSimpleName();\n"
         + "    }else{\n"
         + "      return object.getClass().getSimpleName();\n"
@@ -98,10 +113,18 @@ public class ObjectSerializerSupporter {
         + "  }\n"
         + "\n"
         + "  public static String getClassName(Field object){\n"
-        + "    if (object.getType().getClass().getEnclosingClass() != null){\n"
+        + "    if (isThereEnclosingClass(object.getType().getClass())){\n"
         + "      return object.getType().getEnclosingClass().getSimpleName();\n"
         + "    }else{\n"
         + "      return object.getType().getSimpleName();\n"
+        + "    }\n"
+        + "  }\n"
+        + "\n"
+        + "  public static boolean isThereEnclosingClass(Class currentClass){\n"
+        + "    if (currentClass.getEnclosingClass() != null){\n"
+        + "      return true;\n"
+        + "    }else{\n"
+        + "      return false;\n"
         + "    }\n"
         + "  }"
         + "\n"
@@ -138,9 +161,9 @@ public class ObjectSerializerSupporter {
         + "              .format(\"\\tpublic %s deserializeObject%s() throws IOException {\\n\"\n"
         + "                      + \"\\t\\tjava.io.InputStream s = SerializedObjectSupporter.class.getClassLoader().getResourceAsStream(\\\"serializedObjects\\\"+File.separator+\\\"%s\\\");\\n\"\n"
         + "                      + \"\\t\\treturn (%s) deserializeAny(readFileContents(s));\\n\" +\n"
-        + "                      \"\\t}\", getCanonicalClassName(serializedObject),\n"
+        + "                      \"\\t}\", getClassNameMethodSignature(serializedObject),\n"
         + "                  file.getName().replace(\".xml\", \"\"), file.getName(),\n"
-        + "                  getCanonicalClassName(serializedObject), file.getPath());\n"
+        + "                  getClassNameMethodSignature(serializedObject), file.getPath());\n"
         + "          methods.add(aux);\n"
         + "        }\n"
         + "      }catch (Exception e){\n"
@@ -177,6 +200,7 @@ public class ObjectSerializerSupporter {
         + "    try{\n"
         + "      obj = deserializeWithXtream(file);\n"
         + "    }catch (Exception e){\n"
+        + "       System.out.println(e);"
         + "    }\n"
         + "    return obj;\n"
         + "  }\n"
@@ -209,6 +233,18 @@ public class ObjectSerializerSupporter {
       e.printStackTrace();
     }
     return false;
+  }
+
+  public static String getClassNameMethodSignature(Object object) {
+    if (object.getClass().getEnclosingClass() != null && !object.getClass().getName().startsWith("java")) {
+      if (object.getClass().getCanonicalName().equals("java.util.Arrays.ArrayList")
+          || object.getClass().getCanonicalName().equals("java.util.Collections.UnmodifiableRandomAccessList")) {
+        return List.class.getCanonicalName();
+      } else if (object.getClass().getCanonicalName().equals("java.util.Collections.SynchronizedSet")) {
+        return Collections.class.getCanonicalName();
+      }
+    }
+      return object.getClass().getCanonicalName();
   }
 
   public boolean deleteObjectSerializerSupporterClass(String fileDirectory) {
