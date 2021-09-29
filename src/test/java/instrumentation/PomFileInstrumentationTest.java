@@ -431,6 +431,7 @@ public class PomFileInstrumentationTest {
         + "   <plugins>\n"
         + "            <plugin>\n"
         + "                <artifactId>maven-assembly-plugin</artifactId>\n"
+        + "                <version>2.6</version>\n"
         + "                <configuration>\n"
         + "                    <archive>\n"
         + "                        <manifest>\n"

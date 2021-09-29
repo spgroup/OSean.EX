@@ -28,6 +28,7 @@ public class ProcessManager extends Thread {
       while ((line = br.readLine()) != null) {
         outputs.add(line);
       }
+      br.close();
     } catch (IOException ioe) {
       ioe.printStackTrace();
     }

@@ -148,9 +148,14 @@ public class PomFileInstrumentation {
   private boolean isNodeForJarWithDependenciesAvailable(NodeList nodeList, Node newNode){
     for(int temp=0; temp < nodeList.getLength(); temp++){
       Node node = nodeList.item(temp);
-      if (newNode.getFirstChild().getNextSibling().getFirstChild().getNextSibling().getFirstChild().getTextContent()
-          .equals(node.getTextContent())){
-        return true;
+      try {
+        if (newNode.getFirstChild().getNextSibling().getFirstChild().getNextSibling()
+            .getFirstChild().getTextContent()
+            .equals(node.getTextContent())) {
+          return true;
+        }
+      }catch (NullPointerException e){
+        e.printStackTrace();
       }
     }
     return false;
@@ -207,6 +212,8 @@ public class PomFileInstrumentation {
     Node plugin = document.createElement("plugin");
     Node artifactId = document.createElement("artifactId");
     artifactId.setTextContent("maven-assembly-plugin");
+    Node version = document.createElement("version");
+    version.setTextContent("2.6");
     Node configuration = document.createElement("configuration");
     Node archive = document.createElement("archive");
     Node manifest = document.createElement("manifest");
@@ -223,6 +230,7 @@ public class PomFileInstrumentation {
     configuration.appendChild(descriptorRefs);
 
     plugin.appendChild(artifactId);
+    plugin.appendChild(version);
     plugin.appendChild(configuration);
 
     return plugin;
