@@ -121,16 +121,18 @@ public class ObjectSerializer {
               fileFinderSupport.getTargetClassLocalPath() + File.separator + mergeScenarioUnderAnalysis.getTargetClass()));
         }
 
-        startProcess(pomDirectory.getAbsolutePath(), "mvn clean compile assembly:single", "Generating jar file with serialized objects", false);
+        if (startProcess(pomDirectory.getAbsolutePath(), "mvn clean compile assembly:single", "Generating jar file with serialized objects", false)) {
 
-        serializedObjectAccessOutputClass.deleteOldClassSupporter();
-        serializedObjectAccessClassIntrumentation.undoTransformations(new File(
-            fileFinderSupport.getTargetClassLocalPath() + File.separator
-                + mergeScenarioUnderAnalysis.getTargetClass()));
-        JarManager.saveGeneratedJarFile(generatedJarFile,
-            mergeScenarioUnderAnalysis.getLocalProjectPath().split(mergeScenarioUnderAnalysis.getProjectName())[0] +
-                File.separator + "GeneratedJars" + File.separator + mergeScenarioUnderAnalysis.getProjectName(), mergeScenarioCommit + ".jar");
-
+          serializedObjectAccessOutputClass.deleteOldClassSupporter();
+          serializedObjectAccessClassIntrumentation.undoTransformations(new File(
+              fileFinderSupport.getTargetClassLocalPath() + File.separator
+                  + mergeScenarioUnderAnalysis.getTargetClass()));
+          JarManager.saveGeneratedJarFile(generatedJarFile,
+              mergeScenarioUnderAnalysis.getLocalProjectPath()
+                  .split(mergeScenarioUnderAnalysis.getProjectName())[0] +
+                  File.separator + "GeneratedJars" + File.separator
+                  + mergeScenarioUnderAnalysis.getProjectName(), mergeScenarioCommit + ".jar");
+        }
         gitProjectActions.undoCurrentChanges();
         gitProjectActions.checkoutPreviousSHA();
       }
