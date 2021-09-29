@@ -230,8 +230,8 @@ public class PomFileInstrumentation {
     configuration.appendChild(descriptorRefs);
 
     plugin.appendChild(artifactId);
-    plugin.appendChild(version);
     plugin.appendChild(configuration);
+    plugin.appendChild(version);
 
     return plugin;
   }
