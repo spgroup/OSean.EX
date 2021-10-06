@@ -154,6 +154,7 @@ public class ObjectSerializer {
     pomFileInstrumentation.changeAnimalSnifferPluginIfAdded();
     pomFileInstrumentation.addResourcesForGeneratedJar();
     pomFileInstrumentation.addPluginForJarWithAllDependencies();
+    pomFileInstrumentation.changeSurefirePlugin();
 
     return pomFileInstrumentation;
   }

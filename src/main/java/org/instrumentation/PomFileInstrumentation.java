@@ -389,4 +389,32 @@ public class PomFileInstrumentation {
     return resource;
   }
 
+  public void changeSurefirePlugin() throws TransformerException{
+    Document document = getPomFileAsDocument();
+
+    if (document != null){
+      document.getDocumentElement().normalize();
+
+      NodeList nList = document.getElementsByTagName("artifactId");
+
+      for (int temp = 0; temp < nList.getLength(); temp++) {
+        Node node = nList.item(temp);
+        Node target = node.getFirstChild();
+        String test = target.getNodeValue();
+        if(test.equals("maven-surefire-plugin")){
+          Node aux = node.getNextSibling().getNextSibling().getFirstChild();
+          aux.setNodeValue("2.19.1");
+          Node configuration = document.createElement("configuration");
+          Node includes = document.createElement("includes");
+          Node include = document.createElement("include");
+          include.setTextContent("**/*Test.java");
+          includes.appendChild(include);
+          configuration.appendChild(includes);
+          node.getParentNode().appendChild(configuration);
+        }
+        saveChangesOnPomFiles(document);
+      }
+    }
+  }
+
 }
