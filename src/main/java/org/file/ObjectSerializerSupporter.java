@@ -45,7 +45,7 @@ public class ObjectSerializerSupporter {
         + "  public static void serializeWithXtreamOut(Object request) throws UnsupportedEncodingException {\n"
         + "    if (resourceDirectory != null){\n"
         + "      for(Field field: request.getClass().getDeclaredFields()){\n"
-        + "        if (!field.getType().isPrimitive() && Modifier.isPublic(field.getModifiers())){\n"
+        + "        if (!field.getType().isPrimitive()){\n"
         + "          try {\n"
         + "            Object a = field.get(request);\n"
         + "            XStream xtream = new XStream();\n"

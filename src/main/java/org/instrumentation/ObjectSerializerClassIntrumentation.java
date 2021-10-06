@@ -3,6 +3,7 @@ package org.instrumentation;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.io.FileUtils;
@@ -27,10 +28,12 @@ import org.eclipse.jdt.core.dom.TryStatement;
 public class ObjectSerializerClassIntrumentation {
   protected String packageName;
   protected String targetMethod;
+  protected List<String> targetClasses;
 
   public ObjectSerializerClassIntrumentation(String targetMethod, String packageName){
     this.packageName = packageName;
     this.targetMethod = targetMethod;
+    this.targetClasses = new ArrayList<>();
   }
 
   public String getPackageName() {
@@ -169,6 +172,14 @@ public class ObjectSerializerClassIntrumentation {
   private void addMethodCallForSerialization(MethodDeclaration node){
     if (isNodeTheTargetMethod(node)){
       createAstNodeWithMethodBody(node);
+      getTargetClasses(node);
+    }
+  }
+
+  private void getTargetClasses(MethodDeclaration node){
+    for (Object parameter: node.parameters()) {
+      SingleVariableDeclaration parameterVariable = (SingleVariableDeclaration) parameter;
+      this.targetClasses.add(parameterVariable.getType().toString());
     }
   }
 
@@ -263,6 +274,10 @@ public class ObjectSerializerClassIntrumentation {
       e.printStackTrace();
     }
     return false;
+  }
+
+  public List<String> getTargetClasses(){
+    return this.targetClasses;
   }
 
 }

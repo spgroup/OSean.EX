@@ -49,6 +49,8 @@ public class ObjectSerializer {
             new File(fileFinderSupport.getTargetClassLocalPath() + File.separator + mergeScenarioUnderAnalysis.getTargetClass()),
             new ObjectSerializerClassIntrumentation(mergeScenarioUnderAnalysis.getTargetMethod(), objectSerializerSupporter.getFullSerializerSupporterClass()));
 
+        applyTestabilityTransformationsTargetClasses(fileFinderSupport, objectSerializerClassIntrumentation.getTargetClasses());
+
         SerializedObjectAccessClassIntrumentation serializedObjectAccessClassIntrumentation = new SerializedObjectAccessClassIntrumentation(
             mergeScenarioUnderAnalysis.getTargetMethod(), objectSerializerSupporter.getFullSerializerSupporterClass());
 
@@ -86,6 +88,7 @@ public class ObjectSerializer {
 
         runTestabilityTransformations(new File(
             fileFinderSupport.getTargetClassLocalPath() + File.separator + mergeScenarioUnderAnalysis.getTargetClass()));
+        applyTestabilityTransformationsTargetClasses(fileFinderSupport, objectSerializerClassIntrumentation.getTargetClasses());
 
         SerializedObjectAccessOutputClass serializedObjectAccessOutputClass = new SerializedObjectAccessOutputClass();
 
@@ -234,6 +237,15 @@ public class ObjectSerializer {
     }
     System.out.println("UNSUCCESSFUL");
     return false;
+  }
+
+  private void applyTestabilityTransformationsTargetClasses(FileFinderSupport fileFinderSupport, List<String> classes){
+    for(String targetClass: classes){
+      File targetClassFile = fileFinderSupport.searchForFileByName(targetClass+".java", fileFinderSupport.getProjectLocalPath());
+      if (targetClassFile != null){
+       runTestabilityTransformations(targetClassFile);
+      }
+    }
   }
 
   private boolean startProcess(String directoryPath, String command, String message, boolean isTestTask)
