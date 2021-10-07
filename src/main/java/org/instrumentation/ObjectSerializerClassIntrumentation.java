@@ -190,7 +190,7 @@ public class ObjectSerializerClassIntrumentation {
   }
 
   private boolean isNodeTheTargetMethod(MethodDeclaration node) {
-    return !node.isConstructor() && node.getName().toString().equals(this.targetMethod);
+    return node.getName().toString().equals(this.targetMethod);
   }
 
 
@@ -240,7 +240,11 @@ public class ObjectSerializerClassIntrumentation {
 
     result.setBody(body);
     result.catchClauses().add(catchClause);
-    nodeMethod.getBody().statements().add(0, result);
+    if (nodeMethod.isConstructor()) {
+      nodeMethod.getBody().statements().add(nodeMethod.getBody().statements().size(), result);
+    }else {
+      nodeMethod.getBody().statements().add(0, result);
+    }
 
     return nodeMethod;
   }

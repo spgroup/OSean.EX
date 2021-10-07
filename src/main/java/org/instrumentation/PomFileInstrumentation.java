@@ -381,8 +381,12 @@ public class PomFileInstrumentation {
     directory.setTextContent("src/main/resources");
     Node includes = document.createElement("includes");
     Node include = document.createElement("include");
-    include.setTextContent("**/*.xml");
+    include.setTextContent("**/*.*ml");
     includes.appendChild(include);
+
+    Node includeYml = document.createElement("include");
+    includeYml.setTextContent("**/*.yml");
+    //includes.appendChild(includeYml);
 
     resource.appendChild(directory);
     resource.appendChild(includes);
