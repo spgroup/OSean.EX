@@ -101,7 +101,10 @@ public class ObjectSerializer {
             fileFinderSupport.getTargetClassLocalPath() + File.separator + mergeScenarioUnderAnalysis.getTargetClass()));
 
 
-        startProcess(pomDirectory.getAbsolutePath(), "mvn clean compile assembly:single", "Generating jar file with serialized objects", false);
+        if (!startProcess(pomDirectory.getAbsolutePath(), "mvn clean compile assembly:single", "Generating jar file with serialized objects", false)){
+          startProcess(fileFinderSupport.getProjectLocalPath().getPath(), "mvn clean compile", "Compiling the whole project", false);
+          startProcess(pomDirectory.getAbsolutePath(), "mvn compile assembly:single", "Generating jar file with serialized objects", false);
+        }
 
         String generatedJarFile = JarManager.getJarFile(pomFileInstrumentation);
 
@@ -135,6 +138,19 @@ public class ObjectSerializer {
                   .split(mergeScenarioUnderAnalysis.getProjectName())[0] +
                   File.separator + "GeneratedJars" + File.separator
                   + mergeScenarioUnderAnalysis.getProjectName(), mergeScenarioCommit + ".jar");
+        }else{
+          if (startProcess(fileFinderSupport.getProjectLocalPath().getPath(), "mvn clean compile", "Compiling the whole project", false) &&
+          startProcess(pomDirectory.getAbsolutePath(), "mvn compile assembly:single", "Generating jar file with serialized objects", false)){
+            serializedObjectAccessOutputClass.deleteOldClassSupporter();
+            serializedObjectAccessClassIntrumentation.undoTransformations(new File(
+                fileFinderSupport.getTargetClassLocalPath() + File.separator
+                    + mergeScenarioUnderAnalysis.getTargetClass()));
+            JarManager.saveGeneratedJarFile(generatedJarFile,
+                mergeScenarioUnderAnalysis.getLocalProjectPath()
+                    .split(mergeScenarioUnderAnalysis.getProjectName())[0] +
+                    File.separator + "GeneratedJars" + File.separator
+                    + mergeScenarioUnderAnalysis.getProjectName(), mergeScenarioCommit + ".jar");
+          }
         }
         gitProjectActions.undoCurrentChanges();
         gitProjectActions.checkoutPreviousSHA();
