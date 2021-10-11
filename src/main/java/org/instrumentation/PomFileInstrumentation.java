@@ -381,7 +381,7 @@ public class PomFileInstrumentation {
     directory.setTextContent("src/main/resources");
     Node includes = document.createElement("includes");
     Node include = document.createElement("include");
-    include.setTextContent("**/*.*ml");
+    include.setTextContent("**/*.*l");
     includes.appendChild(include);
 
     Node includeYml = document.createElement("include");
@@ -405,20 +405,42 @@ public class PomFileInstrumentation {
         Node node = nList.item(temp);
         Node target = node.getFirstChild();
         String test = target.getNodeValue();
-        if(test.equals("maven-surefire-plugin")){
-          Node aux = node.getNextSibling().getNextSibling().getFirstChild();
-          aux.setNodeValue("2.19.1");
-          Node configuration = document.createElement("configuration");
+        if(test.equals("maven-surefire-plugin")) {
+          Node surefire = document.createElement("plugin");
+
+          Node groupId = document.createElement("groupId");
+          groupId.setTextContent("org.apache.maven.plugins");
+          Node artifactId = document.createElement("artifactId");
+          artifactId.setTextContent("maven-surefire-plugin");
+          Node version = document.createElement("version");
+          version.setTextContent("2.19.1");
+
+          Node configurationNode = document.createElement("configuration");
           Node includes = document.createElement("includes");
           Node include = document.createElement("include");
           include.setTextContent("**/*Test.java");
           includes.appendChild(include);
-          configuration.appendChild(includes);
-          node.getParentNode().appendChild(configuration);
+          configurationNode.appendChild(includes);
+
+          surefire.appendChild(groupId);
+          surefire.appendChild(artifactId);
+          surefire.appendChild(configurationNode);
+          node.getParentNode().getParentNode().appendChild(surefire);
+          node.getParentNode().getParentNode().removeChild(node.getParentNode());
         }
         saveChangesOnPomFiles(document);
       }
     }
+  }
+
+  private Node getConfigurationNode(Node node){
+    if (node != null && node.getNextSibling() != null && node.getNextSibling().getNextSibling() != null &&
+        node.getNextSibling().getNextSibling().getNextSibling() != null &&
+        node.getNextSibling().getNextSibling().getNextSibling().getNextSibling() != null &&
+        node.getNextSibling().getNextSibling().getNextSibling().getNextSibling().getNodeName().equals("configuration")){
+      return node.getNextSibling().getNextSibling().getNextSibling().getNextSibling();
+    }
+    return null;
   }
 
 }

@@ -180,6 +180,10 @@ public class ObjectSerializerClassIntrumentation {
     for (Object parameter: node.parameters()) {
       SingleVariableDeclaration parameterVariable = (SingleVariableDeclaration) parameter;
       this.targetClasses.add(parameterVariable.getType().toString());
+      /*Class<?> aux = parameterVariable.resolveBinding().getType().getClass().getSuperclass();
+      if (parameter.getClass().getSuperclass() == null) {
+        this.targetClasses.add(parameterVariable.getType().toString());
+      }*/
     }
   }
 
