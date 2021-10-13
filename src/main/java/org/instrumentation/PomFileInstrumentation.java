@@ -413,6 +413,26 @@ public class PomFileInstrumentation {
     }
   }
 
+  public void updateOldRepository() throws TransformerException {
+    Document document = getPomFileAsDocument();
+
+    if (document != null) {
+      document.getDocumentElement().normalize();
+
+      NodeList nList = document.getElementsByTagName("url");
+      for (int temp = 0; temp < nList.getLength(); temp++) {
+        Node node = nList.item(temp);
+        System.out.println(node.getFirstChild().getNodeValue());
+        if (node.getFirstChild().getNodeValue().equals("http://download.osgeo.org/webdav/geotools/")
+            && node.getParentNode() != null
+            && node.getParentNode().getNodeName().equals("repository")){
+          node.getFirstChild().setTextContent("https://repo.osgeo.org/repository/release/");
+        }
+      }
+      saveChangesOnPomFiles(document);
+    }
+  }
+
   public void changeSurefirePlugin() throws TransformerException{
     Document document = getPomFileAsDocument();
 
