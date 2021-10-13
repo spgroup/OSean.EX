@@ -393,6 +393,26 @@ public class PomFileInstrumentation {
     return resource;
   }
 
+  public void updateOldDependencies() throws TransformerException {
+    Document document = getPomFileAsDocument();
+
+    if (document != null) {
+      document.getDocumentElement().normalize();
+
+      NodeList nList = document.getElementsByTagName("version");
+      for (int temp = 0; temp < nList.getLength(); temp++) {
+        Node node = nList.item(temp);
+        if (node.getFirstChild().getNodeValue().contains("SNAPSHOT")
+            && node.getParentNode() != null
+            && node.getParentNode().getNodeName().equals("parent")){
+          String newVersion = node.getFirstChild().getNodeValue().split("(-)?SNAPSHOT")[0];
+          node.setTextContent(newVersion);
+        }
+      }
+      saveChangesOnPomFiles(document);
+    }
+  }
+
   public void changeSurefirePlugin() throws TransformerException{
     Document document = getPomFileAsDocument();
 
