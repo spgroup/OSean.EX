@@ -117,8 +117,10 @@ public class PomFileInstrumentation {
         Node dependencies = document.createElement("dependencies");
         Node xstream = getNode(document, "com.thoughtworks.xstream", "xstream", "1.4.15");
         Node commons = getNode(document, "org.apache.commons", "commons-lang3", "3.0");
+        Node mockito = getNode(document, "org.mockito", "mockito-all", "1.10.19");
         dependencies.appendChild(xstream);
         dependencies.appendChild(commons);
+        dependencies.appendChild(mockito);
         root.appendChild(dependencies);
         saveChangesOnPomFiles(document);
         return true;
@@ -136,6 +138,9 @@ public class PomFileInstrumentation {
               node.appendChild(commons);
               addedDependencies = true;
             }
+            Node mockito = getNode(document, "org.mockito", "mockito-all", "1.10.19");
+            node.appendChild(mockito);
+            addedDependencies = true;
           }
           saveChangesOnPomFiles(document);
         }
