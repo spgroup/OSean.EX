@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 
 public class ObjectSerializerSupporter {
-  private String fullSerializerSupporterClass;
+  protected String fullSerializerSupporterClass;
 
   public ObjectSerializerSupporter (String packageName){
     if(packageName.split("src.main.java.").length > 1){
@@ -25,27 +25,35 @@ public class ObjectSerializerSupporter {
     String classText = ""
         + "package "+this.fullSerializerSupporterClass+";\n\n"
         + "import com.thoughtworks.xstream.XStream;\n"
+        + "import com.thoughtworks.xstream.converters.Converter;\n"
         + "import java.io.File;\n"
         + "import java.io.FileWriter;\n"
         + "import java.io.IOException;\n"
         + "import java.io.UnsupportedEncodingException;\n"
         + "import java.lang.reflect.Field;\n"
+        + "import java.lang.reflect.InvocationTargetException;\n"
         + "import java.util.ArrayList;\n"
         + "import java.util.HashMap;\n"
         + "import java.lang.reflect.Modifier;\n"
         + "import java.util.List;\n"
         + "import java.io.PrintWriter;\n"
+        + "import java.util.Map;\n"
         + "import org.apache.commons.lang3.builder.EqualsBuilder;\n\n"
         + "public class ObjectSerializerSupporter {\n"
         + "\n"
         + "  private static File resourceDirectory = new File(\""+resourceDirectory+"\");\n"
         + "  public static HashMap<String, Integer> count = new HashMap<String, Integer>();\n"
         + "  public static HashMap<String, ArrayList<Object>> serializedObjects = new HashMap<String, ArrayList<Object>>();\n"
+        + "  public static ArrayList<String> converters = new ArrayList<String>();\n"
         + "\n"
-        + "  public static void serializeWithXtreamOut(Object request) throws UnsupportedEncodingException {\n"
+        + "  public static void serializeWithXtreamOut(Object request) throws UnsupportedEncodingException, IllegalAccessException {\n"
         + "    if (resourceDirectory != null){\n"
         + "      for(Field field: request.getClass().getDeclaredFields()){\n"
         + "        if (!field.getType().isPrimitive() && Modifier.isPublic(field.getModifiers())){\n"
+        + "          if(org.mockito.Mockito.mockingDetails(field.get(request)).isMock()){\n"
+        + "            field.setAccessible(true);\n"
+        + "            field.set(request, null);\n"
+        + "          }\n"
         + "          try {\n"
         + "            Object a = field.get(request);\n"
         + "            XStream xtream = new XStream();\n"
@@ -55,6 +63,9 @@ public class ObjectSerializerSupporter {
         + "              writeUsingFileWriter(xml, new File(resourceDirectory.getPath()+File.separator+getClassName(field)+\"\"+count.get(getClassName(field))+\".xml\").getPath());\n"
         + "              serializedObjects.put(getClassName(field), new ArrayList<Object>());\n"
         + "              serializedObjects.get(getClassName(field)).add(a);\n"
+        + "              if (!converters.contains(field.getType().getCanonicalName()) && !field.getType().isPrimitive()){\n"
+        + "                converters.add(field.getType().getCanonicalName());\n"
+        + "              }\n"
         + "            }else{\n"
         + "              ArrayList<Object> aux = serializedObjects.get(getClassName(field));\n"
         + "              boolean isEqual = false;\n"
@@ -86,7 +97,11 @@ public class ObjectSerializerSupporter {
         + "      String xml = xtream.toXML(request);\n"
         + "      System.out.println(getClassName(request));\n"
         + "      writeUsingFileWriter(xml, new File(resourceDirectory.getPath()+File.separator+getClassName(request)+\"\"+count.get(getClassName(request))+\".xml\").getPath());\n"
+        + "      if (!converters.contains(getCanonicalClassName(request)) && !request.getClass().isPrimitive()){\n"
+        + "        converters.add(getCanonicalClassName(request));\n"
+        + "      }\n"
         + "    }\n"
+        + "    saveFile(converters, \"converters-name\");\n"
         + "  }\n"
         + "\n"
         + "  public static String getClassName(Object object){\n"
@@ -146,7 +161,7 @@ public class ObjectSerializerSupporter {
         + "      }catch (Exception e){\n"
         + "        e.printStackTrace();\n"
         + "      }\n"
-        + "      saveFile(methods);\n"
+        + "      saveFile(methods, \"output-methods\");\n"
         + "    }\n"
         + "  }\n"
         + "\n"
@@ -158,9 +173,9 @@ public class ObjectSerializerSupporter {
         + "    }\n"
         + "  }"
         + "\n"
-        + " private static boolean saveFile(List<String> methods){\n"
+        + " private static boolean saveFile(List<String> methods, String fileName){\n"
         + "   try{\n"
-        + "     PrintWriter writer = new PrintWriter(resourceDirectory.getPath()+File.separator+\"output-methods.txt\");\n"
+        + "     PrintWriter writer = new PrintWriter(resourceDirectory.getPath()+File.separator+fileName+\".txt\");\n"
         + "     for(String oneMethod: methods){\n"
         + "         writer.println(oneMethod);\n"
         + "     }\n"
@@ -181,14 +196,36 @@ public class ObjectSerializerSupporter {
         + "    return obj;\n"
         + "  }\n"
         + "\n"
-        + "  static private Object deserializeWithXtream(File e) {\n"
+        + "  static private Object deserializeWithXtream(File e)\n"
+        + "      throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {\n"
         + "    XStream xtream = new XStream();\n"
-        + "    Object obj = xtream.fromXML(e);\n"
+        + "    HashMap<String, String> myConverters = new HashMap<String, String>();\n"
+        + "    Object obj = null;\n"
+        + "    try {\n"
+        + "      obj = xtream.fromXML(e);\n"
+        + "    }catch (Exception exception){\n"
+        + "      exception.printStackTrace();\n"
+        + "    }"
+        + "    if (obj == null) {\n"
+        + "      for (Map.Entry<String, String> converter : myConverters.entrySet()) {\n"
+        + "        int i = 0;\n"
+        + "        while (obj == null && i < myConverters.size()) {\n"
+        + "          xtream.registerConverter(\n"
+        + "              (Converter) Class.forName(converter.getValue()).getConstructor().newInstance());\n"
+        + "          try {\n"
+        + "            obj = xtream.fromXML(e);\n"
+        + "          }catch (Exception ex){\n"
+        + "            ex.printStackTrace();\n"
+        + "          }\n"
+        + "          i++;\n"
+        + "        }\n"
+        + "      }\n"
+        + "    }\n"
         + "    return obj;\n"
         + "  }\n"
         + "}";
     try {
-      saveFile(pomFileDirectory, classText);
+      saveFile(pomFileDirectory, classText, "ObjectSerializerSupporter");
       return true;
     }catch (Exception e){
       e.printStackTrace();
@@ -196,9 +233,9 @@ public class ObjectSerializerSupporter {
     return false;
   }
 
-  private boolean saveFile(String fileDirectory, String contents) {
+  protected boolean saveFile(String fileDirectory, String contents, String fileName) {
     deleteObjectSerializerSupporterClass(fileDirectory);
-    try(FileWriter fw = new FileWriter(fileDirectory+File.separator+"ObjectSerializerSupporter.java", true);
+    try(FileWriter fw = new FileWriter(fileDirectory+File.separator+fileName+".java", true);
         BufferedWriter bw = new BufferedWriter(fw);
         PrintWriter out = new PrintWriter(bw))
     {
