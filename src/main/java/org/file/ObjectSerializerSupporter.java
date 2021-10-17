@@ -8,6 +8,7 @@ import java.io.PrintWriter;
 
 public class ObjectSerializerSupporter {
   private String fullSerializerSupporterClass;
+  private String resourceDirectory;
 
   public ObjectSerializerSupporter (String packageName){
     if(packageName.split("src.main.java.").length > 1){
@@ -15,6 +16,7 @@ public class ObjectSerializerSupporter {
     }else{
       this.fullSerializerSupporterClass = packageName;
     }
+    this.resourceDirectory = "";
   }
 
   public String getFullSerializerSupporterClass(){
@@ -22,6 +24,7 @@ public class ObjectSerializerSupporter {
   }
 
   public boolean getOutputClass(String pomFileDirectory, String resourceDirectory){
+    this.resourceDirectory = resourceDirectory;
     String classText = ""
         + "package "+this.fullSerializerSupporterClass+";\n\n"
         + "import com.thoughtworks.xstream.XStream;\n"
@@ -213,4 +216,11 @@ public class ObjectSerializerSupporter {
     return  new File(fileDirectory+File.separator+"ObjectSerializerSupporter.java").delete();
   }
 
+  public String getClassPackage(){
+    return this.fullSerializerSupporterClass;
+  }
+
+  public String getResourceDirectory(){
+    return this.resourceDirectory;
+  }
 }

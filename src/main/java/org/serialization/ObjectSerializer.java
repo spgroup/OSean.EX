@@ -17,6 +17,7 @@ import org.instrumentation.ObjectSerializerClassIntrumentation;
 import org.instrumentation.PomFileInstrumentation;
 import org.instrumentation.SerializedObjectAccessClassIntrumentation;
 import org.util.GitProjectActions;
+import org.util.InputHandler;
 import org.util.JarManager;
 import org.util.ProcessManager;
 import org.util.input.MergeScenarioUnderAnalysis;
@@ -36,7 +37,7 @@ public class ObjectSerializer {
           .findFile(mergeScenarioUnderAnalysis.getTargetClass(), fileFinderSupport.getProjectLocalPath());
 
       if (pomDirectory != null) {
-        PomFileInstrumentation pomFileInstrumentation = createAndRunPomFileInstrumentation(pomDirectory);
+        PomFileInstrumentation pomFileInstrumentation = createAndRunPomFileInstrumentation(pomDirectory, "");
         fileFinderSupport.createNewDirectory(pomDirectory);
 
         runTestabilityTransformations(new File(
@@ -56,6 +57,10 @@ public class ObjectSerializer {
 
         startProcess(fileFinderSupport.getProjectLocalPath().getPath(), "mvn clean test -Dmaven.test.failure.ignore=true", "Creating Serialized Objects", true);
 
+        if (InputHandler.isDirEmpty(new File(objectSerializerSupporter.getResourceDirectory()).toPath())){
+          pomFileInstrumentation.changeSurefirePlugin(objectSerializerSupporter.getClassPackage());
+          startProcess(fileFinderSupport.getProjectLocalPath().getPath(), "mvn clean test -Dmaven.test.failure.ignore=true", "Creating Serialized Objects", true);
+        }
         objectSerializerSupporter.deleteObjectSerializerSupporterClass(fileFinderSupport.getTargetClassLocalPath().getPath());
 
         gitProjectActions.undoCurrentChanges();
@@ -84,7 +89,7 @@ public class ObjectSerializer {
         gitProjectActions.checkoutCommit(mergeScenarioCommit);
 
         PomFileInstrumentation pomFileInstrumentation = createAndRunPomFileInstrumentation(
-            pomDirectory);
+            pomDirectory, "");
 
         runTestabilityTransformations(new File(
             fileFinderSupport.getTargetClassLocalPath() + File.separator + mergeScenarioUnderAnalysis.getTargetClass()));
@@ -162,7 +167,7 @@ public class ObjectSerializer {
     return false;
   }
 
-  private PomFileInstrumentation createAndRunPomFileInstrumentation(File pomDirectory)
+  private PomFileInstrumentation createAndRunPomFileInstrumentation(File pomDirectory, String targetPackage)
       throws TransformerException {
     PomFileInstrumentation pomFileInstrumentation = new PomFileInstrumentation(
         pomDirectory.getPath());
@@ -170,7 +175,7 @@ public class ObjectSerializer {
     pomFileInstrumentation.changeAnimalSnifferPluginIfAdded();
     pomFileInstrumentation.addResourcesForGeneratedJar();
     pomFileInstrumentation.addPluginForJarWithAllDependencies();
-    pomFileInstrumentation.changeSurefirePlugin();
+    pomFileInstrumentation.changeSurefirePlugin(targetPackage);
     pomFileInstrumentation.updateOldDependencies();
     pomFileInstrumentation.updateOldRepository();
 

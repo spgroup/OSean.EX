@@ -5,6 +5,9 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import org.util.input.MergeScenarioUnderAnalysis;
@@ -40,6 +43,12 @@ public class InputHandler {
       e.printStackTrace();
     }
 
+  }
+
+  public static boolean isDirEmpty(final Path directory) throws IOException {
+    try(DirectoryStream<Path> dirStream = Files.newDirectoryStream(directory)) {
+      return !dirStream.iterator().hasNext();
+    }
   }
 
 }

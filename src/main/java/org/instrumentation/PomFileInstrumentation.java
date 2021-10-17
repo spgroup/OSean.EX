@@ -422,7 +422,6 @@ public class PomFileInstrumentation {
       NodeList nList = document.getElementsByTagName("url");
       for (int temp = 0; temp < nList.getLength(); temp++) {
         Node node = nList.item(temp);
-        System.out.println(node.getFirstChild().getNodeValue());
         if (node.getFirstChild().getNodeValue().equals("http://download.osgeo.org/webdav/geotools/")
             && node.getParentNode() != null
             && node.getParentNode().getNodeName().equals("repository")){
@@ -433,7 +432,7 @@ public class PomFileInstrumentation {
     }
   }
 
-  public void changeSurefirePlugin() throws TransformerException{
+  public void changeSurefirePlugin(String targetPackage) throws TransformerException{
     Document document = getPomFileAsDocument();
 
     if (document != null){
@@ -458,12 +457,17 @@ public class PomFileInstrumentation {
           Node configurationNode = document.createElement("configuration");
           Node includes = document.createElement("includes");
           Node include = document.createElement("include");
-          include.setTextContent("**/*Test.java");
+          if(target.equals("")){
+            include.setTextContent("**/*Test.java");
+          }else{
+            include.setTextContent(targetPackage+".*");
+          }
           includes.appendChild(include);
           configurationNode.appendChild(includes);
 
           surefire.appendChild(groupId);
           surefire.appendChild(artifactId);
+          surefire.appendChild(version);
           surefire.appendChild(configurationNode);
           node.getParentNode().getParentNode().appendChild(surefire);
           node.getParentNode().getParentNode().removeChild(node.getParentNode());
