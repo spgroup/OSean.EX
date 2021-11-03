@@ -55,7 +55,7 @@ public class ObjectSerializer {
         SerializedObjectAccessClassIntrumentation serializedObjectAccessClassIntrumentation = new SerializedObjectAccessClassIntrumentation(
             mergeScenarioUnderAnalysis.getTargetMethod(), objectSerializerSupporter.getFullSerializerSupporterClass());
 
-        startProcess(fileFinderSupport.getProjectLocalPath().getPath(), "mvn clean test -Dmaven.test.failure.ignore=true", "Creating Serialized Objects", true);
+        runSerializedObjectCreation(fileFinderSupport, pomFileInstrumentation, "mvn clean test -Dmaven.test.failure.ignore=true", "Creating Serialized Objects", true);
 
         if (InputHandler.isDirEmpty(new File(objectSerializerSupporter.getResourceDirectory()).toPath())){
           pomFileInstrumentation.changeSurefirePlugin(objectSerializerSupporter.getClassPackage());
@@ -75,6 +75,15 @@ public class ObjectSerializer {
 
         fileFinderSupport.deleteResourceDirectory();
       }
+    }
+  }
+
+  private void runSerializedObjectCreation(FileFinderSupport fileFinderSupport,
+      PomFileInstrumentation pomFileInstrumentation, String command, String message, boolean isTestTask)
+      throws IOException, InterruptedException, TransformerException {
+    if (!startProcess(fileFinderSupport.getProjectLocalPath().getPath(), command, message, isTestTask)){
+      pomFileInstrumentation.updateOldDependencies();
+      startProcess(fileFinderSupport.getProjectLocalPath().getPath(), command, message, isTestTask);
     }
   }
 
@@ -105,10 +114,13 @@ public class ObjectSerializer {
         objectSerializerClassIntrumentation.runTransformation(new File(
             fileFinderSupport.getTargetClassLocalPath() + File.separator + mergeScenarioUnderAnalysis.getTargetClass()));
 
+        //runSerializedObjectCreation(fileFinderSupport, pomFileInstrumentation, "mvn clean compile assembly:single", "Generating jar file with serialized objects", false);
 
         if (!startProcess(pomDirectory.getAbsolutePath(), "mvn clean compile assembly:single", "Generating jar file with serialized objects", false)){
           startProcess(fileFinderSupport.getProjectLocalPath().getPath(), "mvn clean compile", "Compiling the whole project", false);
-          startProcess(pomDirectory.getAbsolutePath(), "mvn compile assembly:single", "Generating jar file with serialized objects", false);
+          if (!startProcess(pomDirectory.getAbsolutePath(), "mvn compile assembly:single", "Generating jar file with serialized objects", false)){
+            runSerializedObjectCreation(fileFinderSupport, pomFileInstrumentation, "mvn clean compile assembly:single", "Generating jar file with serialized objects", false);
+          }
         }
 
         String generatedJarFile = JarManager.getJarFile(pomFileInstrumentation);
@@ -145,7 +157,7 @@ public class ObjectSerializer {
                   + mergeScenarioUnderAnalysis.getProjectName(), mergeScenarioCommit + ".jar");
         }else{
           if (startProcess(fileFinderSupport.getProjectLocalPath().getPath(), "mvn clean compile", "Compiling the whole project", false) &&
-          startProcess(pomDirectory.getAbsolutePath(), "mvn compile assembly:single", "Generating jar file with serialized objects", false)){
+              startProcess(pomDirectory.getAbsolutePath(), "mvn compile assembly:single", "Generating jar file with serialized objects", false)){
             serializedObjectAccessOutputClass.deleteOldClassSupporter();
             serializedObjectAccessClassIntrumentation.undoTransformations(new File(
                 fileFinderSupport.getTargetClassLocalPath() + File.separator
@@ -176,7 +188,7 @@ public class ObjectSerializer {
     pomFileInstrumentation.addResourcesForGeneratedJar();
     pomFileInstrumentation.addPluginForJarWithAllDependencies();
     pomFileInstrumentation.changeSurefirePlugin(targetPackage);
-    pomFileInstrumentation.updateOldDependencies();
+    //pomFileInstrumentation.updateOldDependencies();
     pomFileInstrumentation.updateOldRepository();
 
     return pomFileInstrumentation;
@@ -193,7 +205,7 @@ public class ObjectSerializer {
       FileFinderSupport fileFinderSupport, PomFileInstrumentation pomFileInstrumentation) {
     ObjectSerializerSupporter objectSerializerSupporter = new ObjectSerializerSupporter(
         Paths.get(fileFinderSupport.getProjectLocalPath().getPath() + File.separator + "src" +
-            File.separator + "main" + File.separator + "java")
+                File.separator + "main" + File.separator + "java")
             .relativize(Paths.get(fileFinderSupport.
                 getTargetClassLocalPath().getPath())).toString().replace(File.separator, "."));
     objectSerializerSupporter
@@ -267,7 +279,7 @@ public class ObjectSerializer {
     for(String targetClass: classes){
       File targetClassFile = fileFinderSupport.searchForFileByName(targetClass+".java", fileFinderSupport.getProjectLocalPath());
       if (targetClassFile != null){
-       runTestabilityTransformations(targetClassFile);
+        runTestabilityTransformations(targetClassFile);
       }
     }
   }
