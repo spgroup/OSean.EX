@@ -2,6 +2,7 @@ package org.serialization;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
@@ -10,7 +11,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.xml.transform.TransformerException;
 import org.Transformations;
+import org.file.ConverterSupporter;
 import org.file.FileFinderSupport;
+import org.file.ObjectDeserializerSupporter;
 import org.file.ObjectSerializerSupporter;
 import org.file.SerializedObjectAccessOutputClass;
 import org.instrumentation.ObjectSerializerClassIntrumentation;
@@ -45,6 +48,8 @@ public class ObjectSerializer {
 
         ObjectSerializerSupporter objectSerializerSupporter = createAndAddObjectSerializerSupporter(
             fileFinderSupport, pomFileInstrumentation);
+        ObjectDeserializerSupporter objectDeserializerSupporter = createAndAddObjectDeserializerSupporter(
+            fileFinderSupport, pomFileInstrumentation);
 
         ObjectSerializerClassIntrumentation objectSerializerClassIntrumentation = createAndRunObjectSerializerInstrumentation(
             new File(fileFinderSupport.getTargetClassLocalPath() + File.separator + mergeScenarioUnderAnalysis.getTargetClass()),
@@ -68,7 +73,7 @@ public class ObjectSerializer {
 
         generateJarsForAllMergeScenarioCommits(gitProjectActions,
             pomDirectory, objectSerializerClassIntrumentation, fileFinderSupport,
-            objectSerializerSupporter, serializedObjectAccessClassIntrumentation, mergeScenarioUnderAnalysis);
+            objectSerializerSupporter, objectDeserializerSupporter, serializedObjectAccessClassIntrumentation, mergeScenarioUnderAnalysis);
 
         gitProjectActions.undoCurrentChanges();
         gitProjectActions.checkoutPreviousSHA();
@@ -90,6 +95,7 @@ public class ObjectSerializer {
   public boolean generateJarsForAllMergeScenarioCommits(GitProjectActions gitProjectActions,
       File pomDirectory, ObjectSerializerClassIntrumentation objectSerializerClassIntrumentation,
       FileFinderSupport fileFinderSupport, ObjectSerializerSupporter objectSerializerSupporter,
+      ObjectDeserializerSupporter objectDeserializerSupporter,
       SerializedObjectAccessClassIntrumentation serializedObjectAccessClassIntrumentation, MergeScenarioUnderAnalysis mergeScenarioUnderAnalysis) {
 
     try {
@@ -105,6 +111,7 @@ public class ObjectSerializer {
         applyTestabilityTransformationsTargetClasses(fileFinderSupport, objectSerializerClassIntrumentation.getTargetClasses());
 
         SerializedObjectAccessOutputClass serializedObjectAccessOutputClass = new SerializedObjectAccessOutputClass();
+        ConverterSupporter converterSupporter = new ConverterSupporter();
 
         objectSerializerSupporter
             .getOutputClass(fileFinderSupport.getTargetClassLocalPath().getPath(),
@@ -114,7 +121,17 @@ public class ObjectSerializer {
         objectSerializerClassIntrumentation.runTransformation(new File(
             fileFinderSupport.getTargetClassLocalPath() + File.separator + mergeScenarioUnderAnalysis.getTargetClass()));
 
-        //runSerializedObjectCreation(fileFinderSupport, pomFileInstrumentation, "mvn clean compile assembly:single", "Generating jar file with serialized objects", false);
+        List<String> converterList = getConverterList(fileFinderSupport, pomFileInstrumentation.getPomFileDirectory());
+        if(converterList.size() > 0){
+          converterSupporter.getOutputClass(converterList, fileFinderSupport.getTargetClassLocalPath().getPath(),
+              objectSerializerSupporter.getFullSerializerSupporterClass());
+        }
+
+        objectDeserializerSupporter
+            .getOutputClass(fileFinderSupport.getTargetClassLocalPath().getPath(),
+                fileFinderSupport
+                    .getResourceDirectoryPath(pomFileInstrumentation.getPomFileDirectory()),
+                converterSupporter.classesPathSignature);
 
         if (!startProcess(pomDirectory.getAbsolutePath(), "mvn clean compile assembly:single", "Generating jar file with serialized objects", false)){
           startProcess(fileFinderSupport.getProjectLocalPath().getPath(), "mvn clean compile", "Compiling the whole project", false);
@@ -126,7 +143,7 @@ public class ObjectSerializer {
         String generatedJarFile = JarManager.getJarFile(pomFileInstrumentation);
 
         startProcess(fileFinderSupport.getProjectLocalPath().getPath(), "java -cp " + generatedJarFile
-            + " " + getObjectClassPathOnTargetProject(objectSerializerClassIntrumentation), "Generating method list associated to serialized objects", false);
+            + " " + getObjectDeserializerClassPathOnTargetProject(objectSerializerClassIntrumentation), "Generating method list associated to serialized objects", false);
 
         List<String> methodList = getMethodList(fileFinderSupport, pomFileInstrumentation.getPomFileDirectory());
 
@@ -135,6 +152,8 @@ public class ObjectSerializer {
                 + mergeScenarioUnderAnalysis.getTargetClass()));
         objectSerializerSupporter.deleteObjectSerializerSupporterClass(
             fileFinderSupport.getTargetClassLocalPath().getPath());
+        objectDeserializerSupporter.deleteObjectSerializerSupporterClass(fileFinderSupport.getTargetClassLocalPath().getPath());
+        converterSupporter.deleteOldClassSupporter();
 
         if (methodList.size() > 0) {
           serializedObjectAccessOutputClass
@@ -187,8 +206,6 @@ public class ObjectSerializer {
     pomFileInstrumentation.changeAnimalSnifferPluginIfAdded();
     pomFileInstrumentation.addResourcesForGeneratedJar();
     pomFileInstrumentation.addPluginForJarWithAllDependencies();
-    pomFileInstrumentation.changeSurefirePlugin(targetPackage);
-    //pomFileInstrumentation.updateOldDependencies();
     pomFileInstrumentation.updateOldRepository();
 
     return pomFileInstrumentation;
@@ -213,6 +230,16 @@ public class ObjectSerializer {
             fileFinderSupport
                 .getResourceDirectoryPath(pomFileInstrumentation.getPomFileDirectory()));
     return objectSerializerSupporter;
+  }
+
+  private ObjectDeserializerSupporter createAndAddObjectDeserializerSupporter(
+      FileFinderSupport fileFinderSupport, PomFileInstrumentation pomFileInstrumentation) {
+    ObjectDeserializerSupporter objectDeserializerSupporter = new ObjectDeserializerSupporter(
+        Paths.get(fileFinderSupport.getProjectLocalPath().getPath() + File.separator + "src" +
+                File.separator + "main" + File.separator + "java")
+            .relativize(Paths.get(fileFinderSupport.
+                getTargetClassLocalPath().getPath())).toString().replace(File.separator, "."));
+    return objectDeserializerSupporter;
   }
 
   private List<String> getMethodList(FileFinderSupport fileFinderSupport, File pom){
@@ -247,6 +274,26 @@ public class ObjectSerializer {
     return methods;
   }
 
+  private List<String> getConverterList(FileFinderSupport fileFinderSupport, File pom){
+    String resourceDirectory =  fileFinderSupport
+        .getResourceDirectoryPath(pom);
+    List<String> converters = new ArrayList<>();
+
+    if (new File(resourceDirectory+File.separator+"converters-name.txt").exists()){
+      try {
+        File file = new File(resourceDirectory+File.separator+"converters-name.txt");
+        Scanner myReader = new Scanner(file);
+        while (myReader.hasNextLine()) {
+          String nextLine = myReader.nextLine();
+          converters.add(nextLine);
+        }
+      }catch (Exception e){
+        e.printStackTrace();
+      }
+    }
+    return converters;
+  }
+
   private void runTestabilityTransformationsForSerializedObjectClasses(FileFinderSupport fileFinderSupport, List<String> serializedObjects){
     for(String serializedObject: serializedObjects){
       File serializedObjectFile = fileFinderSupport.searchForFileByName(serializedObject+".java", fileFinderSupport.getProjectLocalPath());
@@ -260,6 +307,12 @@ public class ObjectSerializer {
       ObjectSerializerClassIntrumentation objectSerializerClassIntrumentation) {
     return objectSerializerClassIntrumentation.getPackageName() + File.separator
         + "ObjectSerializerSupporter";
+  }
+
+  private String getObjectDeserializerClassPathOnTargetProject(
+      ObjectSerializerClassIntrumentation objectSerializerClassIntrumentation) {
+    return objectSerializerClassIntrumentation.getPackageName() + File.separator
+        + "ObjectDeserializerSupporter";
   }
 
   private boolean runTestabilityTransformations(File file){
