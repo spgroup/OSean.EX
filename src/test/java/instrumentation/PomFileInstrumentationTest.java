@@ -256,7 +256,7 @@ public class PomFileInstrumentationTest {
         + "</project>");
 
     PomFileInstrumentation pomFileInstrumentation = new PomFileInstrumentation(new File("src/test/resources/project").getPath());
-    Assert.assertFalse(pomFileInstrumentation.addRequiredDependenciesOnPOM());
+    Assert.assertTrue(pomFileInstrumentation.addRequiredDependenciesOnPOM());
   }
 
   @Test

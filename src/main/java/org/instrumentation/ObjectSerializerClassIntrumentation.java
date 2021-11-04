@@ -180,10 +180,6 @@ public class ObjectSerializerClassIntrumentation {
     for (Object parameter: node.parameters()) {
       SingleVariableDeclaration parameterVariable = (SingleVariableDeclaration) parameter;
       this.targetClasses.add(parameterVariable.getType().toString());
-      /*Class<?> aux = parameterVariable.resolveBinding().getType().getClass().getSuperclass();
-      if (parameter.getClass().getSuperclass() == null) {
-        this.targetClasses.add(parameterVariable.getType().toString());
-      }*/
     }
   }
 
@@ -194,7 +190,27 @@ public class ObjectSerializerClassIntrumentation {
   }
 
   private boolean isNodeTheTargetMethod(MethodDeclaration node) {
-    return node.getName().toString().equals(this.targetMethod);
+    if (this.targetMethod.contains("(")){
+      if (node.getName().toString().equals(this.targetMethod.split("\\(")[0])) {
+        String[] parameters = this.targetMethod.split(this.targetMethod.split("\\(")[0])[1].replace("(","").replace(")","").split(",");
+        List parameterMethod = node.parameters();
+        if (parameterMethod.size() == parameters.length) {
+          int i = 0;
+
+          while (i < parameters.length) {
+            SingleVariableDeclaration aux2 = (SingleVariableDeclaration) parameterMethod.get(i);
+            if (!parameters[i].contains(aux2.getType().toString())) {
+              return false;
+            }
+            i++;
+          }
+          return true;
+        }
+      }
+      return false;
+    }else {
+      return node.getName().toString().equals(this.targetMethod);
+    }
   }
 
 
