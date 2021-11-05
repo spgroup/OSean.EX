@@ -71,7 +71,7 @@ public class PomFileInstrumentation {
       } else{
         for (int temp = 0; temp < nList.getLength(); temp++) {
           Node node = nList.item(temp);
-          Node plugin = getPluginNode(document);
+          Node plugin = getPluginMavenAssemblyPlugin(document);
           if (!isNodeAlreadyAvailable(document.getElementsByTagName("plugin"), plugin, document.getElementsByTagName("descriptorRef"))){
             node.appendChild(plugin);
             saveChangesOnPomFiles(document);
@@ -241,6 +241,53 @@ public class PomFileInstrumentation {
     return plugin;
   }
 
+  private Node getPluginMavenAssemblyPlugin(Document document){
+    Node plugin = document.createElement("plugin");
+
+    Node artifactId = document.createElement("artifactId");
+    artifactId.setTextContent("maven-assembly-plugin");
+    Node version = document.createElement("version");
+    version.setTextContent("2.3");
+    Node configuration = document.createElement("configuration");
+    Node descriptor = document.createElement("descriptor");
+    descriptor.setTextContent("src/main/assembly/assembly.xml");
+    configuration.appendChild(descriptor);
+    plugin.appendChild(artifactId);
+    plugin.appendChild(version);
+    plugin.appendChild(configuration);
+
+    Node executions = document.createElement("executions");
+    Node execution = document.createElement("execution");
+    Node id = document.createElement("id");
+    id.setTextContent("make-assembly");
+    execution.appendChild(id);
+
+    Node phase = document.createElement("phase");
+    phase.setTextContent("package");
+    execution.appendChild(phase);
+
+    Node goals = document.createElement("goals");
+    Node goal = document.createElement("goal");
+    goal.setTextContent("single");
+    goals.appendChild(goal);
+    execution.appendChild(goals);
+
+    Node configurationExec = document.createElement("configuration");
+    Node archive = document.createElement("archive");
+    Node manifest = document.createElement("manifest");
+    Node mainClass = document.createElement("mainClass");
+    mainClass.setTextContent("fully.qualified.MainClass");
+    manifest.appendChild(mainClass);
+    archive.appendChild(manifest);
+    configurationExec.appendChild(archive);
+    execution.appendChild(configurationExec);
+
+    executions.appendChild(execution);
+    plugin.appendChild(executions);
+
+    return plugin;
+  }
+
   private Node getNode(Document document, String groupIdValue, String artifactIdValue, String versionValue) {
     Node dependency = document.createElement("dependency");
     Node groupId = document.createElement("groupId");
@@ -371,7 +418,7 @@ public class PomFileInstrumentation {
 
   private Node getPluginsNode(Document document){
     Node plugins = document.createElement("plugins");
-    Node plugin = getPluginNode(document);
+    Node plugin = getPluginMavenAssemblyPlugin(document);
     plugins.appendChild(plugin);
     return plugins;
   }
