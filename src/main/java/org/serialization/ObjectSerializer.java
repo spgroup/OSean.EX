@@ -211,6 +211,7 @@ public class ObjectSerializer {
     pomFileInstrumentation.addResourcesForGeneratedJar();
     pomFileInstrumentation.addPluginForJarWithAllDependencies();
     pomFileInstrumentation.updateOldRepository();
+    pomFileInstrumentation.changeSurefirePlugin(targetPackage);
 
     return pomFileInstrumentation;
   }

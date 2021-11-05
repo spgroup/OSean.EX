@@ -72,7 +72,8 @@ public class PomFileInstrumentation {
         for (int temp = 0; temp < nList.getLength(); temp++) {
           Node node = nList.item(temp);
           Node plugin = getPluginMavenAssemblyPlugin(document);
-          if (!isNodeAlreadyAvailable(document.getElementsByTagName("plugin"), plugin, document.getElementsByTagName("descriptorRef"))){
+          if (node.getParentNode().getNodeName().equals("build")
+              && !isNodeAlreadyAvailable(document.getElementsByTagName("plugin"), plugin, document.getElementsByTagName("descriptorRef"))){
             node.appendChild(plugin);
             saveChangesOnPomFiles(document);
             addedDependency = true;
