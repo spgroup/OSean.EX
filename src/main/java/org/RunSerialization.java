@@ -34,7 +34,9 @@ public class RunSerialization {
         System.out.println("2º: class holding the target method");
         System.out.println("3º: target method");
         System.out.println("4º: project name");
-        System.out.println("5º: list of commit hashes");
+        System.out.println("5º: indication for applying testability transformations");
+        System.out.println("6º: indication for applying full testability transformations");
+        System.out.println("7º: list of commit hashes");
     }
 
   }

@@ -24,6 +24,7 @@ import org.util.InputHandler;
 import org.util.JarManager;
 import org.util.ProcessManager;
 import org.util.input.MergeScenarioUnderAnalysis;
+import org.util.input.TransformationOption;
 
 public class ObjectSerializer {
 
@@ -47,7 +48,9 @@ public class ObjectSerializer {
         assembyFileSupporter.createNewDirectory(pomDirectory);
 
         runTestabilityTransformations(new File(
-            resourceFileSupporter.getTargetClassLocalPath() + File.separator + mergeScenarioUnderAnalysis.getTargetClass()));
+            resourceFileSupporter.getTargetClassLocalPath() + File.separator + mergeScenarioUnderAnalysis.getTargetClass()),
+            mergeScenarioUnderAnalysis.getTransformationOption().applyTransformations(),
+            mergeScenarioUnderAnalysis.getTransformationOption().applyFullTransformations());
 
         ObjectSerializerSupporter objectSerializerSupporter = createAndAddObjectSerializerSupporter(
         resourceFileSupporter, pomFileInstrumentation);
@@ -58,7 +61,7 @@ public class ObjectSerializer {
             new File(resourceFileSupporter.getTargetClassLocalPath() + File.separator + mergeScenarioUnderAnalysis.getTargetClass()),
             new ObjectSerializerClassIntrumentation(mergeScenarioUnderAnalysis.getTargetMethod(), objectSerializerSupporter.getFullSerializerSupporterClass()));
 
-        applyTestabilityTransformationsTargetClasses(resourceFileSupporter, objectSerializerClassIntrumentation.getTargetClasses());
+        applyTestabilityTransformationsTargetClasses(resourceFileSupporter, objectSerializerClassIntrumentation.getTargetClasses(), mergeScenarioUnderAnalysis.getTransformationOption());
 
         SerializedObjectAccessClassIntrumentation serializedObjectAccessClassIntrumentation = new SerializedObjectAccessClassIntrumentation(
             mergeScenarioUnderAnalysis.getTargetMethod(), objectSerializerSupporter.getFullSerializerSupporterClass());
@@ -111,8 +114,10 @@ public class ObjectSerializer {
             pomDirectory, "");
 
         runTestabilityTransformations(new File(
-        resourceFileSupporter.getTargetClassLocalPath() + File.separator + mergeScenarioUnderAnalysis.getTargetClass()));
-        applyTestabilityTransformationsTargetClasses(resourceFileSupporter, objectSerializerClassIntrumentation.getTargetClasses());
+        resourceFileSupporter.getTargetClassLocalPath() + File.separator + mergeScenarioUnderAnalysis.getTargetClass()),
+            mergeScenarioUnderAnalysis.getTransformationOption().applyTransformations(),
+            mergeScenarioUnderAnalysis.getTransformationOption().applyFullTransformations());
+        applyTestabilityTransformationsTargetClasses(resourceFileSupporter, objectSerializerClassIntrumentation.getTargetClasses(), mergeScenarioUnderAnalysis.getTransformationOption());
 
         SerializedObjectAccessOutputClass serializedObjectAccessOutputClass = new SerializedObjectAccessOutputClass();
         ConverterSupporter converterSupporter = new ConverterSupporter();
@@ -149,7 +154,7 @@ public class ObjectSerializer {
         startProcess(resourceFileSupporter.getProjectLocalPath().getPath(), "java -cp " + generatedJarFile
             + " " + getObjectDeserializerClassPathOnTargetProject(objectSerializerClassIntrumentation), "Generating method list associated to serialized objects", false);
 
-        List<String> methodList = getMethodList(resourceFileSupporter, pomFileInstrumentation.getPomFileDirectory());
+        List<String> methodList = getMethodList(resourceFileSupporter, pomFileInstrumentation.getPomFileDirectory(), mergeScenarioUnderAnalysis.getTransformationOption());
 
         objectSerializerClassIntrumentation.undoTransformations(new File(
             resourceFileSupporter.getTargetClassLocalPath() + File.separator
@@ -247,7 +252,7 @@ public class ObjectSerializer {
     return objectDeserializerSupporter;
   }
 
-  private List<String> getMethodList(ResourceFileSupporter resourceFileSupporter, File pom){
+  private List<String> getMethodList(ResourceFileSupporter resourceFileSupporter, File pom, TransformationOption transformationOption){
     String resourceDirectory =  resourceFileSupporter
         .getResourceDirectoryPath(pom);
     List<String> methods = new ArrayList<>();
@@ -275,7 +280,7 @@ public class ObjectSerializer {
         e.printStackTrace();
       }
     }
-    runTestabilityTransformationsForSerializedObjectClasses(resourceFileSupporter, serializedObjectTypes);
+    runTestabilityTransformationsForSerializedObjectClasses(resourceFileSupporter, serializedObjectTypes, transformationOption);
     return methods;
   }
 
@@ -299,12 +304,13 @@ public class ObjectSerializer {
     return converters;
   }
 
+  //aqui
   private void runTestabilityTransformationsForSerializedObjectClasses(
-      ResourceFileSupporter resourceFileSupporter, List<String> serializedObjects){
+      ResourceFileSupporter resourceFileSupporter, List<String> serializedObjects, TransformationOption transformationOption){
     for(String serializedObject: serializedObjects){
       File serializedObjectFile = resourceFileSupporter.searchForFileByName(serializedObject+".java", resourceFileSupporter.getProjectLocalPath());
       if (serializedObjectFile != null){
-        runTestabilityTransformations(serializedObjectFile);
+        runTestabilityTransformations(serializedObjectFile, transformationOption.applyTransformations(), transformationOption.applyFullTransformations());
       }
     }
   }
@@ -321,10 +327,11 @@ public class ObjectSerializer {
         + "ObjectDeserializerSupporter";
   }
 
-  private boolean runTestabilityTransformations(File file){
+  private boolean runTestabilityTransformations(File file, boolean applyTransformations, boolean applyFully){
     System.out.print("Applying Testability Transformations : ");
     try {
-      Transformations.main(new String[]{new String(file.getPath())});
+      Transformations.main(new String[]{new String(file.getPath()),
+          String.valueOf(applyTransformations), String.valueOf(applyFully)});
       System.out.println("SUCCESSFUL");
       return true;
     } catch (IOException e) {
@@ -334,11 +341,11 @@ public class ObjectSerializer {
     return false;
   }
 
-  private void applyTestabilityTransformationsTargetClasses(ResourceFileSupporter resourceFileSupporter, List<String> classes){
+  private void applyTestabilityTransformationsTargetClasses(ResourceFileSupporter resourceFileSupporter, List<String> classes, TransformationOption transformationOption){
     for(String targetClass: classes){
       File targetClassFile = resourceFileSupporter.searchForFileByName(targetClass+".java", resourceFileSupporter.getProjectLocalPath());
       if (targetClassFile != null){
-        runTestabilityTransformations(targetClassFile);
+        runTestabilityTransformations(targetClassFile, transformationOption.applyTransformations(), transformationOption.applyFullTransformations());
       }
     }
   }

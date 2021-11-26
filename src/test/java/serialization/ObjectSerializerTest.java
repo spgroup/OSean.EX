@@ -31,8 +31,31 @@ public class ObjectSerializerTest {
         "Person.java",
         "getOccupation",
         "toy-project",
+        "true",
+        "true",
         "7810b85dd711ac2648675dcfe5e65539aec1ea1d"
         };
+    List<MergeScenarioUnderAnalysis> mergeScenarioUnderAnalyses = InputHandler.splitInputInMergeScenarios(args);
+    objectSerializer.startSerialization(mergeScenarioUnderAnalyses);
+    Repository subRepo = SubmoduleWalk.getSubmoduleRepository(getMainRepository(),
+        GitProjectActionsTest.projectPath);
+    GitProjectActions gitProjectActions = new GitProjectActions(subRepo);
+    Assert.assertTrue(gitProjectActions.checkoutCommit("main"));
+    Assert.assertTrue(new File(directoryForGeneratedJars+File.separator+"7810b85dd711ac2648675dcfe5e65539aec1ea1d.jar").exists());
+    deleteOldJar();
+  }
+
+  @Test
+  public void expectJarGenerationForToyProjectWithPartialTransformations() throws IOException, InterruptedException, TransformerException {
+    ObjectSerializer objectSerializer = new ObjectSerializer();
+    String[] args = {System.getProperty("user.dir")+File.separator+"src"+ File.separator+"test"+File.separator+"resources"+File.separator+"toy-project",
+        "Person.java",
+        "getOccupation",
+        "toy-project",
+        "false",
+        "false",
+        "7810b85dd711ac2648675dcfe5e65539aec1ea1d"
+    };
     List<MergeScenarioUnderAnalysis> mergeScenarioUnderAnalyses = InputHandler.splitInputInMergeScenarios(args);
     objectSerializer.startSerialization(mergeScenarioUnderAnalyses);
     Repository subRepo = SubmoduleWalk.getSubmoduleRepository(getMainRepository(),
@@ -50,6 +73,8 @@ public class ObjectSerializerTest {
         "Person.java",
         "getName",
         "toy-project",
+        "true",
+        "true",
         "85077377978f98e31e637c121b5987e01725f5fd"
     };
     runSerialization.runAnalysis(args);
@@ -68,6 +93,8 @@ public class ObjectSerializerTest {
         "Person.java",
         "getName",
         "toy-project",
+        "true",
+        "true",
         "85077377978f98e31e637c121b5987e01725f5fd",
         "5215c5d623a131ac94284be5c3c42c2124618e99"
     };
@@ -113,7 +140,7 @@ public class ObjectSerializerTest {
       FileWriter csvWriter = new FileWriter(inputFile);
       csvWriter.append(String.join(",", System.getProperty("user.dir")+File.separator+"src"+
               File.separator+"test"+File.separator+"resources"+File.separator+"toy-project",
-        "Person.java","getName","toy-project","85077377978f98e31e637c121b5987e01725f5fd", "5215c5d623a131ac94284be5c3c42c2124618e99"));
+        "Person.java","getName","toy-project","true","true", "85077377978f98e31e637c121b5987e01725f5fd", "5215c5d623a131ac94284be5c3c42c2124618e99"));
       csvWriter.flush();
       csvWriter.close();
     } catch (IOException e) {
@@ -129,6 +156,8 @@ public class ObjectSerializerTest {
         "Person.java",
         "Person(java.lang.String, int, java.lang.String)",
         "toy-project",
+        "true",
+        "true",
         "7810b85dd711ac2648675dcfe5e65539aec1ea1d"
     };
     List<MergeScenarioUnderAnalysis> mergeScenarioUnderAnalyses = InputHandler.splitInputInMergeScenarios(args);
