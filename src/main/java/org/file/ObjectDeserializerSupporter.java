@@ -88,6 +88,7 @@ public class ObjectDeserializerSupporter extends ObjectSerializerSupporter{
         + "  static private Object deserializeWithXtream(File e)\n"
         + "      throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {\n"
         + "    XStream xtream = new XStream();\n"
+        + "    xtream.ignoreUnknownElements();\n"
         + "    List<String> myConverters = new ArrayList<String>();\n"
         + "    "+getConvertersDeclaration(converters)+"\n"
         + "    Object obj = null;\n"
