@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.Path;
 import java.util.List;
+import org.apache.commons.io.FileDeleteStrategy;
 
 public class SerializedObjectAccessOutputClass {
   protected Path outputClassPath;
@@ -73,9 +74,10 @@ public class SerializedObjectAccessOutputClass {
     return false;
   }
 
-  public boolean deleteOldClassSupporter() {
+  public boolean deleteOldClassSupporter() throws IOException {
     if (this.outputClassPath != null && this.outputClassPath.toFile().exists()){
-      return this.outputClassPath.toFile().delete();
+      FileDeleteStrategy.FORCE.delete(this.outputClassPath.toFile());
+      return true;
     }
     return false;
   }
