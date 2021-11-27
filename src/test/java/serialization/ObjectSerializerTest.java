@@ -33,6 +33,7 @@ public class ObjectSerializerTest {
         "toy-project",
         "true",
         "true",
+        "60",
         "7810b85dd711ac2648675dcfe5e65539aec1ea1d"
         };
     List<MergeScenarioUnderAnalysis> mergeScenarioUnderAnalyses = InputHandler.splitInputInMergeScenarios(args);
@@ -54,6 +55,7 @@ public class ObjectSerializerTest {
         "toy-project",
         "false",
         "false",
+        "60",
         "7810b85dd711ac2648675dcfe5e65539aec1ea1d"
     };
     List<MergeScenarioUnderAnalysis> mergeScenarioUnderAnalyses = InputHandler.splitInputInMergeScenarios(args);
@@ -75,6 +77,7 @@ public class ObjectSerializerTest {
         "toy-project",
         "true",
         "true",
+        "60",
         "85077377978f98e31e637c121b5987e01725f5fd"
     };
     runSerialization.runAnalysis(args);
@@ -95,6 +98,7 @@ public class ObjectSerializerTest {
         "toy-project",
         "true",
         "true",
+        "60",
         "85077377978f98e31e637c121b5987e01725f5fd",
         "5215c5d623a131ac94284be5c3c42c2124618e99"
     };
@@ -140,7 +144,7 @@ public class ObjectSerializerTest {
       FileWriter csvWriter = new FileWriter(inputFile);
       csvWriter.append(String.join(",", System.getProperty("user.dir")+File.separator+"src"+
               File.separator+"test"+File.separator+"resources"+File.separator+"toy-project",
-        "Person.java","getName","toy-project","true","true", "85077377978f98e31e637c121b5987e01725f5fd", "5215c5d623a131ac94284be5c3c42c2124618e99"));
+        "Person.java","getName","toy-project","true","true","60","85077377978f98e31e637c121b5987e01725f5fd", "5215c5d623a131ac94284be5c3c42c2124618e99"));
       csvWriter.flush();
       csvWriter.close();
     } catch (IOException e) {
@@ -158,6 +162,7 @@ public class ObjectSerializerTest {
         "toy-project",
         "true",
         "true",
+        "60",
         "7810b85dd711ac2648675dcfe5e65539aec1ea1d"
     };
     List<MergeScenarioUnderAnalysis> mergeScenarioUnderAnalyses = InputHandler.splitInputInMergeScenarios(args);

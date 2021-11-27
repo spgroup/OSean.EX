@@ -16,13 +16,13 @@ public class MergeScenarioUnderAnalysis {
     this.targetClass = args[1];
     this.targetMethod = args[2];
     this.projectName = args[3];
-    this.transformationOption = new TransformationOption(args[5], args[6]);
+    this.transformationOption = new TransformationOption(args[4], args[5], args[6]);
     this.mergeScenarioCommits = parseMergeScenarioCommits(args);
   }
 
   private List<String> parseMergeScenarioCommits(String[] args){
     List<String> mergeScenarioCommits = new ArrayList<>();
-      for(int i=6; i < args.length && args.length > 6; i++){
+      for(int i=7; i < args.length && args.length > 6; i++){
         if (args[i] != null && args[i] != ""){
           mergeScenarioCommits.add(args[i]);
         }

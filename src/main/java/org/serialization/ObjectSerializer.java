@@ -41,6 +41,7 @@ public class ObjectSerializer {
           .findFile(mergeScenarioUnderAnalysis.getTargetClass(), resourceFileSupporter.getProjectLocalPath());
 
       AssembyFileSupporter assembyFileSupporter = new AssembyFileSupporter(mergeScenarioUnderAnalysis.getLocalProjectPath());
+      ProcessManager processManager = new ProcessManager(mergeScenarioUnderAnalysis.getTransformationOption().getBudget());
 
       if (pomDirectory != null) {
         PomFileInstrumentation pomFileInstrumentation = createAndRunPomFileInstrumentation(pomDirectory, "");
@@ -66,11 +67,11 @@ public class ObjectSerializer {
         SerializedObjectAccessClassIntrumentation serializedObjectAccessClassIntrumentation = new SerializedObjectAccessClassIntrumentation(
             mergeScenarioUnderAnalysis.getTargetMethod(), objectSerializerSupporter.getFullSerializerSupporterClass());
 
-        runSerializedObjectCreation(resourceFileSupporter, pomFileInstrumentation, "mvn clean test -Dmaven.test.failure.ignore=true", "Creating Serialized Objects", true);
+        runSerializedObjectCreation(resourceFileSupporter, pomFileInstrumentation, "mvn clean test -Dmaven.test.failure.ignore=true", "Creating Serialized Objects", true, processManager);
 
         if (InputHandler.isDirEmpty(new File(objectSerializerSupporter.getResourceDirectory()).toPath())){
           pomFileInstrumentation.changeSurefirePlugin(objectSerializerSupporter.getClassPackage());
-          startProcess(resourceFileSupporter.getProjectLocalPath().getPath(), "mvn clean test -Dmaven.test.failure.ignore=true", "Creating Serialized Objects", true);
+          startProcess(resourceFileSupporter.getProjectLocalPath().getPath(), "mvn clean test -Dmaven.test.failure.ignore=true", "Creating Serialized Objects", true, processManager);
         }
         objectSerializerSupporter.deleteObjectSerializerSupporterClass(resourceFileSupporter.getTargetClassLocalPath().getPath());
 
@@ -79,7 +80,8 @@ public class ObjectSerializer {
 
         generateJarsForAllMergeScenarioCommits(gitProjectActions,
             pomDirectory, objectSerializerClassIntrumentation, resourceFileSupporter,
-            objectSerializerSupporter, objectDeserializerSupporter, serializedObjectAccessClassIntrumentation, mergeScenarioUnderAnalysis);
+            objectSerializerSupporter, objectDeserializerSupporter, serializedObjectAccessClassIntrumentation,
+            mergeScenarioUnderAnalysis, processManager);
 
         gitProjectActions.undoCurrentChanges();
         gitProjectActions.checkoutPreviousSHA();
@@ -91,11 +93,11 @@ public class ObjectSerializer {
   }
 
   private void runSerializedObjectCreation(ResourceFileSupporter resourceFileSupporter,
-      PomFileInstrumentation pomFileInstrumentation, String command, String message, boolean isTestTask)
+      PomFileInstrumentation pomFileInstrumentation, String command, String message, boolean isTestTask, ProcessManager processManager)
       throws IOException, InterruptedException, TransformerException {
-    if (!startProcess(resourceFileSupporter.getProjectLocalPath().getPath(), command, message, isTestTask)){
+    if (!startProcess(resourceFileSupporter.getProjectLocalPath().getPath(), command, message, isTestTask, processManager)){
       pomFileInstrumentation.updateOldDependencies();
-      startProcess(resourceFileSupporter.getProjectLocalPath().getPath(), command, message, isTestTask);
+      startProcess(resourceFileSupporter.getProjectLocalPath().getPath(), command, message, isTestTask, processManager);
     }
   }
 
@@ -103,7 +105,8 @@ public class ObjectSerializer {
       File pomDirectory, ObjectSerializerClassIntrumentation objectSerializerClassIntrumentation,
       ResourceFileSupporter resourceFileSupporter, ObjectSerializerSupporter objectSerializerSupporter,
       ObjectDeserializerSupporter objectDeserializerSupporter,
-      SerializedObjectAccessClassIntrumentation serializedObjectAccessClassIntrumentation, MergeScenarioUnderAnalysis mergeScenarioUnderAnalysis) {
+      SerializedObjectAccessClassIntrumentation serializedObjectAccessClassIntrumentation,
+      MergeScenarioUnderAnalysis mergeScenarioUnderAnalysis, ProcessManager processManager) {
 
     try {
       for (String mergeScenarioCommit : mergeScenarioUnderAnalysis.getMergeScenarioCommits()) {
@@ -142,17 +145,18 @@ public class ObjectSerializer {
                     .getResourceDirectoryPath(pomFileInstrumentation.getPomFileDirectory()),
                 converterSupporter.classesPathSignature);
 
-        if (!startProcess(pomDirectory.getAbsolutePath(), "mvn clean compile assembly:single", "Generating jar file with serialized objects", false)){
-          startProcess(resourceFileSupporter.getProjectLocalPath().getPath(), "mvn clean compile", "Compiling the whole project", false);
-          if (!startProcess(pomDirectory.getAbsolutePath(), "mvn compile assembly:single", "Generating jar file with serialized objects", false)){
-            runSerializedObjectCreation(resourceFileSupporter, pomFileInstrumentation, "mvn clean compile assembly:single", "Generating jar file with serialized objects", false);
+        if (!startProcess(pomDirectory.getAbsolutePath(), "mvn clean compile assembly:single", "Generating jar file with serialized objects", false, processManager)){
+          startProcess(resourceFileSupporter.getProjectLocalPath().getPath(), "mvn clean compile", "Compiling the whole project", false, processManager);
+          if (!startProcess(pomDirectory.getAbsolutePath(), "mvn compile assembly:single", "Generating jar file with serialized objects", false, processManager)){
+            runSerializedObjectCreation(resourceFileSupporter, pomFileInstrumentation, "mvn clean compile assembly:single", "Generating jar file with serialized objects", false, processManager);
           }
         }
 
         String generatedJarFile = JarManager.getJarFile(pomFileInstrumentation);
 
         startProcess(resourceFileSupporter.getProjectLocalPath().getPath(), "java -cp " + generatedJarFile
-            + " " + getObjectDeserializerClassPathOnTargetProject(objectSerializerClassIntrumentation), "Generating method list associated to serialized objects", false);
+            + " " + getObjectDeserializerClassPathOnTargetProject(objectSerializerClassIntrumentation),
+            "Generating method list associated to serialized objects", false, processManager);
 
         List<String> methodList = getMethodList(resourceFileSupporter, pomFileInstrumentation.getPomFileDirectory(), mergeScenarioUnderAnalysis.getTransformationOption());
 
@@ -172,7 +176,8 @@ public class ObjectSerializer {
               resourceFileSupporter.getTargetClassLocalPath() + File.separator + mergeScenarioUnderAnalysis.getTargetClass()));
         }
 
-        if (startProcess(pomDirectory.getAbsolutePath(), "mvn clean compile assembly:single", "Generating jar file with serialized objects", false)) {
+        if (startProcess(pomDirectory.getAbsolutePath(), "mvn clean compile assembly:single",
+            "Generating jar file with serialized objects", false, processManager)) {
 
           serializedObjectAccessOutputClass.deleteOldClassSupporter();
           serializedObjectAccessClassIntrumentation.undoTransformations(new File(
@@ -184,8 +189,10 @@ public class ObjectSerializer {
                   File.separator + "GeneratedJars" + File.separator
                   + mergeScenarioUnderAnalysis.getProjectName(), mergeScenarioCommit + ".jar");
         }else{
-          if (startProcess(resourceFileSupporter.getProjectLocalPath().getPath(), "mvn clean compile", "Compiling the whole project", false) &&
-              startProcess(pomDirectory.getAbsolutePath(), "mvn compile assembly:single", "Generating jar file with serialized objects", false)){
+          if (startProcess(resourceFileSupporter.getProjectLocalPath().getPath(), "mvn clean compile",
+              "Compiling the whole project", false, processManager) &&
+              startProcess(pomDirectory.getAbsolutePath(), "mvn compile assembly:single",
+                  "Generating jar file with serialized objects", false, processManager)){
             serializedObjectAccessOutputClass.deleteOldClassSupporter();
             serializedObjectAccessClassIntrumentation.undoTransformations(new File(
                 resourceFileSupporter.getTargetClassLocalPath() + File.separator
@@ -304,7 +311,6 @@ public class ObjectSerializer {
     return converters;
   }
 
-  //aqui
   private void runTestabilityTransformationsForSerializedObjectClasses(
       ResourceFileSupporter resourceFileSupporter, List<String> serializedObjects, TransformationOption transformationOption){
     for(String serializedObject: serializedObjects){
@@ -350,12 +356,12 @@ public class ObjectSerializer {
     }
   }
 
-  private boolean startProcess(String directoryPath, String command, String message, boolean isTestTask)
+  private boolean startProcess(String directoryPath, String command, String message, boolean isTestTask, ProcessManager processManager)
       throws IOException, InterruptedException {
     Process process = Runtime.getRuntime()
         .exec(command, null,
             new File(directoryPath));
-    return ProcessManager.computeProcessOutput(process, message, isTestTask);
+    return processManager.computeProcessOutput(process, message, isTestTask);
   }
 
 }
