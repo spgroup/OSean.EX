@@ -183,11 +183,7 @@ public class ObjectSerializer {
           serializedObjectAccessClassIntrumentation.undoTransformations(new File(
               resourceFileSupporter.getTargetClassLocalPath() + File.separator
                   + mergeScenarioUnderAnalysis.getTargetClass()));
-          JarManager.saveGeneratedJarFile(generatedJarFile,
-              mergeScenarioUnderAnalysis.getLocalProjectPath()
-                  .split(mergeScenarioUnderAnalysis.getProjectName())[0] +
-                  File.separator + "GeneratedJars" + File.separator
-                  + mergeScenarioUnderAnalysis.getProjectName(), mergeScenarioCommit + ".jar");
+          saveJarFile(generatedJarFile, mergeScenarioUnderAnalysis, mergeScenarioCommit);
         }else{
           if (startProcess(resourceFileSupporter.getProjectLocalPath().getPath(), "mvn clean compile",
               "Compiling the whole project", false, processManager) &&
@@ -197,11 +193,7 @@ public class ObjectSerializer {
             serializedObjectAccessClassIntrumentation.undoTransformations(new File(
                 resourceFileSupporter.getTargetClassLocalPath() + File.separator
                     + mergeScenarioUnderAnalysis.getTargetClass()));
-            JarManager.saveGeneratedJarFile(generatedJarFile,
-                mergeScenarioUnderAnalysis.getLocalProjectPath()
-                    .split(mergeScenarioUnderAnalysis.getProjectName())[0] +
-                    File.separator + "GeneratedJars" + File.separator
-                    + mergeScenarioUnderAnalysis.getProjectName(), mergeScenarioCommit + ".jar");
+            saveJarFile(generatedJarFile, mergeScenarioUnderAnalysis, mergeScenarioCommit);
           }
         }
         gitProjectActions.undoCurrentChanges();
@@ -362,6 +354,15 @@ public class ObjectSerializer {
         .exec(command, null,
             new File(directoryPath));
     return processManager.computeProcessOutput(process, message, isTestTask);
+  }
+
+  private void saveJarFile(String generatedJarFile, MergeScenarioUnderAnalysis mergeScenarioUnderAnalysis, String mergeScenarioCommit){
+    JarManager.saveGeneratedJarFile(generatedJarFile,
+        mergeScenarioUnderAnalysis.getLocalProjectPath()
+            .split(mergeScenarioUnderAnalysis.getProjectName())[0] +
+            File.separator + "GeneratedJars" + File.separator
+            + mergeScenarioUnderAnalysis.getProjectName(),
+        mergeScenarioCommit + "-"+ mergeScenarioUnderAnalysis.getTargetMethod().split("\\(")[0]+".jar");
   }
 
 }

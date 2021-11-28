@@ -42,7 +42,7 @@ public class ObjectSerializerTest {
         GitProjectActionsTest.projectPath);
     GitProjectActions gitProjectActions = new GitProjectActions(subRepo);
     Assert.assertTrue(gitProjectActions.checkoutCommit("main"));
-    Assert.assertTrue(new File(directoryForGeneratedJars+File.separator+"7810b85dd711ac2648675dcfe5e65539aec1ea1d.jar").exists());
+    Assert.assertTrue(new File(directoryForGeneratedJars+File.separator+"7810b85dd711ac2648675dcfe5e65539aec1ea1d-getOccupation.jar").exists());
     deleteOldJar();
   }
 
@@ -64,7 +64,7 @@ public class ObjectSerializerTest {
         GitProjectActionsTest.projectPath);
     GitProjectActions gitProjectActions = new GitProjectActions(subRepo);
     Assert.assertTrue(gitProjectActions.checkoutCommit("main"));
-    Assert.assertTrue(new File(directoryForGeneratedJars+File.separator+"7810b85dd711ac2648675dcfe5e65539aec1ea1d.jar").exists());
+    Assert.assertTrue(new File(directoryForGeneratedJars+File.separator+"7810b85dd711ac2648675dcfe5e65539aec1ea1d-getOccupation.jar").exists());
     deleteOldJar();
   }
 
@@ -85,7 +85,7 @@ public class ObjectSerializerTest {
         GitProjectActionsTest.projectPath);
     GitProjectActions gitProjectActions = new GitProjectActions(subRepo);
     Assert.assertTrue(gitProjectActions.checkoutCommit("main"));
-    Assert.assertTrue(new File(directoryForGeneratedJars+File.separator+"85077377978f98e31e637c121b5987e01725f5fd.jar").exists());
+    Assert.assertTrue(new File(directoryForGeneratedJars+File.separator+"85077377978f98e31e637c121b5987e01725f5fd-getName.jar").exists());
     deleteOldJar();
   }
 
@@ -107,8 +107,8 @@ public class ObjectSerializerTest {
         GitProjectActionsTest.projectPath);
     GitProjectActions gitProjectActions = new GitProjectActions(subRepo);
     Assert.assertTrue(gitProjectActions.checkoutCommit("main"));
-    Assert.assertTrue(new File(directoryForGeneratedJars+File.separator+"85077377978f98e31e637c121b5987e01725f5fd.jar").exists());
-    Assert.assertTrue(new File(directoryForGeneratedJars+File.separator+"5215c5d623a131ac94284be5c3c42c2124618e99.jar").exists());
+    Assert.assertTrue(new File(directoryForGeneratedJars+File.separator+"85077377978f98e31e637c121b5987e01725f5fd-getName.jar").exists());
+    Assert.assertTrue(new File(directoryForGeneratedJars+File.separator+"5215c5d623a131ac94284be5c3c42c2124618e99-getName.jar").exists());
     deleteOldJar();
   }
 
@@ -120,8 +120,8 @@ public class ObjectSerializerTest {
         GitProjectActionsTest.projectPath);
     GitProjectActions gitProjectActions = new GitProjectActions(subRepo);
     Assert.assertTrue(gitProjectActions.checkoutCommit("main"));
-    Assert.assertTrue(new File(directoryForGeneratedJars+File.separator+"5215c5d623a131ac94284be5c3c42c2124618e99.jar").exists());
-    Assert.assertTrue(new File(directoryForGeneratedJars+File.separator+"85077377978f98e31e637c121b5987e01725f5fd.jar").exists());
+    Assert.assertTrue(new File(directoryForGeneratedJars+File.separator+"5215c5d623a131ac94284be5c3c42c2124618e99-getName.jar").exists());
+    Assert.assertTrue(new File(directoryForGeneratedJars+File.separator+"85077377978f98e31e637c121b5987e01725f5fd-getName.jar").exists());
     deleteOldJar();
   }
 
@@ -171,7 +171,7 @@ public class ObjectSerializerTest {
         GitProjectActionsTest.projectPath);
     GitProjectActions gitProjectActions = new GitProjectActions(subRepo);
     Assert.assertTrue(gitProjectActions.checkoutCommit("main"));
-    Assert.assertTrue(new File(directoryForGeneratedJars+File.separator+"7810b85dd711ac2648675dcfe5e65539aec1ea1d.jar").exists());
+    Assert.assertTrue(new File(directoryForGeneratedJars+File.separator+"7810b85dd711ac2648675dcfe5e65539aec1ea1d-Person.jar").exists());
     deleteOldJar();
   }
 }
