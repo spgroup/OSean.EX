@@ -496,7 +496,8 @@ public class PomFileInstrumentation {
 
       NodeList nList = document.getElementsByTagName("artifactId");
 
-      for (int temp = 0; temp < nList.getLength(); temp++) {
+      int numberPlugins = nList.getLength();
+      for (int temp = 0; numberPlugins < nList.getLength(); temp++) {
         Node node = nList.item(temp);
         Node target = node.getFirstChild();
         String test = target.getNodeValue();
@@ -526,7 +527,7 @@ public class PomFileInstrumentation {
           surefire.appendChild(version);
           surefire.appendChild(configurationNode);
           node.getParentNode().getParentNode().appendChild(surefire);
-          node.getParentNode().getParentNode().removeChild(node.getParentNode());
+          //node.getParentNode().getParentNode().removeChild(node.getParentNode());
         }
         saveChangesOnPomFiles(document);
       }
