@@ -497,7 +497,7 @@ public class PomFileInstrumentation {
       NodeList nList = document.getElementsByTagName("artifactId");
 
       int numberPlugins = nList.getLength();
-      for (int temp = 0; numberPlugins < nList.getLength(); temp++) {
+      for (int temp = 0; temp < numberPlugins; temp++) {
         Node node = nList.item(temp);
         Node target = node.getFirstChild();
         String test = target.getNodeValue();
@@ -529,6 +529,24 @@ public class PomFileInstrumentation {
           node.getParentNode().getParentNode().appendChild(surefire);
           //node.getParentNode().getParentNode().removeChild(node.getParentNode());
         }
+        saveChangesOnPomFiles(document);
+      }
+    }
+    changeScopeDependency();
+  }
+
+  public void changeScopeDependency() throws TransformerException{
+    Document document = getPomFileAsDocument();
+
+    if (document != null){
+      document.getDocumentElement().normalize();
+
+      NodeList nList = document.getElementsByTagName("scope");
+
+      int numberPlugins = nList.getLength();
+      for (int temp = 0; temp < numberPlugins; temp++) {
+        Node node = nList.item(temp);
+        node.getFirstChild().setNodeValue("compile");
         saveChangesOnPomFiles(document);
       }
     }
