@@ -39,12 +39,11 @@ public class ObjectSerializer {
       ResourceFileSupporter resourceFileSupporter = new ResourceFileSupporter(mergeScenarioUnderAnalysis.getLocalProjectPath());
       File pomDirectory = resourceFileSupporter
           .findFile(mergeScenarioUnderAnalysis.getTargetClass(), resourceFileSupporter.getProjectLocalPath());
-
       AssembyFileSupporter assembyFileSupporter = new AssembyFileSupporter(mergeScenarioUnderAnalysis.getLocalProjectPath());
       ProcessManager processManager = new ProcessManager(mergeScenarioUnderAnalysis.getTransformationOption().getBudget());
 
       if (pomDirectory != null) {
-        PomFileInstrumentation pomFileInstrumentation = createAndRunPomFileInstrumentation(pomDirectory, "");
+        PomFileInstrumentation pomFileInstrumentation = createAndRunPomFileInstrumentation(pomDirectory, "", resourceFileSupporter.getProjectLocalPath());
         resourceFileSupporter.createNewDirectory(pomDirectory);
         assembyFileSupporter.createNewDirectory(pomDirectory);
 
@@ -114,7 +113,7 @@ public class ObjectSerializer {
         gitProjectActions.checkoutCommit(mergeScenarioCommit);
 
         PomFileInstrumentation pomFileInstrumentation = createAndRunPomFileInstrumentation(
-            pomDirectory, "");
+            pomDirectory, "", resourceFileSupporter.getProjectLocalPath());
 
         runTestabilityTransformations(new File(
         resourceFileSupporter.getTargetClassLocalPath() + File.separator + mergeScenarioUnderAnalysis.getTargetClass()),
@@ -206,7 +205,7 @@ public class ObjectSerializer {
     return false;
   }
 
-  private PomFileInstrumentation createAndRunPomFileInstrumentation(File pomDirectory, String targetPackage)
+  private PomFileInstrumentation createAndRunPomFileInstrumentation(File pomDirectory, String targetPackage, File projectDir)
       throws TransformerException {
     PomFileInstrumentation pomFileInstrumentation = new PomFileInstrumentation(
         pomDirectory.getPath());
@@ -216,7 +215,7 @@ public class ObjectSerializer {
     pomFileInstrumentation.addPluginForJarWithAllDependencies();
     pomFileInstrumentation.updateOldRepository();
     pomFileInstrumentation.changeSurefirePlugin(targetPackage);
-
+    pomFileInstrumentation.removeAllEnforcedDependencies(projectDir);
     return pomFileInstrumentation;
   }
 

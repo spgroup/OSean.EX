@@ -2,6 +2,7 @@ package org.instrumentation;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collection;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -10,6 +11,9 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.filefilter.DirectoryFileFilter;
+import org.apache.commons.io.filefilter.RegexFileFilter;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -38,12 +42,13 @@ public class PomFileInstrumentation {
 
     TransformerFactory transformerFactory = TransformerFactory.newInstance();
     Transformer transformer = transformerFactory.newTransformer();
-    StreamResult result = new StreamResult(this.pomFile.getPath());
+    String aux = document.getDocumentURI();
+    StreamResult result = new StreamResult(document.getDocumentURI());
     transformer.transform(source, result);
   }
 
   public boolean addPluginForJarWithAllDependencies() throws TransformerException {
-    Document document = getPomFileAsDocument();
+    Document document = getPomFileAsDocument(this.pomFile);
     boolean addedDependency = false;
 
     if (document != null){
@@ -86,13 +91,13 @@ public class PomFileInstrumentation {
 
   }
 
-  private Document getPomFileAsDocument() {
+  private Document getPomFileAsDocument(File pomFile) {
     DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
     DocumentBuilder builder = null;
     Document document = null;
     try {
       builder = factory.newDocumentBuilder();
-      document = builder.parse(this.pomFile);
+      document = builder.parse(pomFile);
     } catch (ParserConfigurationException e) {
       e.printStackTrace();
     } catch (SAXException e) {
@@ -105,7 +110,7 @@ public class PomFileInstrumentation {
   }
 
   public boolean addRequiredDependenciesOnPOM() throws TransformerException {
-    Document document = getPomFileAsDocument();
+    Document document = getPomFileAsDocument(this.pomFile);
     boolean addedDependencies = false;
 
     if (document != null){
@@ -308,7 +313,7 @@ public class PomFileInstrumentation {
   }
 
   public boolean addResourcesForGeneratedJar() throws TransformerException {
-    Document document = getPomFileAsDocument();
+    Document document = getPomFileAsDocument(this.pomFile);
     boolean addedResource = false;
 
     if (document != null){
@@ -349,7 +354,7 @@ public class PomFileInstrumentation {
   }
 
   public boolean changeAnimalSnifferPluginIfAdded() throws TransformerException {
-    Document document = getPomFileAsDocument();
+    Document document = getPomFileAsDocument(this.pomFile);
 
     if (document != null) {
       document.getDocumentElement().normalize();
@@ -450,7 +455,7 @@ public class PomFileInstrumentation {
   }
 
   public void updateOldDependencies() throws TransformerException {
-    Document document = getPomFileAsDocument();
+    Document document = getPomFileAsDocument(this.pomFile);
 
     if (document != null) {
       document.getDocumentElement().normalize();
@@ -470,7 +475,7 @@ public class PomFileInstrumentation {
   }
 
   public void updateOldRepository() throws TransformerException {
-    Document document = getPomFileAsDocument();
+    Document document = getPomFileAsDocument(this.pomFile);
 
     if (document != null) {
       document.getDocumentElement().normalize();
@@ -489,7 +494,7 @@ public class PomFileInstrumentation {
   }
 
   public void changeSurefirePlugin(String targetPackage) throws TransformerException{
-    Document document = getPomFileAsDocument();
+    Document document = getPomFileAsDocument(this.pomFile);
 
     if (document != null){
       document.getDocumentElement().normalize();
@@ -532,23 +537,25 @@ public class PomFileInstrumentation {
         saveChangesOnPomFiles(document);
       }
     }
-    changeScopeDependency();
+    changeTagContent(this.pomFile, "scope", "compile", "test");
   }
 
-  public void changeScopeDependency() throws TransformerException{
-    Document document = getPomFileAsDocument();
+  public void changeTagContent(File pomFile, String targetTag, String newValue, String oldValue) throws TransformerException{
+    Document document = getPomFileAsDocument(pomFile);
 
     if (document != null){
       document.getDocumentElement().normalize();
 
-      NodeList nList = document.getElementsByTagName("scope");
+      NodeList nList = document.getElementsByTagName(targetTag);
 
       int numberPlugins = nList.getLength();
       for (int temp = 0; temp < numberPlugins; temp++) {
         Node node = nList.item(temp);
-        node.getFirstChild().setNodeValue("compile");
-        saveChangesOnPomFiles(document);
+        if(node.getFirstChild().getNodeValue().equals(oldValue)) {
+          node.getFirstChild().setNodeValue(newValue);
+        }
       }
+      saveChangesOnPomFiles(document);
     }
   }
 
@@ -560,6 +567,21 @@ public class PomFileInstrumentation {
       return node.getNextSibling().getNextSibling().getNextSibling().getNextSibling();
     }
     return null;
+  }
+
+  public void removeAllEnforcedDependencies(File dir) throws TransformerException {
+    Collection<File> files = getAllPomFiles(dir);
+    for(File onePom: files){
+      changeTagContent(onePom, "goal", "display-info", "enforce");
+    }
+  }
+
+  private Collection<File> getAllPomFiles(File dir){
+    return FileUtils.listFiles(
+        dir,
+        new RegexFileFilter("pom.xml"),
+        DirectoryFileFilter.DIRECTORY
+    );
   }
 
 }
