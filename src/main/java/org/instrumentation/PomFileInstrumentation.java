@@ -123,7 +123,7 @@ public class PomFileInstrumentation {
         Node dependencies = document.createElement("dependencies");
         Node xstream = getNode(document, "com.thoughtworks.xstream", "xstream", "1.4.15");
         Node commons = getNode(document, "org.apache.commons", "commons-lang3", "3.0");
-        Node mockito = getNode(document, "org.mockito", "mockito-all", "1.10.19");
+        Node mockito = getNode(document, "org.mockito", "mockito-core", "1.10.19");
         dependencies.appendChild(xstream);
         dependencies.appendChild(commons);
         dependencies.appendChild(mockito);
@@ -144,7 +144,7 @@ public class PomFileInstrumentation {
               node.appendChild(commons);
               addedDependencies = true;
             }
-            Node mockito = getNode(document, "org.mockito", "mockito-all", "1.10.19");
+            Node mockito = getNode(document, "org.mockito", "mockito-core", "1.10.19");
             node.appendChild(mockito);
             addedDependencies = true;
           }
@@ -573,6 +573,14 @@ public class PomFileInstrumentation {
     Collection<File> files = getAllPomFiles(dir);
     for(File onePom: files){
       changeTagContent(onePom, "goal", "display-info", "enforce");
+    }
+  }
+
+  public void updateSourceOption(File dir) throws TransformerException {
+    Collection<File> files = getAllPomFiles(dir);
+    for(File onePom: files){
+      changeTagContent(onePom, "source", "1.6", "1.5");
+      changeTagContent(onePom, "target", "1.6", "1.5");
     }
   }
 

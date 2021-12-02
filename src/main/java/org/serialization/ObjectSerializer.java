@@ -216,6 +216,7 @@ public class ObjectSerializer {
     pomFileInstrumentation.updateOldRepository();
     pomFileInstrumentation.changeSurefirePlugin(targetPackage);
     pomFileInstrumentation.removeAllEnforcedDependencies(projectDir);
+    pomFileInstrumentation.updateSourceOption(projectDir);
     return pomFileInstrumentation;
   }
 
