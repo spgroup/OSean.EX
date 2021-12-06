@@ -127,6 +127,7 @@ public class PomFileInstrumentation {
         Node mockito = getNode(document, "org.mockito", "mockito-all", "1.10.19");
         dependencies.appendChild(xstream);
         dependencies.appendChild(commons);
+        dependencies.appendChild(mockitoCore);
         dependencies.appendChild(mockito);
         root.appendChild(dependencies);
         saveChangesOnPomFiles(document);
