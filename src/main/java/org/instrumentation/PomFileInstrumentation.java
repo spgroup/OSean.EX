@@ -589,4 +589,23 @@ public class PomFileInstrumentation {
     );
   }
 
+  public void changeMockitoCore() throws TransformerException {
+    Document document = getPomFileAsDocument(pomFile);
+
+    if (document != null){
+      document.getDocumentElement().normalize();
+
+      NodeList nList = document.getElementsByTagName("artifactId");
+
+      int numberPlugins = nList.getLength();
+      for (int temp = 0; temp < numberPlugins; temp++) {
+        Node node = nList.item(temp);
+        if(node.getFirstChild().getNodeValue().equals("mockito-core")) {
+          node.getNextSibling().getFirstChild().setNodeValue("1.10.19");
+        }
+      }
+      saveChangesOnPomFiles(document);
+    }
+  }
+
 }
