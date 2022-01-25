@@ -581,6 +581,14 @@ public class PomFileInstrumentation {
     }
   }
 
+  public void updateSourceOption(File dir) throws TransformerException {
+    Collection<File> files = getAllPomFiles(dir);
+    for(File onePom: files){
+      changeTagContent(onePom, "source", "1.6", "1.5");
+      changeTagContent(onePom, "target", "1.6", "1.5");
+    }
+  }
+
   private Collection<File> getAllPomFiles(File dir){
     return FileUtils.listFiles(
         dir,
