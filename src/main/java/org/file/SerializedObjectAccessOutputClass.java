@@ -42,6 +42,7 @@ public class SerializedObjectAccessOutputClass {
         + "\n"
         + "\n\tprivate Object deserializeWithXtreamString(String e) {\n"
         + "\t\tXStream xtream = new XStream();\n"
+        + "\t\txtream.ignoreUnknownElements();\n"
         + "\t\tObject obj = xtream.fromXML(e);\n"
         + "\t\treturn obj;\n"
         + "\t}"
