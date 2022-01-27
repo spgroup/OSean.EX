@@ -70,6 +70,7 @@ public class ObjectSerializer {
 
         if (InputHandler.isDirEmpty(new File(objectSerializerSupporter.getResourceDirectory()).toPath())){
           pomFileInstrumentation.changeSurefirePlugin(objectSerializerSupporter.getClassPackage());
+          pomFileInstrumentation.changeMockitoCore();
           startProcess(resourceFileSupporter.getProjectLocalPath().getPath(), "mvn clean test -Dmaven.test.failure.ignore=true", "Creating Serialized Objects", true, processManager);
         }
         objectSerializerSupporter.deleteObjectSerializerSupporterClass(resourceFileSupporter.getTargetClassLocalPath().getPath());
@@ -144,7 +145,7 @@ public class ObjectSerializer {
                     .getResourceDirectoryPath(pomFileInstrumentation.getPomFileDirectory()),
                 converterSupporter.classesPathSignature);
 
-        if (!startProcess(pomDirectory.getAbsolutePath(), "mvn clean compile assembly:single", "Generating jar file with serialized objects", false, processManager)){
+        if (!startProcess(pomDirectory.getAbsolutePath(), "mvn clean compile test-compile assembly:single", "Generating jar file with serialized objects", false, processManager)){
           startProcess(resourceFileSupporter.getProjectLocalPath().getPath(), "mvn clean compile", "Compiling the whole project", false, processManager);
           if (!startProcess(pomDirectory.getAbsolutePath(), "mvn compile assembly:single", "Generating jar file with serialized objects", false, processManager)){
             runSerializedObjectCreation(resourceFileSupporter, pomFileInstrumentation, "mvn clean compile assembly:single", "Generating jar file with serialized objects", false, processManager);
@@ -175,7 +176,7 @@ public class ObjectSerializer {
               resourceFileSupporter.getTargetClassLocalPath() + File.separator + mergeScenarioUnderAnalysis.getTargetClass()));
         }
 
-        if (startProcess(pomDirectory.getAbsolutePath(), "mvn clean compile assembly:single",
+        if (startProcess(pomDirectory.getAbsolutePath(), "mvn clean compile test-compile assembly:single",
             "Generating jar file with serialized objects", false, processManager)) {
 
           serializedObjectAccessOutputClass.deleteOldClassSupporter();
@@ -185,7 +186,7 @@ public class ObjectSerializer {
           saveJarFile(generatedJarFile, mergeScenarioUnderAnalysis, mergeScenarioCommit);
         }else{
           if (startProcess(resourceFileSupporter.getProjectLocalPath().getPath(), "mvn clean compile",
-              "Compiling the whole project", false, processManager) &&
+              "Compiling the whole project", false, processManager) ||
               startProcess(pomDirectory.getAbsolutePath(), "mvn compile assembly:single",
                   "Generating jar file with serialized objects", false, processManager)){
             serializedObjectAccessOutputClass.deleteOldClassSupporter();
@@ -270,8 +271,15 @@ public class ObjectSerializer {
           if (matcher.find()) {
             int index = matcher.group(0).lastIndexOf(".");
             String objectType = matcher.group(0).substring(index+1).replace(" deserialize", "");
-            if (!serializedObjectTypes.contains(objectType))
-              serializedObjectTypes.add(objectType);
+            File classFile = resourceFileSupporter.searchForFileByName(objectType+".java", resourceFileSupporter.getProjectLocalPath());
+            if(classFile != null && classFile.getCanonicalPath().contains("/src/test/")){
+              for (int i = 0; i < 3; i++)
+                myReader.nextLine();
+              continue;
+            }else {
+              if (!serializedObjectTypes.contains(objectType))
+                serializedObjectTypes.add(objectType);
+            }
           }
           methods.add(nextLine);
         }
