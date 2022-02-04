@@ -59,4 +59,28 @@ public class ObjectSerializerSupporterTest {
     resourceFileSupporter.deleteResourceDirectory();
   }
 
+  @Test
+  //Construtor do serializer supporter s/ relativizar caminho
+  public void teste01() {
+    ResourceFileSupporter resourceFileSupporter = new ResourceFileSupporter("src/test/resources/validProject");
+    Assert.assertTrue(resourceFileSupporter.createNewDirectory(
+        resourceFileSupporter.findFile("Person.java", resourceFileSupporter.getProjectLocalPath())));
+    Assert.assertEquals(true, new File(System.getProperty("user.dir")+File.separator+"src/test/resources/validProject/src/main/resources").exists());
+
+    File pomDirectory = resourceFileSupporter.findFile("Person.java", resourceFileSupporter.getProjectLocalPath());
+    PomFileInstrumentation pomFileInstrumentation = new PomFileInstrumentation(
+        pomDirectory.getPath());
+
+    ObjectSerializerSupporter objectSerializerSupporter = new ObjectSerializerSupporter(
+        Paths.get(resourceFileSupporter.getTargetClassLocalPath().getPath()).toString().replace(File.separator,"."));
+    objectSerializerSupporter.getOutputClass(resourceFileSupporter.getTargetClassLocalPath().getPath(),
+        resourceFileSupporter.getResourceDirectoryPath(pomFileInstrumentation.getPomFileDirectory()));
+    Assert.assertTrue(objectSerializerSupporter.getClassPackage().equals("org"));
+    
+    Assert.assertTrue(new File(System.getProperty("user.dir")+File.separator+"src/test/resources/validProject/src/main/java/org/ObjectSerializerSupporter.java").exists());
+    objectSerializerSupporter.deleteObjectSerializerSupporterClass(
+        resourceFileSupporter.getTargetClassLocalPath().getPath());
+    resourceFileSupporter.deleteResourceDirectory();
+  }
+
 }

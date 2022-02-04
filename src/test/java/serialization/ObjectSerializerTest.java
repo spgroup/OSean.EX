@@ -23,6 +23,10 @@ public class ObjectSerializerTest {
   private String directoryForGeneratedJars = System.getProperty("user.dir")+File.separator+"src"+
       File.separator+"test"+File.separator+"resources"+File.separator+"GeneratedJars"+
       File.separator+"toy-project";
+  
+  private String directoryForGeneratedJarsToyProject1 = System.getProperty("user.dir")+File.separator+"src"+
+  File.separator+"test"+File.separator+"resources"+File.separator+"GeneratedJars"+
+  File.separator+"toy-project-1";
 
   @Test
   public void expectJarGenerationForToyProject() throws IOException, InterruptedException, TransformerException {
@@ -157,21 +161,44 @@ public class ObjectSerializerTest {
   public void expectJarGenerationForToyProjectMethodWithParameters() throws IOException, InterruptedException, TransformerException {
     ObjectSerializer objectSerializer = new ObjectSerializer();
     String[] args = {System.getProperty("user.dir")+File.separator+"src"+ File.separator+"test"+File.separator+"resources"+File.separator+"toy-project",
+    "Person.java",
+    "Person(java.lang.String, int, java.lang.String)",
+    "toy-project",
+    "true",
+    "true",
+    "60",
+    "7810b85dd711ac2648675dcfe5e65539aec1ea1d"
+  };
+  List<MergeScenarioUnderAnalysis> mergeScenarioUnderAnalyses = InputHandler.splitInputInMergeScenarios(args);
+  objectSerializer.startSerialization(mergeScenarioUnderAnalyses);
+  Repository subRepo = SubmoduleWalk.getSubmoduleRepository(getMainRepository(),
+  GitProjectActionsTest.projectPath);
+  GitProjectActions gitProjectActions = new GitProjectActions(subRepo);
+  Assert.assertTrue(gitProjectActions.checkoutCommit("main"));
+  Assert.assertTrue(new File(directoryForGeneratedJars+File.separator+"7810b85dd711ac2648675dcfe5e65539aec1ea1d-Person.jar").exists());
+  deleteOldJar();
+}
+
+  @Test
+  public void expectJarGenerationForProjectWithMockitoPluginProblem() throws IOException, InterruptedException, TransformerException {
+    ObjectSerializer objectSerializer = new ObjectSerializer();
+    String[] args = {System.getProperty("user.dir")+File.separator+"src"+ File.separator+"test"+File.separator+"resources"+File.separator+"toy-project-1",
         "Person.java",
         "Person(java.lang.String, int, java.lang.String)",
-        "toy-project",
+        "toy-project-1",
         "true",
         "true",
         "60",
-        "7810b85dd711ac2648675dcfe5e65539aec1ea1d"
-    };
+        "00c4a9fd0ae7587499f942cf2238fcf90b287baa",
+        "04a8d0d4f3197467cc881374569dcfcf9746d071"
+        };
     List<MergeScenarioUnderAnalysis> mergeScenarioUnderAnalyses = InputHandler.splitInputInMergeScenarios(args);
     objectSerializer.startSerialization(mergeScenarioUnderAnalyses);
     Repository subRepo = SubmoduleWalk.getSubmoduleRepository(getMainRepository(),
         GitProjectActionsTest.projectPath);
     GitProjectActions gitProjectActions = new GitProjectActions(subRepo);
     Assert.assertTrue(gitProjectActions.checkoutCommit("main"));
-    Assert.assertTrue(new File(directoryForGeneratedJars+File.separator+"7810b85dd711ac2648675dcfe5e65539aec1ea1d-Person.jar").exists());
+    Assert.assertTrue(new File(directoryForGeneratedJarsToyProject1+File.separator+"04a8d0d4f3197467cc881374569dcfcf9746d071-Person.jar").exists());
     deleteOldJar();
   }
 }

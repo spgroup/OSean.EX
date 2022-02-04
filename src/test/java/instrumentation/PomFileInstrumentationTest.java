@@ -4,6 +4,8 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
+
 import javax.xml.transform.TransformerException;
 import org.instrumentation.PomFileInstrumentation;
 import org.junit.After;
@@ -561,6 +563,43 @@ public class PomFileInstrumentationTest {
     PomFileInstrumentation pomFileInstrumentation = new PomFileInstrumentation(new File("src/test/resources/project").getPath());
     Assert.assertTrue(pomFileInstrumentation.changeAnimalSnifferPluginIfAdded());
   }
+  
+  @Test
+  public void expectTrueForUpdateOldRepository() throws IOException, TransformerException {
+    updatePomFile("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+        + "<project xmlns=\"http://maven.apache.org/POM/4.0.0\"\n"
+        + "  xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n"
+        + "  xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd\">\n"
+        + "  <modelVersion>4.0.0</modelVersion>\n"
+        + "\n"
+        + "  <groupId>projectId</groupId>\n"
+        + "  <artifactId>project</artifactId>\n"
+        + "  <version>1.0</version>\n"
+        + "\n"
+        + "<repositories>\n"
+        + "  <repository>\n"
+        + "    <id>osgeo</id>\n"
+        + "    <name>OSGeo Release Repository</name>\n"
+        + "    <url>http://download.osgeo.org/webdav/geotools/</url>\n"
+        + "  </repository>\n"
+        + "</repositories>\n"
+        + "\n"
+        + "  <properties>\n"
+        + "    <maven.compiler.source>8</maven.compiler.source>\n"
+        + "    <maven.compiler.target>8</maven.compiler.target>\n"
+        + "  </properties>\n"
+        + "\n"
+        + "<build>\n"
+        + "<resources><resource><directory>src/main/resources</directory><includes><include>**/*.xml</include></includes></resource></resources>"
+        + "</build>\n"
+        + "</project>");
+
+    PomFileInstrumentation pomFileInstrumentation = new PomFileInstrumentation(new File("src/test/resources/project").getPath());
+    pomFileInstrumentation.updateOldRepository();
+    String pomContent = new String(Files.readAllBytes(pomFileInstrumentation.getPomFile().toPath()));
+    Assert.assertTrue(pomContent.contains("https://repo.osgeo.org/repository/release/"));
+  }
+
 
   public String getPomWithBuildTagOn(){
     return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
