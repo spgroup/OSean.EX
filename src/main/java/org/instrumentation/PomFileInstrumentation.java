@@ -30,7 +30,7 @@ public class PomFileInstrumentation {
   }
 
   public File getPomFile() {
-    return pomFile;
+    return this.pomFile;
   }
 
   public File getPomFileDirectory() {
@@ -181,13 +181,14 @@ public class PomFileInstrumentation {
     for (int temp = 0; temp < nodeList.getLength(); temp++) {
       Node node = nodeList.item(temp);
       if(node.getFirstChild() != null && node.getFirstChild().getNextSibling() != null && node.getFirstChild().getNextSibling().getFirstChild() != null &&
-            node.getFirstChild().getNextSibling().getFirstChild().getTextContent().equals(newDependency.getFirstChild().getFirstChild().getTextContent())
-        && (isNodeForJarWithDependenciesAvailable(descriptorRefs, newDependency))){
-          return true;
-      }else if (node.getFirstChild() != null && node.getFirstChild().getNextSibling() != null && node.getFirstChild().getNextSibling().getFirstChild() != null &&
-          node.getFirstChild().getNextSibling().getFirstChild().getTextContent().equals(newDependency.getFirstChild().getFirstChild().getTextContent())){
-          nodeList.item(temp).getParentNode().removeChild(node);
-          return false;
+            node.getFirstChild().getNextSibling().getFirstChild().getTextContent().equals(newDependency.getFirstChild().getFirstChild().getTextContent())){
+            
+            if (isNodeForJarWithDependenciesAvailable(descriptorRefs, newDependency))
+              return true;
+            else {
+              nodeList.item(temp).getParentNode().removeChild(node);
+              return false;
+            }
       }
     }
     return false;
@@ -222,34 +223,6 @@ public class PomFileInstrumentation {
       }
     }
     return false;
-  }
-
-  private Node getPluginNode(Document document){
-    Node plugin = document.createElement("plugin");
-    Node artifactId = document.createElement("artifactId");
-    artifactId.setTextContent("maven-assembly-plugin");
-    Node version = document.createElement("version");
-    version.setTextContent("2.6");
-    Node configuration = document.createElement("configuration");
-    Node archive = document.createElement("archive");
-    Node manifest = document.createElement("manifest");
-    Node mainClass = document.createElement("mainClass");
-    mainClass.setTextContent("fully.qualified.MainClass");
-    manifest.appendChild(mainClass);
-    archive.appendChild(manifest);
-    configuration.appendChild(archive);
-
-    Node descriptorRefs = document.createElement("descriptorRefs");
-    Node descriptorRef = document.createElement("descriptorRef");
-    descriptorRef.setTextContent("jar-with-dependencies");
-    descriptorRefs.appendChild(descriptorRef);
-    configuration.appendChild(descriptorRefs);
-
-    plugin.appendChild(artifactId);
-    plugin.appendChild(configuration);
-    plugin.appendChild(version);
-
-    return plugin;
   }
 
   private Node getPluginMavenAssemblyPlugin(Document document){
@@ -498,6 +471,7 @@ public class PomFileInstrumentation {
     }
   }
 
+  // Method used to fix surefire plugin behavior in elasticsearch-river-mongodb project
   public void changeSurefirePlugin(String targetPackage) throws TransformerException{
     Document document = getPomFileAsDocument(this.pomFile);
 
@@ -537,12 +511,11 @@ public class PomFileInstrumentation {
           surefire.appendChild(version);
           surefire.appendChild(configurationNode);
           node.getParentNode().getParentNode().appendChild(surefire);
-          //node.getParentNode().getParentNode().removeChild(node.getParentNode());
+          node.getParentNode().getParentNode().removeChild(node.getParentNode());
         }
         saveChangesOnPomFiles(document);
       }
     }
-    changeTagContent(this.pomFile, "scope", "compile", "test");
   }
 
   public void changeTagContent(File pomFile, String targetTag, String newValue, String oldValue) throws TransformerException{
@@ -562,16 +535,6 @@ public class PomFileInstrumentation {
       }
       saveChangesOnPomFiles(document);
     }
-  }
-
-  private Node getConfigurationNode(Node node){
-    if (node != null && node.getNextSibling() != null && node.getNextSibling().getNextSibling() != null &&
-        node.getNextSibling().getNextSibling().getNextSibling() != null &&
-        node.getNextSibling().getNextSibling().getNextSibling().getNextSibling() != null &&
-        node.getNextSibling().getNextSibling().getNextSibling().getNextSibling().getNodeName().equals("configuration")){
-      return node.getNextSibling().getNextSibling().getNextSibling().getNextSibling();
-    }
-    return null;
   }
 
   public void removeAllEnforcedDependencies(File dir) throws TransformerException {
@@ -597,6 +560,7 @@ public class PomFileInstrumentation {
     );
   }
 
+  //Method used to fix incompatibility in mockito plugins used in spring-boot project
   public void changeMockitoCore() throws TransformerException {
     Document document = getPomFileAsDocument(pomFile);
 
@@ -608,11 +572,21 @@ public class PomFileInstrumentation {
       int numberPlugins = nList.getLength();
       for (int temp = 0; temp < numberPlugins; temp++) {
         Node node = nList.item(temp);
-        if(node.getFirstChild().getNodeValue().equals("mockito-core")) {
-          node.getNextSibling().getFirstChild().setNodeValue("1.10.19");
-        }
+        if(node.getFirstChild().getNodeValue().equals("mockito-core"))
+          updateVersionNode(node, "1.10.19");
       }
       saveChangesOnPomFiles(document);
+    }
+  }
+
+  private void updateVersionNode(Node node, String newValue){
+    NodeList nList = node.getParentNode().getChildNodes();
+    int numberPlugins = nList.getLength();
+    for (int temp = 0; temp < numberPlugins; temp++) {
+      Node nodeAux = nList.item(temp);
+      String tagName = nodeAux.getNodeName();
+      if(tagName.equals("version"))
+        nodeAux.getFirstChild().setNodeValue(newValue);
     }
   }
 

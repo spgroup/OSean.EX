@@ -281,18 +281,6 @@ public class ObjectSerializerSupporter {
     return false;
   }
 
-  public static String getClassNameMethodSignature(Object object) {
-    if (object.getClass().getEnclosingClass() != null && !object.getClass().getName().startsWith("java")) {
-      if (object.getClass().getCanonicalName().equals("java.util.Arrays.ArrayList")
-          || object.getClass().getCanonicalName().equals("java.util.Collections.UnmodifiableRandomAccessList")) {
-        return List.class.getCanonicalName();
-      } else if (object.getClass().getCanonicalName().equals("java.util.Collections.SynchronizedSet")) {
-        return Collections.class.getCanonicalName();
-      }
-    }
-      return object.getClass().getCanonicalName();
-  }
-
   public boolean deleteObjectSerializerSupporterClass(String fileDirectory) {
     return  new File(fileDirectory+File.separator+"ObjectSerializerSupporter.java").delete();
   }

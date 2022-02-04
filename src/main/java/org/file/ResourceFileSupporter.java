@@ -23,6 +23,10 @@ public class ResourceFileSupporter {
     return targetClassLocalPath;
   }
 
+  public File getLocalPathResourceDirectory(){
+    return this.localPathResourceDirectory;
+  }
+
   public File findFile(String name,File file){
     File targetFile = searchForFileByName(name, file);
     if (targetFile != null){

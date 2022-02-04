@@ -95,7 +95,8 @@ public class ObjectSerializer {
   private void runSerializedObjectCreation(ResourceFileSupporter resourceFileSupporter,
       PomFileInstrumentation pomFileInstrumentation, String command, String message, boolean isTestTask, ProcessManager processManager)
       throws IOException, InterruptedException, TransformerException {
-    if (!startProcess(resourceFileSupporter.getProjectLocalPath().getPath(), command, message, isTestTask, processManager)){
+        startProcess(resourceFileSupporter.getProjectLocalPath().getPath(), command, message, isTestTask, processManager);
+    if (InputHandler.isDirEmpty(resourceFileSupporter.getLocalPathResourceDirectory().toPath())){
       pomFileInstrumentation.updateOldDependencies();
       startProcess(resourceFileSupporter.getProjectLocalPath().getPath(), command, message, isTestTask, processManager);
     }
@@ -185,16 +186,15 @@ public class ObjectSerializer {
                   + mergeScenarioUnderAnalysis.getTargetClass()));
           saveJarFile(generatedJarFile, mergeScenarioUnderAnalysis, mergeScenarioCommit);
         }else{
-          if (startProcess(resourceFileSupporter.getProjectLocalPath().getPath(), "mvn clean compile",
-              "Compiling the whole project", false, processManager) ||
-              startProcess(pomDirectory.getAbsolutePath(), "mvn compile assembly:single",
-                  "Generating jar file with serialized objects", false, processManager)){
-            serializedObjectAccessOutputClass.deleteOldClassSupporter();
-            serializedObjectAccessClassIntrumentation.undoTransformations(new File(
-                resourceFileSupporter.getTargetClassLocalPath() + File.separator
-                    + mergeScenarioUnderAnalysis.getTargetClass()));
-            saveJarFile(generatedJarFile, mergeScenarioUnderAnalysis, mergeScenarioCommit);
+          startProcess(resourceFileSupporter.getProjectLocalPath().getPath(), "mvn clean compile", "Compiling the whole project", false, processManager);
+          if (!startProcess(pomDirectory.getAbsolutePath(), "mvn compile assembly:single", "Generating jar file with serialized objects", false, processManager)){
+            runSerializedObjectCreation(resourceFileSupporter, pomFileInstrumentation, "mvn clean compile assembly:single", "Generating jar file with serialized objects", false, processManager);
           }
+          serializedObjectAccessOutputClass.deleteOldClassSupporter();
+          serializedObjectAccessClassIntrumentation.undoTransformations(new File(
+              resourceFileSupporter.getTargetClassLocalPath() + File.separator
+                  + mergeScenarioUnderAnalysis.getTargetClass()));
+          saveJarFile(generatedJarFile, mergeScenarioUnderAnalysis, mergeScenarioCommit);
         }
         gitProjectActions.undoCurrentChanges();
         gitProjectActions.checkoutPreviousSHA();
@@ -215,7 +215,7 @@ public class ObjectSerializer {
     pomFileInstrumentation.addResourcesForGeneratedJar();
     pomFileInstrumentation.addPluginForJarWithAllDependencies();
     pomFileInstrumentation.updateOldRepository();
-    pomFileInstrumentation.changeSurefirePlugin(targetPackage);
+    pomFileInstrumentation.changeTagContent(pomFileInstrumentation.getPomFile(), "scope", "compile", "test");
     pomFileInstrumentation.removeAllEnforcedDependencies(projectDir);
     pomFileInstrumentation.updateSourceOption(projectDir);
     return pomFileInstrumentation;
