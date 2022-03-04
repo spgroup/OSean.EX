@@ -69,9 +69,8 @@ public class ObjectSerializer {
         runSerializedObjectCreation(objectSerializerSupporter, resourceFileSupporter, pomFileInstrumentation, "mvn clean test -Dmaven.test.failure.ignore=true", "Creating Serialized Objects", true, processManager);
 
         objectSerializerSupporter.deleteObjectSerializerSupporterClass(resourceFileSupporter.getTargetClassLocalPath().getPath());
-
+        
         gitProjectActions.undoCurrentChanges();
-        gitProjectActions.checkoutPreviousSHA();
 
         generateJarsForAllMergeScenarioCommits(gitProjectActions,
             pomDirectory, objectSerializerClassIntrumentation, resourceFileSupporter,
@@ -79,12 +78,23 @@ public class ObjectSerializer {
             mergeScenarioUnderAnalysis, processManager);
 
         gitProjectActions.undoCurrentChanges();
-        gitProjectActions.checkoutPreviousSHA();
+        gitProjectActions.checkoutCommit(gitProjectActions.getInitialSHA());
 
-        resourceFileSupporter.deleteResourceDirectory();
-        assembyFileSupporter.deleteResourceDirectory();
+        cleanResourceDirectory(resourceFileSupporter, assembyFileSupporter);
       }
     }
+  }
+  
+  public boolean cleanResourceDirectory(ResourceFileSupporter resourceFileSupporter,
+      AssembyFileSupporter assembyFileSupporter) {
+        try{
+          resourceFileSupporter.deleteResourceDirectory();
+          assembyFileSupporter.deleteResourceDirectory();
+          return true;
+        }catch (Exception e){
+          e.printStackTrace();
+        }
+        return false;
   }
 
   private void runSerializedObjectCreation(ObjectSerializerSupporter objectSerializerSupporter, ResourceFileSupporter resourceFileSupporter,
@@ -114,7 +124,7 @@ public class ObjectSerializer {
     try {
       for (String mergeScenarioCommit : mergeScenarioUnderAnalysis.getMergeScenarioCommits()) {
 
-        gitProjectActions.checkoutCommit(mergeScenarioCommit);
+        safeCheckout(gitProjectActions, mergeScenarioCommit);
 
         PomFileInstrumentation pomFileInstrumentation = createAndRunPomFileInstrumentation(
             pomDirectory, "", resourceFileSupporter.getProjectLocalPath());
@@ -199,13 +209,20 @@ public class ObjectSerializer {
           saveJarFile(generatedJarFile, mergeScenarioUnderAnalysis, mergeScenarioCommit);
         }
         gitProjectActions.undoCurrentChanges();
-        gitProjectActions.checkoutPreviousSHA();
       }
       return true;
     }catch (Exception e){
       e.printStackTrace();
     }
     return false;
+  }
+
+  private void safeCheckout(GitProjectActions gitProjectActions, String mergeScenarioCommit) {
+    gitProjectActions.addChanges();
+    gitProjectActions.stashChanges();
+    gitProjectActions.checkoutCommit(mergeScenarioCommit);
+    gitProjectActions.stashPop();
+    gitProjectActions.restoreChanges();
   }
 
   private PomFileInstrumentation createAndRunPomFileInstrumentation(File pomDirectory, String targetPackage, File projectDir)
