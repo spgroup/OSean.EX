@@ -85,6 +85,39 @@ public class GitProjectActionsTest {
     Assert.assertEquals("9d9b8d1bf5bee49cdded16fa0619730bc0ccd3a4", gitProjectActions.getCurrentSHA());
     Assert.assertTrue(gitProjectActions.checkoutCommit("main"));
   }
+  
+  @Test
+  public void expectCheckoutToInitialCommit() throws IOException, InterruptedException {
+    GitProjectActions gitProjectActions = getGitProjectActions();
+    gitProjectActions.checkoutCommit("main");
+    String mainSHA = gitProjectActions.getCurrentSHA();
+    gitProjectActions.checkoutCommit("9d9b8d1bf5bee49cdded16fa0619730bc0ccd3a4");
+    gitProjectActions.checkoutCommit("00407114d1232ece915a3609490128f7beb21691");
+    gitProjectActions.checkoutCommit("5215c5d623a131ac94284be5c3c42c2124618e99");
+    gitProjectActions.checkoutCommit(gitProjectActions.getInitialSHA());
+    Assert.assertEquals(mainSHA, gitProjectActions.getCurrentSHA());
+    Assert.assertTrue(gitProjectActions.checkoutCommit("main"));
+  }
+
+  @Test
+  public void expectUnstagedChangesAfterCommit() throws IOException, InterruptedException {
+    GitProjectActions gitProjectActions = getGitProjectActions();
+    gitProjectActions.checkoutCommit("main");
+    String mainSHA = gitProjectActions.getCurrentSHA();
+    
+    appendTextOnFile(pomPath);
+    gitProjectActions.addChanges();
+    gitProjectActions.stashChanges();
+    gitProjectActions.checkoutCommit("9d9b8d1bf5bee49cdded16fa0619730bc0ccd3a4");
+    gitProjectActions.stashPop();
+    gitProjectActions.restoreChanges();
+
+    Assert.assertTrue(gitProjectActions.undoCurrentChanges());
+    
+    gitProjectActions.checkoutCommit(gitProjectActions.getInitialSHA());
+    Assert.assertEquals(mainSHA, gitProjectActions.getCurrentSHA());
+    Assert.assertTrue(gitProjectActions.checkoutCommit("main"));
+  }
 
   @NotNull
   private GitProjectActions getGitProjectActions() throws IOException {
