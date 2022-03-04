@@ -13,17 +13,20 @@ public class GitProjectActions {
   private Repository repository;
   private Git git;
   private String lastSHA;
+  private String initialSHA;
 
   public GitProjectActions(String repositoryGit) throws IOException {
     this.repository = this.getDefaultRepository(repositoryGit);
     this.git = new Git(this.repository);
     this.lastSHA = getCurrentSHA();
+    this.initialSHA = getCurrentSHA();
   }
 
   public GitProjectActions(Repository repository){
     this.repository = repository;
     this.git = new Git(repository);
     this.lastSHA = getCurrentSHA();
+    this.initialSHA = getCurrentSHA();
   }
 
   public boolean undoCurrentChanges() {
@@ -81,6 +84,10 @@ public class GitProjectActions {
     return this.lastSHA;
   }
 
+  public String getInitialSHA(){
+    return this.initialSHA;
+  }
+
   public Git getGit(){
     return this.git;
   }
@@ -114,5 +121,44 @@ public class GitProjectActions {
         .build();
   }
 
+  public boolean addChanges(){
+    try {
+      this.git.add().addFilepattern(".").call();
+      return true;
+    } catch (GitAPIException e) {
+      e.printStackTrace();
+    }
+    return false;
+  }
+  
+  public boolean stashChanges(){
+    try {
+      this.git.stashCreate().call();
+      return true;
+    } catch (GitAPIException e) {
+      e.printStackTrace();
+    }
+    return false;
+  }
+  
+  public boolean stashPop(){
+    try {
+      this.git.stashApply().call();
+      return true;
+    } catch (GitAPIException e) {
+      e.printStackTrace();
+    }
+    return false;
+  }
+  
+  public boolean restoreChanges(){
+    try {
+      this.git.reset().setMode(ResetType.MIXED).call();
+      return true;
+    } catch (GitAPIException e) {
+      e.printStackTrace();
+    }
+    return false;
+  }
 }
 
