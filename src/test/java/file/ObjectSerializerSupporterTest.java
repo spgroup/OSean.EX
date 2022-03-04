@@ -60,8 +60,7 @@ public class ObjectSerializerSupporterTest {
   }
 
   @Test
-  //Construtor do serializer supporter s/ relativizar caminho
-  public void teste01() {
+  public void buildSerializerSupporterWithoutPathRelativaze() {
     ResourceFileSupporter resourceFileSupporter = new ResourceFileSupporter("src/test/resources/validProject");
     Assert.assertTrue(resourceFileSupporter.createNewDirectory(
         resourceFileSupporter.findFile("Person.java", resourceFileSupporter.getProjectLocalPath())));
