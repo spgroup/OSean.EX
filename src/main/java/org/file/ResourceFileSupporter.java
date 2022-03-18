@@ -9,10 +9,17 @@ public class ResourceFileSupporter {
   protected File projectLocalPath;
   protected File targetClassLocalPath;
   protected File localPathResourceDirectory;
+  protected String targetClassName;
 
   public ResourceFileSupporter(String pathFile){
     this.projectLocalPath = new File(pathFile);
     this.targetClassLocalPath = new File(pathFile);
+  }
+  
+  public ResourceFileSupporter(String pathFile, String targetClassName){
+    this.projectLocalPath = new File(pathFile);
+    this.targetClassLocalPath = new File(pathFile);
+    this.targetClassName = targetClassName;
   }
 
   public File getProjectLocalPath(){
@@ -27,13 +34,15 @@ public class ResourceFileSupporter {
     return this.localPathResourceDirectory;
   }
 
-  public File findFile(String name,File file){
+  public String getTargetClassName(){
+    return this.targetClassName;
+  }
+
+  public void findTargetClassLocalPath(String name,File file){
     File targetFile = searchForFileByName(name, file);
     if (targetFile != null){
       this.targetClassLocalPath = new File(targetFile.getPath().split(name)[0]);
-      return findPomDirectory(targetFile.getParentFile());
     }
-    return targetFile;
   }
 
   public File searchForFileByName(String name,File file){
@@ -54,9 +63,9 @@ public class ResourceFileSupporter {
     return null;
   }
 
-  protected File findPomDirectory(File file){
+  public File findBuildFileDirectory(File file, String buildFileName){
     File[] list = file.listFiles();
-    String name = "pom.xml";
+    String name = buildFileName;
     File aux = new File(this.projectLocalPath.getPath()).getParentFile();
     if(list!=null && !aux.equals(file)) {
       for (File fil : list) {
@@ -64,7 +73,7 @@ public class ResourceFileSupporter {
           return fil.getParentFile();
         }
       }
-      return findPomDirectory(file.getParentFile());
+      return findBuildFileDirectory(file.getParentFile(), buildFileName);
     }else{
       return null;
     }

@@ -26,9 +26,10 @@ Once you have the object serializer jar file, you can call it for a specific pro
 * indication for applying the testability transformations (true/false);
 * indication for fully applying the testability transformations (empty constructor, true/false);
 * budget time for serialization;
+* indication of which build tool is used on project (maven|gradle);
 * list of commits.
 
-For example, consider calling the object serializer for this project: ```java -cp ObjectSerialization-1.0-SNAPSHOT-jar-with-dependencies.jar org.RunSerialization "/home/lmps2/projects/toy-project" "Person.java" "addRelative" "toy-project" "true" "true" "60" "abdc125" "abdc156"```.
+For example, consider calling the object serializer for this project: ```java -cp ObjectSerialization-1.0-SNAPSHOT-jar-with-dependencies.jar org.RunSerialization "/home/lmps2/projects/toy-project" "Person.java" "addRelative" "toy-project" "true" "true" "60" "maven" "abdc125" "abdc156"```.
 
 You may inform up to four (4) commit hashes.
 The first commit will be used to create the serialized objects; next, they will be deserialized in all commits previously informed.

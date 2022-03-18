@@ -8,6 +8,7 @@ public class MergeScenarioUnderAnalysis {
   private String targetClass;
   private String targetMethod;
   private String projectName;
+  private String buildManager;
   private List<String> mergeScenarioCommits;
   private TransformationOption transformationOption;
 
@@ -16,13 +17,14 @@ public class MergeScenarioUnderAnalysis {
     this.targetClass = args[1];
     this.targetMethod = args[2];
     this.projectName = args[3];
+    this.buildManager = args[7];
     this.transformationOption = new TransformationOption(args[4], args[5], args[6]);
     this.mergeScenarioCommits = parseMergeScenarioCommits(args);
   }
 
   private List<String> parseMergeScenarioCommits(String[] args){
     List<String> mergeScenarioCommits = new ArrayList<>();
-      for(int i=7; i < args.length && args.length > 6; i++){
+      for(int i=8; i < args.length && args.length > 8; i++){
         if (args[i] != null && args[i] != ""){
           mergeScenarioCommits.add(args[i]);
         }
@@ -44,6 +46,10 @@ public class MergeScenarioUnderAnalysis {
 
   public String getProjectName() {
     return projectName;
+  }
+  
+  public String getBuildManager() {
+    return buildManager;
   }
 
   public List<String> getMergeScenarioCommits() {
