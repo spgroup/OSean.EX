@@ -56,7 +56,6 @@ public class ObjectSerializerGradleTest {
 
   @Test
   public void expectJarGenerationForBuildFileWithoutFatJarPlugin() throws IOException, InterruptedException, TransformerException {
-    RunSerialization runSerialization = new RunSerialization();
     String[] args = {System.getProperty("user.dir")+File.separator+"src"+ File.separator+"test"+File.separator+"resources"+File.separator+"toy-project-1",
         "Person.java",
         "getName",
@@ -67,7 +66,7 @@ public class ObjectSerializerGradleTest {
         "gradle",
         "bc55f776168214586ea7d5d58187df6719f940c2",
     };
-    runSerialization.runAnalysis(args);
+    RunSerialization.runAnalysis(args);
     Repository subRepo = SubmoduleWalk.getSubmoduleRepository(getMainRepository(),
         GitProjectActionsTest.projectPath);
     GitProjectActions gitProjectActions = new GitProjectActions(subRepo);
@@ -82,7 +81,6 @@ public class ObjectSerializerGradleTest {
    * old every gradle version that still acepts "compile" and "testCompile" commands, rather than "implementation" and "testImplementation"
    */
   public void expectJarGenerationForGradleWithOlderVersion() throws IOException, InterruptedException, TransformerException {
-    RunSerialization runSerialization = new RunSerialization();
     String[] args = {System.getProperty("user.dir")+File.separator+"src"+ File.separator+"test"+File.separator+"resources"+File.separator+"toy-project-1",
         "Person.java",
         "getName",
@@ -93,7 +91,7 @@ public class ObjectSerializerGradleTest {
         "gradle",
         "c257474a8206e05d82a444bead4222d1dec9f60b",
     };
-    runSerialization.runAnalysis(args);
+    RunSerialization.runAnalysis(args);
     Repository subRepo = SubmoduleWalk.getSubmoduleRepository(getMainRepository(),
         GitProjectActionsTest.projectPath);
     GitProjectActions gitProjectActions = new GitProjectActions(subRepo);

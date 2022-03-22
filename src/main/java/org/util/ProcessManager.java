@@ -1,12 +1,8 @@
 package org.util;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
+
 import org.util.output.ProcessReport;
 
 public class ProcessManager extends Thread {
@@ -42,7 +38,6 @@ public class ProcessManager extends Thread {
   public String getProcessOutput(Process process, boolean isTest) throws InterruptedException {
     if (isTest){
       if (!process.waitFor(this.budget, TimeUnit.SECONDS)){
-        process.descendants().forEach(p -> System.out.println(p.pid())); //TODO: remove this. It is only for debug
         process.descendants().forEach(p -> p.destroyForcibly());
         process.destroyForcibly();
         return "FINISHED BY TIMEOUT";

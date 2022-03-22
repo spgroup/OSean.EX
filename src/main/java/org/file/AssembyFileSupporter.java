@@ -6,7 +6,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.Files;
-import org.apache.commons.io.FileUtils;
 
 public class AssembyFileSupporter extends ResourceFileSupporter{
 

@@ -1,14 +1,10 @@
 package org.file;
 
-import static org.eclipse.jgit.lib.ObjectChecker.object;
-
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.Collections;
-import java.util.List;
 
 public class ObjectSerializerSupporter {
   protected String fullSerializerSupporterClass;

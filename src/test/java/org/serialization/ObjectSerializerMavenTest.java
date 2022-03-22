@@ -77,7 +77,6 @@ public class ObjectSerializerMavenTest {
 
   @Test
   public void expectJarGenerationUsingDefaultCall() throws IOException, InterruptedException, TransformerException {
-    RunSerialization runSerialization = new RunSerialization();
     String[] args = {System.getProperty("user.dir")+File.separator+"src"+ File.separator+"test"+File.separator+"resources"+File.separator+"toy-project",
         "Person.java",
         "getName",
@@ -88,7 +87,7 @@ public class ObjectSerializerMavenTest {
         "maven",
         "85077377978f98e31e637c121b5987e01725f5fd"
     };
-    runSerialization.runAnalysis(args);
+    RunSerialization.runAnalysis(args);
     Repository subRepo = SubmoduleWalk.getSubmoduleRepository(getMainRepository(),
         GitProjectActionsTest.projectPath);
     GitProjectActions gitProjectActions = new GitProjectActions(subRepo);
@@ -99,7 +98,6 @@ public class ObjectSerializerMavenTest {
 
   @Test
   public void expectJarGenerationForTwoInputs() throws IOException, InterruptedException, TransformerException {
-    RunSerialization runSerialization = new RunSerialization();
     String[] args = {System.getProperty("user.dir")+File.separator+"src"+ File.separator+"test"+File.separator+"resources"+File.separator+"toy-project",
         "Person.java",
         "getName",
@@ -111,7 +109,7 @@ public class ObjectSerializerMavenTest {
         "85077377978f98e31e637c121b5987e01725f5fd",
         "5215c5d623a131ac94284be5c3c42c2124618e99"
     };
-    runSerialization.runAnalysis(args);
+    RunSerialization.runAnalysis(args);
     Repository subRepo = SubmoduleWalk.getSubmoduleRepository(getMainRepository(),
         GitProjectActionsTest.projectPath);
     GitProjectActions gitProjectActions = new GitProjectActions(subRepo);
@@ -123,8 +121,7 @@ public class ObjectSerializerMavenTest {
 
   @Test
   public void expectJarGenerationUsingDefaultCallByCSVFile() throws IOException, InterruptedException, TransformerException {
-    RunSerialization runSerialization = new RunSerialization();
-    runSerialization.runAnalysis(new String[]{createInputFile()});
+    RunSerialization.runAnalysis(new String[]{createInputFile()});
     Repository subRepo = SubmoduleWalk.getSubmoduleRepository(getMainRepository(),
         GitProjectActionsTest.projectPath);
     GitProjectActions gitProjectActions = new GitProjectActions(subRepo);

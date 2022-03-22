@@ -3,6 +3,7 @@ package org.instrumentation;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
+
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -11,6 +12,7 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
 import org.apache.commons.io.filefilter.RegexFileFilter;
@@ -42,7 +44,6 @@ public class PomFileInstrumentation {
 
     TransformerFactory transformerFactory = TransformerFactory.newInstance();
     Transformer transformer = transformerFactory.newTransformer();
-    String aux = document.getDocumentURI();
     StreamResult result = new StreamResult(document.getDocumentURI());
     transformer.transform(source, result);
   }
@@ -498,7 +499,7 @@ public class PomFileInstrumentation {
           Node configurationNode = document.createElement("configuration");
           Node includes = document.createElement("includes");
           Node include = document.createElement("include");
-          if(target.equals("")){
+          if(targetPackage.equals("")){
             include.setTextContent("**/*Test.java");
           }else{
             include.setTextContent(targetPackage+".*");
