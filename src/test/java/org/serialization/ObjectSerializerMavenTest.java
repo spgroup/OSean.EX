@@ -1,9 +1,8 @@
-package serialization;
+package org.serialization;
 
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.when;
-import static util.GitProjectActionsTest.getMainRepository;
+import static org.util.GitProjectActionsTest.getMainRepository;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -16,13 +15,12 @@ import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.submodule.SubmoduleWalk;
 import org.junit.Assert;
 import org.junit.Test;
-import org.serialization.ObjectSerializer;
 import org.util.GitProjectActions;
 import org.util.InputHandler;
 import org.util.input.MergeScenarioUnderAnalysis;
-import util.GitProjectActionsTest;
+import org.util.GitProjectActionsTest;
 
-public class ObjectSerializerTest {
+public class ObjectSerializerMavenTest {
   private String directoryForGeneratedJars = System.getProperty("user.dir")+File.separator+"src"+
       File.separator+"test"+File.separator+"resources"+File.separator+"GeneratedJars"+
       File.separator+"toy-project";
@@ -33,7 +31,7 @@ public class ObjectSerializerTest {
 
   @Test
   public void expectJarGenerationForToyProject() throws IOException, InterruptedException, TransformerException {
-    ObjectSerializer objectSerializer = new ObjectSerializer();
+    ObjectSerializerMaven objectSerializer = new ObjectSerializerMaven();
     String[] args = {System.getProperty("user.dir")+File.separator+"src"+ File.separator+"test"+File.separator+"resources"+File.separator+"toy-project",
         "Person.java",
         "getOccupation",
@@ -41,10 +39,11 @@ public class ObjectSerializerTest {
         "true",
         "true",
         "60",
+        "maven",
         "7810b85dd711ac2648675dcfe5e65539aec1ea1d"
         };
     List<MergeScenarioUnderAnalysis> mergeScenarioUnderAnalyses = InputHandler.splitInputInMergeScenarios(args);
-    objectSerializer.startSerialization(mergeScenarioUnderAnalyses);
+    objectSerializer.startSerialization(mergeScenarioUnderAnalyses.get(0));
     Repository subRepo = SubmoduleWalk.getSubmoduleRepository(getMainRepository(),
         GitProjectActionsTest.projectPath);
     GitProjectActions gitProjectActions = new GitProjectActions(subRepo);
@@ -55,7 +54,7 @@ public class ObjectSerializerTest {
 
   @Test
   public void expectJarGenerationForToyProjectWithPartialTransformations() throws IOException, InterruptedException, TransformerException {
-    ObjectSerializer objectSerializer = new ObjectSerializer();
+    ObjectSerializerMaven objectSerializer = new ObjectSerializerMaven();
     String[] args = {System.getProperty("user.dir")+File.separator+"src"+ File.separator+"test"+File.separator+"resources"+File.separator+"toy-project",
         "Person.java",
         "getOccupation",
@@ -63,10 +62,11 @@ public class ObjectSerializerTest {
         "false",
         "false",
         "60",
+        "maven",
         "7810b85dd711ac2648675dcfe5e65539aec1ea1d"
     };
     List<MergeScenarioUnderAnalysis> mergeScenarioUnderAnalyses = InputHandler.splitInputInMergeScenarios(args);
-    objectSerializer.startSerialization(mergeScenarioUnderAnalyses);
+    objectSerializer.startSerialization(mergeScenarioUnderAnalyses.get(0));
     Repository subRepo = SubmoduleWalk.getSubmoduleRepository(getMainRepository(),
         GitProjectActionsTest.projectPath);
     GitProjectActions gitProjectActions = new GitProjectActions(subRepo);
@@ -85,6 +85,7 @@ public class ObjectSerializerTest {
         "true",
         "true",
         "60",
+        "maven",
         "85077377978f98e31e637c121b5987e01725f5fd"
     };
     runSerialization.runAnalysis(args);
@@ -106,6 +107,7 @@ public class ObjectSerializerTest {
         "true",
         "true",
         "60",
+        "maven",
         "85077377978f98e31e637c121b5987e01725f5fd",
         "5215c5d623a131ac94284be5c3c42c2124618e99"
     };
@@ -151,7 +153,7 @@ public class ObjectSerializerTest {
       FileWriter csvWriter = new FileWriter(inputFile);
       csvWriter.append(String.join(",", System.getProperty("user.dir")+File.separator+"src"+
               File.separator+"test"+File.separator+"resources"+File.separator+"toy-project",
-        "Person.java","getName","toy-project","true","true","60","85077377978f98e31e637c121b5987e01725f5fd", "5215c5d623a131ac94284be5c3c42c2124618e99"));
+        "Person.java","getName","toy-project","true","true","60", "maven","85077377978f98e31e637c121b5987e01725f5fd", "5215c5d623a131ac94284be5c3c42c2124618e99"));
       csvWriter.flush();
       csvWriter.close();
     } catch (IOException e) {
@@ -162,7 +164,7 @@ public class ObjectSerializerTest {
 
   @Test
   public void expectJarGenerationForToyProjectMethodWithParameters() throws IOException, InterruptedException, TransformerException {
-    ObjectSerializer objectSerializer = new ObjectSerializer();
+    ObjectSerializerMaven objectSerializer = new ObjectSerializerMaven();
     String[] args = {System.getProperty("user.dir")+File.separator+"src"+ File.separator+"test"+File.separator+"resources"+File.separator+"toy-project",
     "Person.java",
     "Person(java.lang.String, int, java.lang.String)",
@@ -170,10 +172,11 @@ public class ObjectSerializerTest {
     "true",
     "true",
     "60",
+    "maven",
     "7810b85dd711ac2648675dcfe5e65539aec1ea1d"
   };
   List<MergeScenarioUnderAnalysis> mergeScenarioUnderAnalyses = InputHandler.splitInputInMergeScenarios(args);
-  objectSerializer.startSerialization(mergeScenarioUnderAnalyses);
+  objectSerializer.startSerialization(mergeScenarioUnderAnalyses.get(0));
   Repository subRepo = SubmoduleWalk.getSubmoduleRepository(getMainRepository(),
   GitProjectActionsTest.projectPath);
   GitProjectActions gitProjectActions = new GitProjectActions(subRepo);
@@ -184,7 +187,7 @@ public class ObjectSerializerTest {
 
   @Test
   public void expectJarGenerationForProjectWithMockitoPluginProblem() throws IOException, InterruptedException, TransformerException {
-    ObjectSerializer objectSerializer = new ObjectSerializer();
+    ObjectSerializerMaven objectSerializer = new ObjectSerializerMaven();
     String[] args = {System.getProperty("user.dir")+File.separator+"src"+ File.separator+"test"+File.separator+"resources"+File.separator+"toy-project-1",
         "Person.java",
         "Person(java.lang.String, int, java.lang.String)",
@@ -192,10 +195,11 @@ public class ObjectSerializerTest {
         "true",
         "true",
         "60",
+        "maven",
         "00c4a9fd0ae7587499f942cf2238fcf90b287baa"
         };
     List<MergeScenarioUnderAnalysis> mergeScenarioUnderAnalyses = InputHandler.splitInputInMergeScenarios(args);
-    objectSerializer.startSerialization(mergeScenarioUnderAnalyses);
+    objectSerializer.startSerialization(mergeScenarioUnderAnalyses.get(0));
     Repository subRepo = SubmoduleWalk.getSubmoduleRepository(getMainRepository(),
         GitProjectActionsTest.projectPath);
     GitProjectActions gitProjectActions = new GitProjectActions(subRepo);
@@ -206,7 +210,7 @@ public class ObjectSerializerTest {
 
   @Test
   public void expectJarGenerationForProjectWithTestCompilationProblem() throws IOException, InterruptedException, TransformerException {
-    ObjectSerializer objectSerializer = new ObjectSerializer();
+    ObjectSerializerMaven objectSerializer = new ObjectSerializerMaven();
     String[] args = {System.getProperty("user.dir")+File.separator+"src"+ File.separator+"test"+File.separator+"resources"+File.separator+"toy-project-1",
         "Person.java",
         "Person(java.lang.String, int, java.lang.String)",
@@ -214,11 +218,12 @@ public class ObjectSerializerTest {
         "true",
         "true",
         "60",
+        "maven",
         "00c4a9fd0ae7587499f942cf2238fcf90b287baa",
         "70fcc5af960e08ac057dfc5f3990225fafa9fd7d"
         };
     List<MergeScenarioUnderAnalysis> mergeScenarioUnderAnalyses = InputHandler.splitInputInMergeScenarios(args);
-    objectSerializer.startSerialization(mergeScenarioUnderAnalyses);
+    objectSerializer.startSerialization(mergeScenarioUnderAnalyses.get(0));
     Repository subRepo = SubmoduleWalk.getSubmoduleRepository(getMainRepository(),
         GitProjectActionsTest.projectPath);
     GitProjectActions gitProjectActions = new GitProjectActions(subRepo);
@@ -229,8 +234,8 @@ public class ObjectSerializerTest {
 
   @Test
   public void dontSerializeEqualObjects() throws IOException, InterruptedException, TransformerException {
-    ObjectSerializer objectSerializer = new ObjectSerializer();
-    ObjectSerializer spySerializer = spy(objectSerializer);
+    ObjectSerializerMaven objectSerializer = new ObjectSerializerMaven();
+    ObjectSerializerMaven spySerializer = spy(objectSerializer);
     String[] args = {System.getProperty("user.dir")+File.separator+"src"+ File.separator+"test"+File.separator+"resources"+File.separator+"toy-project-1",
         "Person.java",
         "Person(java.lang.String, int, java.lang.String)",
@@ -238,16 +243,17 @@ public class ObjectSerializerTest {
         "true",
         "true",
         "60",
+        "maven",
         "a7ceadcb1061874a72f950bdf48a691b68d0622b"
         };
     List<MergeScenarioUnderAnalysis> mergeScenarioUnderAnalyses = InputHandler.splitInputInMergeScenarios(args);
-    when(spySerializer.cleanResourceDirectory(any(), any())).thenReturn(false);
-    spySerializer.startSerialization(mergeScenarioUnderAnalyses);
+    doReturn(false).when(spySerializer).cleanResourceDirectory();
+    spySerializer.startSerialization(mergeScenarioUnderAnalyses.get(0));
     Assert.assertFalse(new File(System.getProperty("user.dir")+File.separator+"src"+ File.separator+"test"
                       +File.separator+"resources"+File.separator+"toy-project-1"
                       +File.separator+"src"+File.separator+"main"+File.separator+"resources"
                       +File.separator+"serializedObjects"+File.separator+"Person3.xml").exists());
-    objectSerializer.startSerialization(mergeScenarioUnderAnalyses);
+    objectSerializer.startSerialization(mergeScenarioUnderAnalyses.get(0));
     Repository subRepo = SubmoduleWalk.getSubmoduleRepository(getMainRepository(),
         GitProjectActionsTest.projectPath);
     GitProjectActions gitProjectActions = new GitProjectActions(subRepo);
@@ -257,25 +263,26 @@ public class ObjectSerializerTest {
 
   @Test
   public void dontSerializeWhenReachesTimeLimit() throws IOException, InterruptedException, TransformerException {
-    ObjectSerializer objectSerializer = new ObjectSerializer();
-    ObjectSerializer spySerializer = spy(objectSerializer);
+    ObjectSerializerMaven objectSerializer = new ObjectSerializerMaven();
+    ObjectSerializerMaven spySerializer = spy(objectSerializer);
     String[] args = {System.getProperty("user.dir")+File.separator+"src"+ File.separator+"test"+File.separator+"resources"+File.separator+"toy-project-1",
         "Person.java",
         "Person(java.lang.String, int, java.lang.String)",
         "toy-project-1",
         "true",
         "true",
-        "60",
+        "50",
+        "maven",
         "916ac4231c0566c39a469bde5cbb8802782ec81b"
         };
     List<MergeScenarioUnderAnalysis> mergeScenarioUnderAnalyses = InputHandler.splitInputInMergeScenarios(args);
-    when(spySerializer.cleanResourceDirectory(any(), any())).thenReturn(false);
-    spySerializer.startSerialization(mergeScenarioUnderAnalyses);
+    doReturn(false).when(spySerializer).cleanResourceDirectory();
+    spySerializer.startSerialization(mergeScenarioUnderAnalyses.get(0));
     Assert.assertFalse(new File(System.getProperty("user.dir")+File.separator+"src"+ File.separator+"test"
                       +File.separator+"resources"+File.separator+"toy-project-1"
                       +File.separator+"src"+File.separator+"main"+File.separator+"resources"
                       +File.separator+"serializedObjects"+File.separator+"Person3.xml").exists());
-    objectSerializer.startSerialization(mergeScenarioUnderAnalyses);
+    objectSerializer.startSerialization(mergeScenarioUnderAnalyses.get(0));
     Repository subRepo = SubmoduleWalk.getSubmoduleRepository(getMainRepository(),
         GitProjectActionsTest.projectPath);
     GitProjectActions gitProjectActions = new GitProjectActions(subRepo);

@@ -1,10 +1,8 @@
-package file;
+package org.file;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
-import org.file.ResourceFileSupporter;
-import org.file.ObjectSerializerSupporter;
 import org.instrumentation.PomFileInstrumentation;
 import org.junit.Assert;
 import org.junit.Test;
@@ -14,11 +12,11 @@ public class ObjectSerializerSupporterTest {
   @Test
   public void expectAddedObjectSerializerSupporterForClassOnRoot() throws IOException {
     ResourceFileSupporter resourceFileSupporter = new ResourceFileSupporter("src/test/resources/validProject");
-    Assert.assertTrue(resourceFileSupporter.createNewDirectory(
-        resourceFileSupporter.findFile("PersonTwo.java", resourceFileSupporter.getProjectLocalPath())));
+    resourceFileSupporter.findTargetClassLocalPath("PersonTwo.java", resourceFileSupporter.getProjectLocalPath());
+    File pomDirectory = resourceFileSupporter.findBuildFileDirectory(resourceFileSupporter.getTargetClassLocalPath(), "pom.xml");
+    Assert.assertTrue(resourceFileSupporter.createNewDirectory(pomDirectory));
     Assert.assertEquals(true, new File(System.getProperty("user.dir")+File.separator+"src/test/resources/validProject/src/main/resources").exists());
 
-    File pomDirectory = resourceFileSupporter.findFile("PersonTwo.java", resourceFileSupporter.getProjectLocalPath());
     PomFileInstrumentation pomFileInstrumentation = new PomFileInstrumentation(
         pomDirectory.getPath());
 
@@ -38,11 +36,11 @@ public class ObjectSerializerSupporterTest {
   @Test
   public void expectAddedObjectSerializerSupporterForClassNotOnRoot() throws IOException {
     ResourceFileSupporter resourceFileSupporter = new ResourceFileSupporter("src/test/resources/validProject");
-    Assert.assertTrue(resourceFileSupporter.createNewDirectory(
-        resourceFileSupporter.findFile("Person.java", resourceFileSupporter.getProjectLocalPath())));
+    resourceFileSupporter.findTargetClassLocalPath("Person.java", resourceFileSupporter.getProjectLocalPath());
+    File pomDirectory = resourceFileSupporter.findBuildFileDirectory(resourceFileSupporter.getTargetClassLocalPath(), "pom.xml");
+    Assert.assertTrue(resourceFileSupporter.createNewDirectory(pomDirectory));
     Assert.assertEquals(true, new File(System.getProperty("user.dir")+File.separator+"src/test/resources/validProject/src/main/resources").exists());
 
-    File pomDirectory = resourceFileSupporter.findFile("Person.java", resourceFileSupporter.getProjectLocalPath());
     PomFileInstrumentation pomFileInstrumentation = new PomFileInstrumentation(
         pomDirectory.getPath());
 
@@ -62,11 +60,11 @@ public class ObjectSerializerSupporterTest {
   @Test
   public void buildSerializerSupporterWithoutPathRelativaze() {
     ResourceFileSupporter resourceFileSupporter = new ResourceFileSupporter("src/test/resources/validProject");
-    Assert.assertTrue(resourceFileSupporter.createNewDirectory(
-        resourceFileSupporter.findFile("Person.java", resourceFileSupporter.getProjectLocalPath())));
+    resourceFileSupporter.findTargetClassLocalPath("Person.java", resourceFileSupporter.getProjectLocalPath());
+    File pomDirectory = resourceFileSupporter.findBuildFileDirectory(resourceFileSupporter.getTargetClassLocalPath(), "pom.xml");
+    Assert.assertTrue(resourceFileSupporter.createNewDirectory(pomDirectory));
     Assert.assertEquals(true, new File(System.getProperty("user.dir")+File.separator+"src/test/resources/validProject/src/main/resources").exists());
 
-    File pomDirectory = resourceFileSupporter.findFile("Person.java", resourceFileSupporter.getProjectLocalPath());
     PomFileInstrumentation pomFileInstrumentation = new PomFileInstrumentation(
         pomDirectory.getPath());
 

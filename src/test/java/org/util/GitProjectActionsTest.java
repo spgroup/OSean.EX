@@ -1,4 +1,4 @@
-package util;
+package org.util;
 
 import java.io.File;
 import java.io.IOException;
@@ -11,7 +11,6 @@ import org.eclipse.jgit.submodule.SubmoduleWalk;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Assert;
 import org.junit.Test;
-import org.util.GitProjectActions;
 
 public class GitProjectActionsTest {
   public static String projectPath = "src"+File.separator+"test"+File.separator+"resources"+

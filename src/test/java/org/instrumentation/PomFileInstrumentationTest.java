@@ -1,4 +1,4 @@
-package instrumentation;
+package org.instrumentation;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 
 import javax.xml.transform.TransformerException;
-import org.instrumentation.PomFileInstrumentation;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
