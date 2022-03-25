@@ -2,6 +2,7 @@ package org.util;
 
 import java.io.File;
 import java.io.IOException;
+
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.ResetCommand.ResetType;
 import org.eclipse.jgit.api.errors.GitAPIException;
@@ -44,6 +45,15 @@ public class GitProjectActions {
   public boolean areThereUncommittedChanges(){
     try {
       return this.git.status().call().hasUncommittedChanges();
+    } catch (GitAPIException e) {
+      e.printStackTrace();
+    }
+    return false;
+  }
+  
+  public boolean areThereUntrackedChanges(){
+    try {
+      return this.git.status().call().getUntracked().size() > 0;
     } catch (GitAPIException e) {
       e.printStackTrace();
     }
@@ -154,6 +164,16 @@ public class GitProjectActions {
   public boolean restoreChanges(){
     try {
       this.git.reset().setMode(ResetType.MIXED).call();
+      return true;
+    } catch (GitAPIException e) {
+      e.printStackTrace();
+    }
+    return false;
+  }
+
+  public boolean cleanChanges(){
+    try {
+      this.git.clean().setForce(true).setCleanDirectories(true).call();
       return true;
     } catch (GitAPIException e) {
       e.printStackTrace();

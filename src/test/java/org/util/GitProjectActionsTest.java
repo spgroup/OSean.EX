@@ -118,6 +118,22 @@ public class GitProjectActionsTest {
     Assert.assertTrue(gitProjectActions.checkoutCommit("main"));
   }
 
+  @Test
+  public void expectNoneUnstagedChangesAfterCleanCommand() throws IOException, InterruptedException {
+    GitProjectActions gitProjectActions = getGitProjectActions();
+    gitProjectActions.checkoutCommit("main");
+    String mainSHA = gitProjectActions.getCurrentSHA();
+    
+    Files.createFile(Paths.get(projectPath+File.separator+"test.xml"));
+    Assert.assertTrue(gitProjectActions.areThereUntrackedChanges());
+    gitProjectActions.cleanChanges();
+    Assert.assertFalse(gitProjectActions.areThereUntrackedChanges());
+
+    gitProjectActions.checkoutCommit(gitProjectActions.getInitialSHA());
+    Assert.assertEquals(mainSHA, gitProjectActions.getCurrentSHA());
+    Assert.assertTrue(gitProjectActions.checkoutCommit("main"));
+  }
+
   @NotNull
   private GitProjectActions getGitProjectActions() throws IOException {
     Repository subRepo = SubmoduleWalk.getSubmoduleRepository(getMainRepository(), projectPath);

@@ -50,7 +50,7 @@ public abstract class ObjectSerializer {
     gitProjectActions = new GitProjectActions(mergeScenarioUnderAnalysis.getLocalProjectPath());
 
     gitProjectActions.checkoutCommit(mergeScenarioUnderAnalysis.getMergeScenarioCommits().get(0));
-
+    
     resourceFileSupporter = new ResourceFileSupporter(mergeScenarioUnderAnalysis.getLocalProjectPath(), mergeScenarioUnderAnalysis.getTargetClass());
     resourceFileSupporter.findTargetClassLocalPath(resourceFileSupporter.getTargetClassName(), resourceFileSupporter.getProjectLocalPath());
     createBuildFileSupporters();
@@ -85,6 +85,7 @@ public abstract class ObjectSerializer {
       generateJarsForAllMergeScenarioCommits(mergeScenarioUnderAnalysis);
 
       gitProjectActions.undoCurrentChanges();
+      gitProjectActions.cleanChanges();
       gitProjectActions.checkoutCommit(gitProjectActions.getInitialSHA());
       
       cleanResourceDirectory();
