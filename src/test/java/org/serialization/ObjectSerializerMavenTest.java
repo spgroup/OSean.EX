@@ -139,6 +139,15 @@ public class ObjectSerializerMavenTest {
       e.printStackTrace();
     }
   }
+  
+  private void deleteTargetFolder(){
+    try {
+      FileUtils.deleteDirectory(new File(System.getProperty("user.dir")+File.separator+"src"+
+          File.separator+"test"+File.separator+"resources"+File.separator+"toy-project-1"+File.separator+"target"));
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+  }
 
   private String createInputFile(){
 
@@ -203,6 +212,7 @@ public class ObjectSerializerMavenTest {
     Assert.assertTrue(gitProjectActions.checkoutCommit("main"));
     Assert.assertTrue(new File(directoryForGeneratedJarsToyProject1+File.separator+"00c4a9fd0ae7587499f942cf2238fcf90b287baa-Person.jar").exists());
     deleteOldJar();
+    deleteTargetFolder();
   }
 
   @Test
@@ -227,6 +237,7 @@ public class ObjectSerializerMavenTest {
     Assert.assertTrue(gitProjectActions.checkoutCommit("main"));
     Assert.assertTrue(new File(directoryForGeneratedJarsToyProject1+File.separator+"70fcc5af960e08ac057dfc5f3990225fafa9fd7d-Person.jar").exists());
     deleteOldJar();
+    deleteTargetFolder();
   }
 
   @Test
@@ -256,6 +267,7 @@ public class ObjectSerializerMavenTest {
     GitProjectActions gitProjectActions = new GitProjectActions(subRepo);
     Assert.assertTrue(gitProjectActions.checkoutCommit("main"));
     deleteOldJar();
+    deleteTargetFolder();
   }
 
   @Test
@@ -285,5 +297,6 @@ public class ObjectSerializerMavenTest {
     GitProjectActions gitProjectActions = new GitProjectActions(subRepo);
     Assert.assertTrue(gitProjectActions.checkoutCommit("main"));
     deleteOldJar();
+    deleteTargetFolder();
   }
 }
