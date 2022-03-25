@@ -86,21 +86,20 @@ public class ResourceFileSupporter {
 
   public boolean createNewDirectory(File localPomDirectory){
     File resourceDirectory = new File(getResourceDirectoryPath(localPomDirectory));
-    if (!resourceDirectory.exists()){
-      try {
-        Files.createDirectories(resourceDirectory.toPath());
-        this.localPathResourceDirectory = resourceDirectory;
-        return true;
-      } catch (IOException e) {
-        e.printStackTrace();
-      }
+    try {
+      FileUtils.deleteDirectory(resourceDirectory);
+      Files.createDirectories(resourceDirectory.toPath());
+      this.localPathResourceDirectory = resourceDirectory;
+      return true;
+    } catch (IOException e) {
+      e.printStackTrace();
     }
     return false;
   }
 
   public boolean deleteResourceDirectory(){
     try {
-      FileUtils.deleteDirectory(new File(this.localPathResourceDirectory.getPath()));
+      FileUtils.deleteDirectory(this.localPathResourceDirectory);
       return true;
     }catch (Exception e){
       e.printStackTrace();

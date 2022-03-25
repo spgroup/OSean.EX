@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.Files;
 
+import org.apache.commons.io.FileUtils;
+
 public class AssembyFileSupporter extends ResourceFileSupporter{
 
   public AssembyFileSupporter(String pathFile){
@@ -21,15 +23,14 @@ public class AssembyFileSupporter extends ResourceFileSupporter{
   @Override
   public boolean createNewDirectory(File localPomDirectory){
     File resourceDirectory = new File(getResourceDirectoryPath(localPomDirectory));
-    if (!resourceDirectory.exists()){
-      try {
-        Files.createDirectories(resourceDirectory.toPath());
-        this.localPathResourceDirectory = resourceDirectory;
-        createAssemblyFile(this.localPathResourceDirectory.getPath());
-        return true;
-      } catch (IOException e) {
-        e.printStackTrace();
-      }
+    try {
+      FileUtils.deleteDirectory(resourceDirectory);
+      Files.createDirectories(resourceDirectory.toPath());
+      this.localPathResourceDirectory = resourceDirectory;
+      createAssemblyFile(this.localPathResourceDirectory.getPath());
+      return true;
+    } catch (IOException e) {
+      e.printStackTrace();
     }
     return false;
   }

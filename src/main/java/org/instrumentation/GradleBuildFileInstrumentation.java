@@ -81,7 +81,7 @@ public class GradleBuildFileInstrumentation {
     }
 
     public void updateOldFatJarPlugin(){
-        int idx = this.fileLines.indexOf("task fatJar(type: Jar) {\n") + 2;
+        int idx = this.fileLines.indexOf("task fatJar(type: Jar) {") + 2;
         this.fileLines.set(idx, " from { (configurations.runtimeClasspath).collect { it.isDirectory() ? it : zipTree(it) } }");
         this.fileLines.add(++idx, " duplicatesStrategy = DuplicatesStrategy.EXCLUDE");
         this.fileLines.set(++idx, " from { (configurations.testRuntimeClasspath).collect { it.isDirectory() ? it : zipTree(it) } }");
