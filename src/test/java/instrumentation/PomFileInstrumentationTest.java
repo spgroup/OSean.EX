@@ -4,12 +4,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import javax.xml.transform.TransformerException;
-import org.file.FileFinderSupport;
-import org.file.ObjectSerializerSupporter;
-import org.instrumentation.ObjectSerializerClassIntrumentation;
 import org.instrumentation.PomFileInstrumentation;
 import org.junit.After;
 import org.junit.Assert;
@@ -256,7 +251,7 @@ public class PomFileInstrumentationTest {
         + "</project>");
 
     PomFileInstrumentation pomFileInstrumentation = new PomFileInstrumentation(new File("src/test/resources/project").getPath());
-    Assert.assertFalse(pomFileInstrumentation.addRequiredDependenciesOnPOM());
+    Assert.assertTrue(pomFileInstrumentation.addRequiredDependenciesOnPOM());
   }
 
   @Test
@@ -448,7 +443,7 @@ public class PomFileInstrumentationTest {
         + "</project>");
 
     PomFileInstrumentation pomFileInstrumentation = new PomFileInstrumentation(new File("src/test/resources/project").getPath());
-    Assert.assertFalse(pomFileInstrumentation.addPluginForJarWithAllDependencies());
+    Assert.assertTrue(pomFileInstrumentation.addPluginForJarWithAllDependencies());
   }
 
   @Test

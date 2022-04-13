@@ -7,41 +7,23 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import org.util.output.ProcessReport;
 
 public class ProcessManager extends Thread {
+  private int budget;
 
-  private InputStream is;
-  private String type;
-  private List<String> outputs;
-
-  public ProcessManager(InputStream is, String type) {
-    this.is = is;
-    this.type = type;
-    this.outputs = new ArrayList<>();
+  public ProcessManager(int budget){
+    this.budget = budget;
   }
 
-  public void run() {
-    try {
-      InputStreamReader isr = new InputStreamReader(is);
-      BufferedReader br = new BufferedReader(isr);
-      String line = null;
-      while ((line = br.readLine()) != null) {
-        outputs.add(line);
-      }
-      br.close();
-    } catch (IOException ioe) {
-      ioe.printStackTrace();
-    }
-  }
-
-  public static boolean computeProcessOutput(Process process, String outputMessage, boolean isTestTask)
+  public boolean computeProcessOutput(Process process, String outputMessage, boolean isTestTask)
       throws IOException, InterruptedException {
 
-    ProcessManager errorGobbler = new
-        ProcessManager(process.getErrorStream(), "ERROR");
+    ProcessReport errorGobbler = new
+        ProcessReport(process.getErrorStream(), "ERROR");
 
-    ProcessManager outputGobbler = new
-        ProcessManager(process.getInputStream(), "OUTPUT");
+    ProcessReport outputGobbler = new
+        ProcessReport(process.getInputStream(), "OUTPUT");
 
     errorGobbler.start();
     outputGobbler.start();
@@ -57,9 +39,9 @@ public class ProcessManager extends Thread {
 
   }
 
-  public static String getProcessOutput(Process process, boolean isTest) throws InterruptedException {
+  public String getProcessOutput(Process process, boolean isTest) throws InterruptedException {
     if (isTest){
-      if (!process.waitFor(1, TimeUnit.MINUTES)){
+      if (!process.waitFor(this.budget, TimeUnit.SECONDS)){
         process.destroy();
         return "FINISHED BY TIMEOUT";
       }else{

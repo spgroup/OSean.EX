@@ -7,9 +7,10 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.Path;
 import java.util.List;
+import org.apache.commons.io.FileDeleteStrategy;
 
 public class SerializedObjectAccessOutputClass {
-  private Path outputClassPath;
+  protected Path outputClassPath;
 
   public boolean getOutputClass(List<String> serializedObjectMethods, String pomFileDirectory, String packageName){
     String classText = ""
@@ -41,17 +42,18 @@ public class SerializedObjectAccessOutputClass {
         + "\n"
         + "\n\tprivate Object deserializeWithXtreamString(String e) {\n"
         + "\t\tXStream xtream = new XStream();\n"
+        + "\t\txtream.ignoreUnknownElements();\n"
         + "\t\tObject obj = xtream.fromXML(e);\n"
         + "\t\treturn obj;\n"
         + "\t}"
         + "\n";
     try {
       String classTextFinal = "\n}";
-      saveFile(pomFileDirectory, classText);
+      saveFile(pomFileDirectory, classText, "SerializedObjectSupporter");
       for (String oneMethod : serializedObjectMethods) {
-        saveFile(pomFileDirectory, oneMethod);
+        saveFile(pomFileDirectory, oneMethod, "SerializedObjectSupporter");
       }
-      saveFile(pomFileDirectory, classTextFinal);
+      saveFile(pomFileDirectory, classTextFinal, "SerializedObjectSupporter");
       this.outputClassPath = new File(pomFileDirectory+File.separator+"SerializedObjectSupporter.java").toPath();
       return true;
     }catch (Exception e){
@@ -60,8 +62,8 @@ public class SerializedObjectAccessOutputClass {
     return false;
   }
 
-  public boolean saveFile(String fileDirectory, String contents) {
-    try(FileWriter fw = new FileWriter(fileDirectory+File.separator+"SerializedObjectSupporter.java", true);
+  public boolean saveFile(String fileDirectory, String contents, String fileName) {
+    try(FileWriter fw = new FileWriter(fileDirectory+File.separator+fileName+".java", true);
         BufferedWriter bw = new BufferedWriter(fw);
         PrintWriter out = new PrintWriter(bw))
     {
@@ -73,9 +75,10 @@ public class SerializedObjectAccessOutputClass {
     return false;
   }
 
-  public boolean deleteOldClassSupporter() {
+  public boolean deleteOldClassSupporter() throws IOException {
     if (this.outputClassPath != null && this.outputClassPath.toFile().exists()){
-      return this.outputClassPath.toFile().delete();
+      FileDeleteStrategy.FORCE.delete(this.outputClassPath.toFile());
+      return true;
     }
     return false;
   }
