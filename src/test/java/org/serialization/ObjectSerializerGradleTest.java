@@ -3,8 +3,11 @@ package org.serialization;
 import static org.util.GitProjectActionsTest.getMainRepository;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.List;
+import java.util.Scanner;
+
 import javax.xml.transform.TransformerException;
 import org.RunSerialization;
 import org.apache.commons.io.FileUtils;
@@ -98,5 +101,36 @@ public class ObjectSerializerGradleTest {
     Assert.assertTrue(gitProjectActions.checkoutCommit("main"));
     Assert.assertTrue(new File(directoryForGeneratedJarsToyProject1+File.separator+"c257474a8206e05d82a444bead4222d1dec9f60b-getName.jar").exists());
     deleteOldJar();
+  }
+
+  @Test
+  public void expectTestFilesJarAndTestFilesListGenerationForToyProject() throws IOException, InterruptedException, TransformerException {
+    ObjectSerializerGradle objectSerializer = new ObjectSerializerGradle();
+    String[] args = {System.getProperty("user.dir")+File.separator+"src"+ File.separator+"test"+File.separator+"resources"+File.separator+"toy-project-1",
+        "Person.java",
+        "isTeenager",
+        "toy-project-1",
+        "true",
+        "true",
+        "60",
+        "gradle",
+        "1d1562dc88008736fdaec9dfa9c8f4756d21da19"
+        };
+    List<MergeScenarioUnderAnalysis> mergeScenarioUnderAnalyses = InputHandler.splitInputInMergeScenarios(args);
+    objectSerializer.startSerialization(mergeScenarioUnderAnalyses.get(0));
+    Repository subRepo = SubmoduleWalk.getSubmoduleRepository(getMainRepository(),
+        GitProjectActionsTest.projectPath);
+    GitProjectActions gitProjectActions = new GitProjectActions(subRepo);
+    Assert.assertTrue(gitProjectActions.checkoutCommit("main"));
+    Assert.assertTrue(new File(directoryForGeneratedJarsToyProject1+File.separator+"1d1562dc88008736fdaec9dfa9c8f4756d21da19-TestFiles.jar").exists());
+    Assert.assertTrue(testFileListContentExpected(new File(directoryForGeneratedJarsToyProject1+File.separator+"1d1562dc88008736fdaec9dfa9c8f4756d21da19-TestFiles.txt")));
+    deleteOldJar();
+  }
+
+  private boolean testFileListContentExpected(File file) throws FileNotFoundException {
+    Scanner sc = new Scanner(file);
+    String className = sc.nextLine();
+    sc.close();
+    return className.equals("org.PersonTest");
   }
 }
