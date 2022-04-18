@@ -57,8 +57,15 @@ public class GradleBuildFileInstrumentation {
         this.fileLines.add(" baseName = project.name + '-jar-with-dependencies'");
         this.fileLines.add(" from { (configurations.runtime).collect { it.isDirectory() ? it : zipTree(it) } }");
         this.fileLines.add(" from { (configurations.testRuntime).collect { it.isDirectory() ? it : zipTree(it) } }");
-        this.fileLines.add(" from sourceSets.test.output");
         this.fileLines.add(" with jar");
+        this.fileLines.add("}");
+    }
+    
+    public void addTestJarPlugin() {   
+        this.fileLines.add("task testJar(type: Jar) {");
+        this.fileLines.add(" baseName = project.name + '-jar-with-dependencies'");
+        this.fileLines.add(" from { (configurations.testRuntime).collect { it.isDirectory() ? it : zipTree(it) } }");
+        this.fileLines.add(" from sourceSets.test.output");
         this.fileLines.add("}");
     }
 
@@ -85,6 +92,12 @@ public class GradleBuildFileInstrumentation {
         this.fileLines.set(idx, " from { (configurations.runtimeClasspath).collect { it.isDirectory() ? it : zipTree(it) } }");
         this.fileLines.add(++idx, " duplicatesStrategy = DuplicatesStrategy.EXCLUDE");
         this.fileLines.set(++idx, " from { (configurations.testRuntimeClasspath).collect { it.isDirectory() ? it : zipTree(it) } }");
+    }
+    
+    public void updateOldTestJarPlugin(){
+        int idx = this.fileLines.indexOf("task testJar(type: Jar) {") + 2;
+        this.fileLines.set(idx, " from { (configurations.testRuntimeClasspath).collect { it.isDirectory() ? it : zipTree(it) } }");
+        this.fileLines.add(++idx, " duplicatesStrategy = DuplicatesStrategy.EXCLUDE");
     }
 
     public void updateOldDependencies(){

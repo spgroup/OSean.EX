@@ -17,7 +17,9 @@ public class ObjectSerializerGradle extends ObjectSerializer{
     protected void createBuildFileSupporters() throws TransformerException {
         buildFileDirectory = resourceFileSupporter.findBuildFileDirectory(resourceFileSupporter.getTargetClassLocalPath(), "build.gradle");
         if (buildFileDirectory != null) {
-            createAndRunBuildFileInstrumentation(resourceFileSupporter.getProjectLocalPath());
+            gradleBuildFileInstrumentation = new GradleBuildFileInstrumentation(buildFileDirectory.getPath());
+            gradleBuildFileInstrumentation.addTestJarPlugin();
+            gradleBuildFileInstrumentation.saveChanges();
         }
     }
 
@@ -36,6 +38,7 @@ public class ObjectSerializerGradle extends ObjectSerializer{
 
         if (InputHandler.isDirEmpty(new File(objectSerializerSupporter.getResourceDirectory()).toPath())){
             gradleBuildFileInstrumentation.updateOldFatJarPlugin();
+            gradleBuildFileInstrumentation.updateOldTestJarPlugin();
             gradleBuildFileInstrumentation.updateOldDependencies();
             gradleBuildFileInstrumentation.saveChanges();
             startProcess(resourceFileSupporter.getProjectLocalPath().getPath(), command, message, isTestTask);
@@ -57,6 +60,16 @@ public class ObjectSerializerGradle extends ObjectSerializer{
             gradleBuildFileInstrumentation.updateOldDependencies();
             gradleBuildFileInstrumentation.saveChanges();
             startProcess(resourceFileSupporter.getProjectLocalPath().getPath(), "./gradlew clean fatJar", "Generating jar file with serialized objects", false);
+        }
+        generatedJarFile = JarManager.getJarFile(buildFileDirectory.getPath() + File.separator + "build" + File.separator + "libs");
+    }
+
+    @Override
+    protected void generateTestFilesJar() throws IOException, InterruptedException, TransformerException {
+        if(!startProcess(resourceFileSupporter.getProjectLocalPath().getPath(), "./gradlew clean testJar", "Generating test files jar", false)){
+            gradleBuildFileInstrumentation.updateOldTestJarPlugin();
+            gradleBuildFileInstrumentation.saveChanges();
+            startProcess(resourceFileSupporter.getProjectLocalPath().getPath(), "./gradlew clean testJar", "Generating test files jar", false);
         }
         generatedJarFile = JarManager.getJarFile(buildFileDirectory.getPath() + File.separator + "build" + File.separator + "libs");
     }

@@ -27,7 +27,8 @@ public class AssembyFileSupporter extends ResourceFileSupporter{
       FileUtils.deleteDirectory(resourceDirectory);
       Files.createDirectories(resourceDirectory.toPath());
       this.localPathResourceDirectory = resourceDirectory;
-      createAssemblyFile(this.localPathResourceDirectory.getPath());
+      createAssemblyFile(this.localPathResourceDirectory.getPath(), "assembly", true);
+      createAssemblyFile(this.localPathResourceDirectory.getPath(), "assemblyTest", false);
       return true;
     } catch (IOException e) {
       e.printStackTrace();
@@ -35,12 +36,16 @@ public class AssembyFileSupporter extends ResourceFileSupporter{
     return false;
   }
 
-  private boolean createAssemblyFile(String fileDirectory){
-    try(FileWriter fw = new FileWriter(fileDirectory+File.separator+"assembly.xml", true);
+  private boolean createAssemblyFile(String fileDirectory, String fileName, Boolean isMainJar){
+    try(FileWriter fw = new FileWriter(fileDirectory+File.separator+fileName+".xml", true);
         BufferedWriter bw = new BufferedWriter(fw);
         PrintWriter out = new PrintWriter(bw))
     {
-      out.println(getAssemblyContent());
+      if(isMainJar)
+        out.println(getAssemblyContent());
+      else
+        out.println(getAssemblyTestContent());
+
       out.close();
       return true;
     } catch (IOException e) {
@@ -68,14 +73,32 @@ public class AssembyFileSupporter extends ResourceFileSupporter{
         + "      <scope>test</scope>\n"
         + "    </dependencySet>\n"
         + "  </dependencySets>\n"
+        + "</assembly>";
+  }
+  
+  private String getAssemblyTestContent(){
+    return "<assembly\n"
+        + "  xmlns=\"http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.3\"\n"
+        + "  xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n"
+        + "  xsi:schemaLocation=\"http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.3\n"
+        + "  http://maven.apache.org/xsd/assembly-1.1.3.xsd\">\n"
+        + "  <id>jar-with-dependencies</id>\n"
+        + "  <formats>\n"
+        + "    <format>jar</format>\n"
+        + "  </formats>\n"
+        + "  <includeBaseDirectory>false</includeBaseDirectory>\n"
+        + "  <dependencySets>\n"
+        + "    <dependencySet>\n"
+        + "      <outputDirectory>/</outputDirectory>\n"
+        + "      <useProjectArtifact>true</useProjectArtifact>\n"
+        + "      <unpack>true</unpack>\n"
+        + "      <scope>test</scope>\n"
+        + "    </dependencySet>\n"
+        + "  </dependencySets>\n"
         + "  <fileSets>\n"
         + "    <fileSet>\n"
         + "      <directory>${project.build.directory}/test-classes</directory>\n"
         + "      <outputDirectory>/</outputDirectory>\n"
-        + "      <includes>\n"
-        + "        <include>**/*.class</include>\n"
-        + "      </includes>\n"
-        + "      <useDefaultExcludes>true</useDefaultExcludes>\n"
         + "    </fileSet>\n"
         + "  </fileSets>\n"
         + "</assembly>";

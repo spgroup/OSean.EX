@@ -5,6 +5,7 @@ import java.io.IOException;
 
 import javax.xml.transform.TransformerException;
 
+import org.apache.commons.io.FileUtils;
 import org.file.AssembyFileSupporter;
 import org.instrumentation.PomFileInstrumentation;
 import org.util.InputHandler;
@@ -18,12 +19,13 @@ public class ObjectSerializerMaven extends ObjectSerializer {
     protected void createBuildFileSupporters() throws TransformerException {
         buildFileDirectory = resourceFileSupporter.findBuildFileDirectory(resourceFileSupporter.getTargetClassLocalPath(), "pom.xml"); 
         if (buildFileDirectory != null) {
-            assemblyFileSupporter = new AssembyFileSupporter(resourceFileSupporter.getProjectLocalPath().getAbsolutePath());
-            assemblyFileSupporter.createNewDirectory(buildFileDirectory);
-            createAndRunBuildFileInstrumentation(resourceFileSupporter.getProjectLocalPath());
+          assemblyFileSupporter = new AssembyFileSupporter(resourceFileSupporter.getProjectLocalPath().getAbsolutePath());
+          assemblyFileSupporter.createNewDirectory(buildFileDirectory);
+          pomFileInstrumentation = new PomFileInstrumentation(buildFileDirectory.getPath());
+          pomFileInstrumentation.addPluginForJarWithAllDependencies();
         }
-    }
-    
+      }
+      
     @Override
     protected void runSerializedObjectCreation() throws IOException, InterruptedException, TransformerException {
         String command = "mvn clean test -Dmaven.test.failure.ignore=true";
@@ -72,6 +74,25 @@ public class ObjectSerializerMaven extends ObjectSerializer {
       }
 
       generatedJarFile = JarManager.getJarFile(buildFileDirectory.getPath() + File.separator + "target");
+    }
+
+    @Override
+    protected void generateTestFilesJar() throws IOException, InterruptedException, TransformerException {
+      pomFileInstrumentation.changeTagContent(pomFileInstrumentation.getPomFile(), "descriptor", "src/main/assembly/assemblyTest.xml", "src/main/assembly/assembly.xml");
+      startProcess(buildFileDirectory.getAbsolutePath(), "mvn clean compile test-compile", "Compiling target class module", false);
+      
+      String compiledSrcFilesPath = buildFileDirectory.getAbsolutePath() + File.separator + "target" + File.separator + "classes";
+      File compiledSrcFilesDirectory = new File(compiledSrcFilesPath);
+      
+      try {
+        FileUtils.deleteDirectory(compiledSrcFilesDirectory);
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+      
+      startProcess(buildFileDirectory.getAbsolutePath(), "mvn assembly:single", "Generating test files jar", false);
+      generatedJarFile = JarManager.getJarFile(buildFileDirectory.getPath() + File.separator + "target");
+      pomFileInstrumentation.changeTagContent(pomFileInstrumentation.getPomFile(), "descriptor", "src/main/assembly/assembly.xml", "src/main/assembly/assemblyTest.xml");
     }
 
 }

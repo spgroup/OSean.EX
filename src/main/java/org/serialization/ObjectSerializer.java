@@ -2,6 +2,7 @@ package org.serialization;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
@@ -33,9 +34,12 @@ public abstract class ObjectSerializer {
   public ObjectSerializerClassIntrumentation objectSerializerClassIntrumentation;
   public SerializedObjectAccessClassIntrumentation serializedObjectAccessClassIntrumentation;
   public String generatedJarFile;
+  public ArrayList<String> testFilesNames = new ArrayList<>();
   
   protected abstract void createBuildFileSupporters() throws TransformerException;
   
+  protected abstract void generateTestFilesJar() throws IOException, InterruptedException, TransformerException;
+
   protected abstract boolean cleanResourceDirectory();
   
   protected abstract void runSerializedObjectCreation() throws IOException, InterruptedException, TransformerException;
@@ -58,6 +62,13 @@ public abstract class ObjectSerializer {
 
     if (buildFileDirectory != null) {
       resourceFileSupporter.createNewDirectory(buildFileDirectory);
+
+      generateTestFilesJar();
+      saveJarFile(generatedJarFile, mergeScenarioUnderAnalysis, mergeScenarioUnderAnalysis.getMergeScenarioCommits().get(0)+"-TestFiles.jar");
+      getTestClassesCompleteNames("", new File(buildFileDirectory.getAbsolutePath() + File.separator + "src" + File.separator + "test" + File.separator + "java"));
+      saveFile(testFilesNames, mergeScenarioUnderAnalysis, mergeScenarioUnderAnalysis.getMergeScenarioCommits().get(0)+"-TestFiles.txt");
+
+      createAndRunBuildFileInstrumentation(resourceFileSupporter.getProjectLocalPath());
 
       runTestabilityTransformations(new File(
           resourceFileSupporter.getTargetClassLocalPath() + File.separator + mergeScenarioUnderAnalysis.getTargetClass()),
@@ -159,7 +170,7 @@ public abstract class ObjectSerializer {
           serializedObjectAccessClassIntrumentation.undoTransformations(new File(
               resourceFileSupporter.getTargetClassLocalPath() + File.separator
                   + mergeScenarioUnderAnalysis.getTargetClass()));
-          saveJarFile(generatedJarFile, mergeScenarioUnderAnalysis, mergeScenarioCommit);
+          saveJarFile(generatedJarFile, mergeScenarioUnderAnalysis, mergeScenarioCommit+"-"+mergeScenarioUnderAnalysis.getTargetMethod().split("\\(")[0]+".jar");
           
           gitProjectActions.undoCurrentChanges();
         }
@@ -320,13 +331,42 @@ public abstract class ObjectSerializer {
     return processManager.computeProcessOutput(process, message, isTestTask);
   }
 
-  public void saveJarFile(String generatedJarFile, MergeScenarioUnderAnalysis mergeScenarioUnderAnalysis, String mergeScenarioCommit){
+  public void saveJarFile(String generatedJarFile, MergeScenarioUnderAnalysis mergeScenarioUnderAnalysis, String fileName){
     JarManager.saveGeneratedJarFile(generatedJarFile,
         mergeScenarioUnderAnalysis.getLocalProjectPath()
             .split(mergeScenarioUnderAnalysis.getProjectName())[0] +
             File.separator + "GeneratedJars" + File.separator
-            + mergeScenarioUnderAnalysis.getProjectName(),
-        mergeScenarioCommit + "-"+ mergeScenarioUnderAnalysis.getTargetMethod().split("\\(")[0]+".jar");
+            + mergeScenarioUnderAnalysis.getProjectName(), fileName);
   }
+
+  public void getTestClassesCompleteNames(String packageName, File directory){
+    File[] testFiles = directory.listFiles();
+
+    for(File file : testFiles){
+      String testSignature = (packageName.equals("") ? file.getName() : packageName + "." + file.getName());
+      if(file.isDirectory())
+        getTestClassesCompleteNames(testSignature, file);
+      else if(file.getName().contains(".java"))
+        testFilesNames.add(testSignature.replace(".java", ""));
+    }
+  }
+
+  public boolean saveFile(ArrayList<String> list, MergeScenarioUnderAnalysis mergeScenarioUnderAnalysis, String fileName){
+    try{
+       PrintWriter writer = new PrintWriter(
+        mergeScenarioUnderAnalysis.getLocalProjectPath()
+            .split(mergeScenarioUnderAnalysis.getProjectName())[0] +
+            File.separator + "GeneratedJars" + File.separator
+            + mergeScenarioUnderAnalysis.getProjectName()+File.separator+fileName);
+       for(String element: list){
+         writer.println(element);
+       }
+       writer.close();
+       return true;
+     }catch(Exception e){
+       e.printStackTrace();
+     }
+     return false;
+   }
 
 }
