@@ -339,6 +339,13 @@ public abstract class ObjectSerializer {
             + mergeScenarioUnderAnalysis.getProjectName(), fileName);
   }
 
+  /*
+  * This method will list every class name inside of test directory. 
+  * The purpose of that is to make it possible to execute those tests 
+  * (they will be included in the jar generated in the method generateTestFilesJar()) later by going through every name in that list. 
+  * Note that, for some projects, there will be classes in the test directory that aren't tests, and for obvious reasons, 
+  * they will fail if you try to execute them. 
+  */
   public void getTestClassesCompleteNames(String packageName, File directory){
     File[] testFiles = directory.listFiles();
 
