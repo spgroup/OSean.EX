@@ -12,12 +12,12 @@ import org.util.input.MergeScenarioUnderAnalysis;
 
 public class RunSerialization {
   public static void main(String[] args) throws IOException, InterruptedException, TransformerException {
-    runAnalysis(args);
+    MergeScenarioUnderAnalysis mergeScenarioUnderAnalysis = new CommandLineParametersParser().parse(args);
+    runAnalysis(mergeScenarioUnderAnalysis);
   }
 
-  // java -cp ObjectSerialization-1.0-SNAPSHOT-jar-with-dependencies.jar org.RunSerialization "/home/lmps2/projects/toy-project" "Person.java" "addRelative" "toy-project" "true" "true" "60" "maven" "abdc125" "abdc156"
-  public static void runAnalysis(String[] args) throws IOException, InterruptedException, TransformerException {
-    MergeScenarioUnderAnalysis mergeScenarioUnderAnalysis = new CommandLineParametersParser().parse(args);
+  public static void runAnalysis(MergeScenarioUnderAnalysis mergeScenarioUnderAnalysis)
+      throws IOException, InterruptedException, TransformerException {
     ObjectSerializer objectSerializer = getObjectSerializer(mergeScenarioUnderAnalysis);
     objectSerializer.startSerialization(mergeScenarioUnderAnalysis);
   }
