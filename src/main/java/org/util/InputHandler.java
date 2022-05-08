@@ -19,7 +19,7 @@ public class InputHandler {
     if (isInputACsvFile(args[0])){
       dealingWithMultipleInput(args[0], mergeScenarioUnderAnalysisList);
     }else{
-      mergeScenarioUnderAnalysisList.add(new MergeScenarioUnderAnalysis(args));
+      // mergeScenarioUnderAnalysisList.add(new MergeScenarioUnderAnalysis(args));
     }
     return mergeScenarioUnderAnalysisList;
   }
@@ -34,7 +34,8 @@ public class InputHandler {
       BufferedReader csvReader = new BufferedReader(new FileReader(csfFile));
       String row;
       while ((row = csvReader.readLine()) != null) {
-        mergeScenarioUnderAnalyses.add(new MergeScenarioUnderAnalysis(row.split(",")));
+        // mergeScenarioUnderAnalyses.add(new
+        // MergeScenarioUnderAnalysis(row.split(",")));
       }
       csvReader.close();
     } catch (FileNotFoundException e) {
