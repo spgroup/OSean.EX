@@ -131,7 +131,7 @@ public class ObjectSerializerGradleTest extends ObjectSerializerTest {
 
     assertJarFilesForScenarioExists(mergeScenarioUnderAnalysis);
     Assert.assertTrue(testFileListContentExpected(new File(String.join(File.separator, BASE_RESOURCES_LOCATION,
-        "GeneratedJars", "1d1562dc88008736fdaec9dfa9c8f4756d21da19-TestFiles.txt"))));
+        "GeneratedJars", "toy-project-1", "1d1562dc88008736fdaec9dfa9c8f4756d21da19-TestFiles.txt"))));
   }
 
   private boolean testFileListContentExpected(File file) throws FileNotFoundException {
