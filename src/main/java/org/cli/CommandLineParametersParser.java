@@ -79,10 +79,11 @@ public class CommandLineParametersParser {
           .targetMethod(cmd.getOptionValue("m"))
           .projectName(cmd.getOptionValue("p"))
           .transformationOption(transformationOption)
-          .buildManager(cmd.hasOption("isGradle") ? "gradle" : "maven")
+          .buildManager(cmd.hasOption("gradle") ? "gradle" : "maven")
           .mergeScenarioCommits(List.of(cmd.getOptionValue("h").split(",")))
           .build();
     } catch (ParseException e) {
+        System.out.println(e.getMessage());
       formatter.printHelp("OSean.EX", options);
       throw new IllegalArgumentException();
     }
