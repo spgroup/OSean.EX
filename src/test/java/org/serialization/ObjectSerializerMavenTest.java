@@ -19,7 +19,7 @@ import org.util.GitProjectActionsTest;
 import org.util.input.MergeScenarioUnderAnalysis;
 import org.util.input.TransformationOption;
 
-public class ObjectSerializerMavenTest extends ObjectSerializerTest<ObjectSerializerMaven> {
+public class ObjectSerializerMavenTest extends ObjectSerializerTest {
   @Override
   protected ObjectSerializerMaven getObjectSerializer() {
     return new ObjectSerializerMaven();

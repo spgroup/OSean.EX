@@ -8,7 +8,7 @@ import org.junit.Assert;
 import org.junit.jupiter.api.AfterEach;
 import org.util.input.MergeScenarioUnderAnalysis;
 
-public abstract class ObjectSerializerTest<T extends ObjectSerializer> {
+public abstract class ObjectSerializerTest {
   protected static final String BASE_RESOURCES_LOCATION = String.join(File.separator, System.getProperty("user.dir"), "src", "test", "resources");
   protected static final String TOY_PROJET_LOCATION = String.join(File.separator, BASE_RESOURCES_LOCATION, "toy-project");
   protected static final String TOY_PROJET_ONE_LOCATION = String.join(File.separator, BASE_RESOURCES_LOCATION, "toy-project-1");
@@ -45,5 +45,5 @@ public abstract class ObjectSerializerTest<T extends ObjectSerializer> {
     });
   }
 
-  protected abstract T getObjectSerializer();
+  protected abstract ObjectSerializer getObjectSerializer();
 }
