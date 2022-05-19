@@ -10,8 +10,8 @@ import org.util.input.MergeScenarioUnderAnalysis;
 
 public abstract class ObjectSerializerTest {
   protected static final String BASE_RESOURCES_LOCATION = String.join(File.separator, System.getProperty("user.dir"), "src", "test", "resources");
-  protected static final String TOY_PROJET_LOCATION = String.join(File.separator, BASE_RESOURCES_LOCATION, "toy-project");
-  protected static final String TOY_PROJET_ONE_LOCATION = String.join(File.separator, BASE_RESOURCES_LOCATION, "toy-project-1");
+  protected static final String TOY_PROJECT_LOCATION = String.join(File.separator, BASE_RESOURCES_LOCATION, "toy-project");
+  protected static final String TOY_PROJECT_ONE_LOCATION = String.join(File.separator, BASE_RESOURCES_LOCATION, "toy-project-1");
 
   @AfterEach
   public void deleteOldJar() {
@@ -26,7 +26,7 @@ public abstract class ObjectSerializerTest {
   @AfterEach
   public void deleteTargetFolder() {
     try {
-      String targetDir = String.join(File.separator, TOY_PROJET_ONE_LOCATION, "target");
+      String targetDir = String.join(File.separator, TOY_PROJECT_ONE_LOCATION, "target");
       FileUtils.deleteDirectory(new File(targetDir));
     } catch (IOException e) {
       e.printStackTrace();

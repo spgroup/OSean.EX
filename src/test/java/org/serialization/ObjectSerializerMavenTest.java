@@ -28,7 +28,7 @@ public class ObjectSerializerMavenTest extends ObjectSerializerTest {
   @Test
   public void expectJarGenerationForToyProject() throws IOException, InterruptedException, TransformerException {
     MergeScenarioUnderAnalysis mergeScenarioUnderAnalysis = MergeScenarioUnderAnalysis.builder()
-        .localProjectPath(TOY_PROJET_LOCATION)
+            .localProjectPath(TOY_PROJECT_LOCATION)
         .targetClass("Person.java")
         .targetMethod("getOccupation")
         .projectName("toy-project")
@@ -55,7 +55,7 @@ public class ObjectSerializerMavenTest extends ObjectSerializerTest {
   public void expectJarGenerationForToyProjectWithPartialTransformations()
       throws IOException, InterruptedException, TransformerException {
     MergeScenarioUnderAnalysis mergeScenarioUnderAnalysis = MergeScenarioUnderAnalysis.builder()
-        .localProjectPath(TOY_PROJET_LOCATION)
+            .localProjectPath(TOY_PROJECT_LOCATION)
         .targetClass("Person.java")
         .targetMethod("getOccupation")
         .projectName("toy-project")
@@ -81,7 +81,7 @@ public class ObjectSerializerMavenTest extends ObjectSerializerTest {
   @Test
   public void expectJarGenerationUsingDefaultCall() throws IOException, InterruptedException, TransformerException {
     MergeScenarioUnderAnalysis mergeScenarioUnderAnalysis = MergeScenarioUnderAnalysis.builder()
-        .localProjectPath(TOY_PROJET_LOCATION)
+            .localProjectPath(TOY_PROJECT_LOCATION)
         .targetClass("Person.java")
         .targetMethod("getName")
         .projectName("toy-project")
@@ -107,7 +107,7 @@ public class ObjectSerializerMavenTest extends ObjectSerializerTest {
   @Test
   public void expectJarGenerationForTwoInputs() throws IOException, InterruptedException, TransformerException {
     MergeScenarioUnderAnalysis mergeScenarioUnderAnalysis = MergeScenarioUnderAnalysis.builder()
-        .localProjectPath(TOY_PROJET_LOCATION)
+            .localProjectPath(TOY_PROJECT_LOCATION)
         .targetClass("Person.java")
         .targetMethod("getName")
         .projectName("toy-project")
@@ -134,7 +134,7 @@ public class ObjectSerializerMavenTest extends ObjectSerializerTest {
   @Test
   public void expectJarGenerationForToyProjectMethodWithParameters() throws IOException, InterruptedException, TransformerException {
     MergeScenarioUnderAnalysis mergeScenarioUnderAnalysis = MergeScenarioUnderAnalysis.builder()
-        .localProjectPath(TOY_PROJET_LOCATION)
+            .localProjectPath(TOY_PROJECT_LOCATION)
         .targetClass("Person.java")
         .targetMethod("Person(java.lang.String, int, java.lang.String)")
         .projectName("toy-project")
@@ -160,7 +160,7 @@ public class ObjectSerializerMavenTest extends ObjectSerializerTest {
   @Test
   public void expectJarGenerationForProjectWithMockitoPluginProblem() throws IOException, InterruptedException, TransformerException {
     MergeScenarioUnderAnalysis mergeScenarioUnderAnalysis = MergeScenarioUnderAnalysis.builder()
-        .localProjectPath(TOY_PROJET_ONE_LOCATION)
+            .localProjectPath(TOY_PROJECT_ONE_LOCATION)
         .targetClass("Person.java")
         .targetMethod("Person(java.lang.String, int, java.lang.String)")
         .projectName("toy-project-1")
@@ -186,7 +186,7 @@ public class ObjectSerializerMavenTest extends ObjectSerializerTest {
   @Test
   public void expectJarGenerationForProjectWithTestCompilationProblem() throws IOException, InterruptedException, TransformerException {
     MergeScenarioUnderAnalysis mergeScenarioUnderAnalysis = MergeScenarioUnderAnalysis.builder()
-        .localProjectPath(TOY_PROJET_ONE_LOCATION)
+            .localProjectPath(TOY_PROJECT_ONE_LOCATION)
         .targetClass("Person.java")
         .targetMethod("Person(java.lang.String, int, java.lang.String)")
         .projectName("toy-project-1")
@@ -213,7 +213,7 @@ public class ObjectSerializerMavenTest extends ObjectSerializerTest {
   @Test
   public void dontSerializeEqualObjects() throws IOException, InterruptedException, TransformerException {
     MergeScenarioUnderAnalysis mergeScenarioUnderAnalysis = MergeScenarioUnderAnalysis.builder()
-        .localProjectPath(TOY_PROJET_ONE_LOCATION)
+            .localProjectPath(TOY_PROJECT_ONE_LOCATION)
         .targetClass("Person.java")
         .targetMethod("Person(java.lang.String, int, java.lang.String)")
         .projectName("toy-project-1")
@@ -245,7 +245,7 @@ public class ObjectSerializerMavenTest extends ObjectSerializerTest {
   @Test
   public void dontSerializeWhenReachesTimeLimit() throws IOException, InterruptedException, TransformerException {
     MergeScenarioUnderAnalysis mergeScenarioUnderAnalysis = MergeScenarioUnderAnalysis.builder()
-        .localProjectPath(TOY_PROJET_ONE_LOCATION)
+            .localProjectPath(TOY_PROJECT_ONE_LOCATION)
         .targetClass("Person.java")
         .targetMethod("Person(java.lang.String, int, java.lang.String)")
         .projectName("toy-project-1")
