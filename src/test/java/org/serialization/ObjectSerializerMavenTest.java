@@ -9,7 +9,6 @@ import java.util.Arrays;
 
 import javax.xml.transform.TransformerException;
 
-import org.RunSerialization;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.submodule.SubmoduleWalk;
 import org.junit.Assert;
@@ -94,7 +93,7 @@ public class ObjectSerializerMavenTest extends ObjectSerializerTest {
         .mergeScenarioCommits(Arrays.asList("85077377978f98e31e637c121b5987e01725f5fd"))
         .build();
 
-    RunSerialization.runAnalysis(mergeScenarioUnderAnalysis);
+    getObjectSerializer().startSerialization(mergeScenarioUnderAnalysis);
 
     Repository subRepo = SubmoduleWalk.getSubmoduleRepository(GitProjectActionsTest.getMainRepository(),
         GitProjectActionsTest.projectPath);
@@ -121,7 +120,7 @@ public class ObjectSerializerMavenTest extends ObjectSerializerTest {
             Arrays.asList("85077377978f98e31e637c121b5987e01725f5fd", "5215c5d623a131ac94284be5c3c42c2124618e99"))
         .build();
 
-    RunSerialization.runAnalysis(mergeScenarioUnderAnalysis);
+    getObjectSerializer().startSerialization(mergeScenarioUnderAnalysis);
 
     Repository subRepo = SubmoduleWalk.getSubmoduleRepository(GitProjectActionsTest.getMainRepository(),
         GitProjectActionsTest.projectPath);
