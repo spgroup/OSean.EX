@@ -8,7 +8,7 @@ import javax.xml.transform.TransformerException;
 import org.apache.commons.io.FileUtils;
 import org.file.AssembyFileSupporter;
 import org.instrumentation.PomFileInstrumentation;
-import org.util.InputHandler;
+import org.util.DirUtils;
 import org.util.JarManager;
 
 public class ObjectSerializerMaven extends ObjectSerializer {
@@ -34,13 +34,13 @@ public class ObjectSerializerMaven extends ObjectSerializer {
 
         startProcess(resourceFileSupporter.getProjectLocalPath().getPath(), command, message, isTestTask);
         
-        if (InputHandler.isDirEmpty(new File(objectSerializerSupporter.getResourceDirectory()).toPath())){
+        if (DirUtils.isDirEmpty(new File(objectSerializerSupporter.getResourceDirectory()).toPath())){
           pomFileInstrumentation.changeSurefirePlugin(objectSerializerSupporter.getClassPackage());
           pomFileInstrumentation.changeMockitoCore();
           startProcess(resourceFileSupporter.getProjectLocalPath().getPath(), command, message, isTestTask);
         }
     
-        if (InputHandler.isDirEmpty(new File(objectSerializerSupporter.getResourceDirectory()).toPath())){
+        if (DirUtils.isDirEmpty(new File(objectSerializerSupporter.getResourceDirectory()).toPath())){
           pomFileInstrumentation.updateOldDependencies();
           startProcess(resourceFileSupporter.getProjectLocalPath().getPath(), command, message, isTestTask);
         }

@@ -6,7 +6,7 @@ import java.io.IOException;
 import javax.xml.transform.TransformerException;
 
 import org.instrumentation.GradleBuildFileInstrumentation;
-import org.util.InputHandler;
+import org.util.DirUtils;
 import org.util.JarManager;
 
 
@@ -36,7 +36,7 @@ public class ObjectSerializerGradle extends ObjectSerializer{
 
         startProcess(resourceFileSupporter.getProjectLocalPath().getPath(), command, message, isTestTask);
 
-        if (InputHandler.isDirEmpty(new File(objectSerializerSupporter.getResourceDirectory()).toPath())){
+        if (DirUtils.isDirEmpty(new File(objectSerializerSupporter.getResourceDirectory()).toPath())){
             gradleBuildFileInstrumentation.updateOldFatJarPlugin();
             gradleBuildFileInstrumentation.updateOldTestJarPlugin();
             gradleBuildFileInstrumentation.updateOldDependencies();
