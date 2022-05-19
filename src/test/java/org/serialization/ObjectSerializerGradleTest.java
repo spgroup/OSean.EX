@@ -11,7 +11,6 @@ import java.util.Scanner;
 import javax.xml.transform.TransformerException;
 
 import org.RunSerialization;
-import org.apache.commons.io.FileUtils;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.submodule.SubmoduleWalk;
 import org.junit.Assert;

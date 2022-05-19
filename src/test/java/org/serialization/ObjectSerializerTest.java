@@ -37,7 +37,7 @@ public abstract class ObjectSerializerTest {
     String directoryForGeneratedJars = String.join(File.separator, BASE_RESOURCES_LOCATION, "GeneratedJars", scenario.getProjectName());
 
     scenario.getMergeScenarioCommits().forEach((sha) -> {
-      int finalMethodIndexName = scenario.getTargetMethod().contains("(") ? scenario.getTargetMethod().indexOf("(") : scenario.getTargetMethod().length() - 1;
+      int finalMethodIndexName = scenario.getTargetMethod().contains("(") ? scenario.getTargetMethod().indexOf("(") : scenario.getTargetMethod().length();
       String methodName = scenario.getTargetMethod().substring(0, finalMethodIndexName);
       String fileName = sha + "-" + methodName + ".jar";
       File expectedOutputFile = new File(directoryForGeneratedJars + File.separator + fileName);
