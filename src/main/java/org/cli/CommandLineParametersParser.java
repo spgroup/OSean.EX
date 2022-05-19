@@ -49,7 +49,13 @@ public class CommandLineParametersParser {
         .longOpt("gradle")
         .desc("Indicates if Gradle is the used build tool")
         .build();
-    Option commits = new Option("h", "commits", true, "Comma separated list of commits");
+    Option commits = Option.builder()
+        .option("h")
+        .longOpt("commits")
+        .desc("Comma separated list of commits")
+        .required()
+        .hasArg()
+        .build();
 
     options
         .addOption(localProjectPath)
@@ -82,10 +88,9 @@ public class CommandLineParametersParser {
           .buildManager(cmd.hasOption("gradle") ? "gradle" : "maven")
           .mergeScenarioCommits(List.of(cmd.getOptionValue("h").split(",")))
           .build();
-    } catch (ParseException e) {
-        System.out.println(e.getMessage());
+  } catch (ParseException e) {
       formatter.printHelp("OSean.EX", options);
-      throw new IllegalArgumentException();
+      throw new IllegalArgumentException(e.getMessage());
     }
   }
 }

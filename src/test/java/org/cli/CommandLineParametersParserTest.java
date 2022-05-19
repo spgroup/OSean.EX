@@ -5,10 +5,10 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.junit.Assert;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 import org.util.input.MergeScenarioUnderAnalysis;
 
-class CommandLineParametersParserTest {
+public class CommandLineParametersParserTest {
   protected static final String BASE_RESOURCES_LOCATION = String.join(File.separator, System.getProperty("user.dir"),
       "src", "test", "resources");
   protected static final String TOY_PROJECT_LOCATION = String.join(File.separator, BASE_RESOURCES_LOCATION,
@@ -19,7 +19,7 @@ class CommandLineParametersParserTest {
   }
 
   @Test
-  void mavenIsTheDefaultBuildManager() {
+  public void mavenIsTheDefaultBuildManager() {
     String[] args = {
         "-l",
         TOY_PROJECT_LOCATION,
@@ -39,7 +39,7 @@ class CommandLineParametersParserTest {
   }
 
   @Test
-  void gradeIsTheBuildManagerIfFlagIsProvided() {
+  public void gradeIsTheBuildManagerIfFlagIsProvided() {
     String[] args = {
         "-l",
         TOY_PROJECT_LOCATION,
@@ -60,7 +60,7 @@ class CommandLineParametersParserTest {
   }
 
   @Test
-  void mergeScenarioCommitsAreProvidedAsCommaSeparated() {
+  public void mergeScenarioCommitsAreProvidedAsCommaSeparated() {
     String[] args = {
         "-l",
         TOY_PROJECT_LOCATION,
@@ -83,7 +83,7 @@ class CommandLineParametersParserTest {
   }
 
   @Test
-  void transformationsAreDisabledByDefault() {
+  public void transformationsAreDisabledByDefault() {
     String[] args = {
         "-l",
         TOY_PROJECT_LOCATION,
@@ -104,7 +104,7 @@ class CommandLineParametersParserTest {
   }
 
   @Test
-  void transformationsHaveADefaultBudgetOf60() {
+  public void transformationsHaveADefaultBudgetOf60() {
     String[] args = {
         "-l",
         TOY_PROJECT_LOCATION,
@@ -126,7 +126,7 @@ class CommandLineParametersParserTest {
   }
 
   @Test
-  void fullTransformationsAreDisabledByDefaultEvenIfTransformationsAreActive() {
+  public void fullTransformationsAreDisabledByDefaultEvenIfTransformationsAreActive() {
     String[] args = {
         "-l",
         TOY_PROJECT_LOCATION,
@@ -145,5 +145,22 @@ class CommandLineParametersParserTest {
 
     Assert.assertTrue(result.getTransformationOption().applyTransformations());
     Assert.assertFalse(result.getTransformationOption().applyFullTransformations());
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void listOfCommitHashesIsMandatory() {
+    String[] args = {
+        "-l",
+        TOY_PROJECT_LOCATION,
+        "-c",
+        "Person",
+        "-m",
+        "getName",
+        "-p",
+        "toy-project",
+        "-att",
+    };
+
+    getCommandLineParametersParser().parse(args);
   }
 }
