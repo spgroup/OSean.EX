@@ -33,7 +33,7 @@ public class CommandLineParametersParserTest {
         "7810b85dd711ac2648675dcfe5e65539aec1ea1d"
     };
 
-    MergeScenarioUnderAnalysis result = getCommandLineParametersParser().parse(args);
+    MergeScenarioUnderAnalysis result = getCommandLineParametersParser().parse(args).get(0);
 
     Assert.assertEquals("maven", result.getBuildManager());
   }
@@ -54,7 +54,7 @@ public class CommandLineParametersParserTest {
         "7810b85dd711ac2648675dcfe5e65539aec1ea1d"
     };
 
-    MergeScenarioUnderAnalysis result = getCommandLineParametersParser().parse(args);
+    MergeScenarioUnderAnalysis result = getCommandLineParametersParser().parse(args).get(0);
 
     Assert.assertEquals("gradle", result.getBuildManager());
   }
@@ -74,7 +74,7 @@ public class CommandLineParametersParserTest {
         "7810b85dd711ac2648675dcfe5e65539aec1ea1d,85077377978f98e31e637c121b5987e01725f5fd"
     };
 
-    MergeScenarioUnderAnalysis result = getCommandLineParametersParser().parse(args);
+    MergeScenarioUnderAnalysis result = getCommandLineParametersParser().parse(args).get(0);
     List<String> expectedCommitHashes = Arrays.asList(
         "7810b85dd711ac2648675dcfe5e65539aec1ea1d",
         "85077377978f98e31e637c121b5987e01725f5fd");
@@ -97,7 +97,7 @@ public class CommandLineParametersParserTest {
         "7810b85dd711ac2648675dcfe5e65539aec1ea1d"
     };
 
-    MergeScenarioUnderAnalysis result = getCommandLineParametersParser().parse(args);
+    MergeScenarioUnderAnalysis result = getCommandLineParametersParser().parse(args).get(0);
 
     Assert.assertFalse(result.getTransformationOption().applyTransformations());
     Assert.assertFalse(result.getTransformationOption().applyFullTransformations());
@@ -119,7 +119,7 @@ public class CommandLineParametersParserTest {
         "7810b85dd711ac2648675dcfe5e65539aec1ea1d"
     };
 
-    MergeScenarioUnderAnalysis result = getCommandLineParametersParser().parse(args);
+    MergeScenarioUnderAnalysis result = getCommandLineParametersParser().parse(args).get(0);
 
     Assert.assertTrue(result.getTransformationOption().applyTransformations());
     Assert.assertEquals(60, result.getTransformationOption().getBudget());
@@ -141,7 +141,7 @@ public class CommandLineParametersParserTest {
         "7810b85dd711ac2648675dcfe5e65539aec1ea1d"
     };
 
-    MergeScenarioUnderAnalysis result = getCommandLineParametersParser().parse(args);
+    MergeScenarioUnderAnalysis result = getCommandLineParametersParser().parse(args).get(0);
 
     Assert.assertTrue(result.getTransformationOption().applyTransformations());
     Assert.assertFalse(result.getTransformationOption().applyFullTransformations());
@@ -162,5 +162,14 @@ public class CommandLineParametersParserTest {
     };
 
     getCommandLineParametersParser().parse(args);
+  }
+
+  @Test
+  public void ifBatchCsvIsProvidedItReadsDataFromFile() {
+    String[] args = { "--batchCsv", String.join(File.separator, BASE_RESOURCES_LOCATION, "cli", "input.csv") };
+
+    List<MergeScenarioUnderAnalysis> result = getCommandLineParametersParser().parse(args);
+
+    Assert.assertEquals(2, result.size());
   }
 }

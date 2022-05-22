@@ -1,6 +1,7 @@
 package org;
 
 import java.io.IOException;
+import java.util.List;
 
 import javax.xml.transform.TransformerException;
 
@@ -12,14 +13,17 @@ import org.util.input.MergeScenarioUnderAnalysis;
 
 public class RunSerialization {
   public static void main(String[] args) throws IOException, InterruptedException, TransformerException {
-    MergeScenarioUnderAnalysis mergeScenarioUnderAnalysis = new CommandLineParametersParser().parse(args);
-    runAnalysis(mergeScenarioUnderAnalysis);
+    List<MergeScenarioUnderAnalysis> mergeScenarioUnderAnalysis = new CommandLineParametersParser().parse(args);
+    mergeScenarioUnderAnalysis.forEach(scenario -> runAnalysis(scenario));
   }
 
-  public static void runAnalysis(MergeScenarioUnderAnalysis mergeScenarioUnderAnalysis)
-      throws IOException, InterruptedException, TransformerException {
-    ObjectSerializer objectSerializer = getObjectSerializer(mergeScenarioUnderAnalysis);
-    objectSerializer.startSerialization(mergeScenarioUnderAnalysis);
+  public static void runAnalysis(MergeScenarioUnderAnalysis mergeScenarioUnderAnalysis) {
+    try {
+      ObjectSerializer objectSerializer = getObjectSerializer(mergeScenarioUnderAnalysis);
+      objectSerializer.startSerialization(mergeScenarioUnderAnalysis);
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
   }
 
   private static ObjectSerializer getObjectSerializer(MergeScenarioUnderAnalysis mergeScenarioUnderAnalysis) {
