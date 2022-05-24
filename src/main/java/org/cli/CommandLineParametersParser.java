@@ -58,7 +58,6 @@ public class CommandLineParametersParser {
         .desc("Indicates if Gradle is the used build tool")
         .build();
     Option commits = Option.builder()
-        .option("h")
         .longOpt("commits")
         .desc("Comma separated list of commits")
         .hasArg()
@@ -67,6 +66,11 @@ public class CommandLineParametersParser {
         .longOpt("batchCsv")
         .desc("A path to a CSV file containing the input")
         .hasArg()
+        .build();
+    Option help = Option.builder()
+        .option("h")
+        .longOpt("help")
+        .desc("Shows this help message")
         .build();
 
     options
@@ -79,7 +83,8 @@ public class CommandLineParametersParser {
         .addOption(budgetTime)
         .addOption(isGradle)
         .addOption(commits)
-        .addOption(batchCsv);
+        .addOption(batchCsv)
+        .addOption(help);
 
     requiredOptions.add(localProjectPath);
     requiredOptions.add(targetClassName);
@@ -93,6 +98,11 @@ public class CommandLineParametersParser {
       List<MergeScenarioUnderAnalysis> scenarios = new ArrayList<>();
 
       CommandLine cmd = parser.parse(options, args);
+
+      if (cmd.hasOption("help")) {
+        formatter.printHelp("OSean.EX", options);
+        return scenarios;
+      }
 
       if (cmd.hasOption("batchCsv")) {
         return readInputFromCsvFile(cmd.getOptionValue("batchCsv"));

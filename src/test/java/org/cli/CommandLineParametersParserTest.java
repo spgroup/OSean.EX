@@ -29,7 +29,7 @@ public class CommandLineParametersParserTest {
         "getName",
         "-p",
         "toy-project",
-        "-h",
+        "--commits",
         "7810b85dd711ac2648675dcfe5e65539aec1ea1d"
     };
 
@@ -50,7 +50,7 @@ public class CommandLineParametersParserTest {
         "-p",
         "toy-project",
         "-g",
-        "-h",
+        "--commits",
         "7810b85dd711ac2648675dcfe5e65539aec1ea1d"
     };
 
@@ -70,7 +70,7 @@ public class CommandLineParametersParserTest {
         "getName",
         "-p",
         "toy-project",
-        "-h",
+        "--commits",
         "7810b85dd711ac2648675dcfe5e65539aec1ea1d,85077377978f98e31e637c121b5987e01725f5fd"
     };
 
@@ -93,7 +93,7 @@ public class CommandLineParametersParserTest {
         "getName",
         "-p",
         "toy-project",
-        "-h",
+        "--commits",
         "7810b85dd711ac2648675dcfe5e65539aec1ea1d"
     };
 
@@ -115,7 +115,7 @@ public class CommandLineParametersParserTest {
         "-p",
         "toy-project",
         "-att",
-        "-h",
+        "--commits",
         "7810b85dd711ac2648675dcfe5e65539aec1ea1d"
     };
 
@@ -137,7 +137,7 @@ public class CommandLineParametersParserTest {
         "-p",
         "toy-project",
         "-att",
-        "-h",
+        "--commits",
         "7810b85dd711ac2648675dcfe5e65539aec1ea1d"
     };
 
@@ -171,5 +171,14 @@ public class CommandLineParametersParserTest {
     List<MergeScenarioUnderAnalysis> result = getCommandLineParametersParser().parse(args);
 
     Assert.assertEquals(2, result.size());
+  }
+
+  @Test
+  public void ifHelpOptionIsPickedItDisplaysInformationAndReturnEmptyList() {
+    String[] args = { "--help" };
+
+    List<MergeScenarioUnderAnalysis> result = getCommandLineParametersParser().parse(args);
+
+    Assert.assertTrue(result.isEmpty());
   }
 }
