@@ -127,7 +127,7 @@ public class CommandLineParametersParser {
           .projectName(cmd.getOptionValue("p"))
           .transformationOption(transformationOption)
           .buildManager(cmd.hasOption("gradle") ? "gradle" : "maven")
-          .mergeScenarioCommits(List.of(cmd.getOptionValue("h").split(",")))
+          .mergeScenarioCommits(List.of(cmd.getOptionValue("commits").split(",")))
           .build());
 
       return scenarios;
