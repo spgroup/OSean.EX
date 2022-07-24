@@ -54,14 +54,16 @@ public class ObjectSerializerGradle extends ObjectSerializer{
     }
 
     @Override
-    protected void generateJarFile() throws IOException, InterruptedException {
+    protected boolean generateJarFile() throws IOException, InterruptedException {
+        boolean successfulAction = true;
         if(!startProcess(resourceFileSupporter.getProjectLocalPath().getPath(), "./gradlew clean fatJar", "Generating jar file with serialized objects", false)){
             gradleBuildFileInstrumentation.updateOldFatJarPlugin();
             gradleBuildFileInstrumentation.updateOldDependencies();
             gradleBuildFileInstrumentation.saveChanges();
-            startProcess(resourceFileSupporter.getProjectLocalPath().getPath(), "./gradlew clean fatJar", "Generating jar file with serialized objects", false);
+            successfulAction &= startProcess(resourceFileSupporter.getProjectLocalPath().getPath(), "./gradlew clean fatJar", "Generating jar file with serialized objects", false);
         }
         generatedJarFile = JarManager.getJarFile(buildFileDirectory.getPath() + File.separator + "build" + File.separator + "libs");
+        return successfulAction;
     }
 
     @Override

@@ -40,13 +40,13 @@ public class CommandLineParametersParser {
         .desc("Target Method Name").build();
     Option projectName = Option.builder().option("p").longOpt("projectName").hasArg()
         .desc("Project name").build();
-    Option applyTestabilityTransformations = Option.builder().option("att")
-        .longOpt("applyTestabilityTransformations")
-        .desc("Apply testability transformations").build();
+    Option applyTestabilityTransformations = Option.builder().option("datt")
+        .longOpt("doesNotApplyTestabilityTransformations")
+        .desc("DOESN'T apply testability transformations").build();
     Option fullyApplyTestabilityTransformations = Option.builder()
-        .option("fatt")
-        .longOpt("fullyApplyTestabilityTransformations")
-        .desc("Fully apply testability transformations").build();
+        .option("dfatt")
+        .longOpt("doesNotApplyFullTestabilityTransformations")
+        .desc("DOESN'T apply full testability transformations").build();
     Option budgetTime = Option.builder()
         .option("b")
         .longOpt("budgetTime")
@@ -115,8 +115,8 @@ public class CommandLineParametersParser {
       });
 
       TransformationOption transformationOption = TransformationOption.builder()
-          .applyTransformations(cmd.hasOption("att"))
-          .applyFullTransformations(cmd.hasOption("fatt"))
+          .applyTransformations(!cmd.hasOption("datt"))
+          .applyFullTransformations(!cmd.hasOption("dfatt"))
           .budget(Integer.parseInt(cmd.getOptionValue("b", "60")))
           .build();
 

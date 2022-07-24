@@ -24,13 +24,16 @@ Once you have the object serializer jar file, you can call it for a specific pro
 - Target Class Name (-c,--targetClassName)
 - Target Method Name (-m,--targetMethodName).
 - Project name (-p,--projectName)
-- Apply testability transformations (-att,--applyTestabilityTransformations). By default, the application will not apply transformations.
-- Fully apply testability transformations (-fatt,--fullyApplyTestabilityTransformations)
+- Comma separated list of commits (--commits).
+
+You can also provide these others options:
+
+- Doesn't apply testability transformations (-datt,--doesNotApplyTestabilityTransformations). By default, the application will apply all transformations.
+- Doesn't apply full testability transformations (-dfatt,--doesNotApplyFullTestabilityTransformations)
 - Serialization budget time in seconds (-b,--budgetTime). By default, a value of 60s is used.
 - Indicate usage of Gradle as build tool (-g, --gradle). If this flag is not provided, the application will use Maven as default.
-- Comma separated list of commits (-h,--commits).
 
-For example, consider calling the object serializer for this project: ```java -cp ObjectSerialization-1.0-SNAPSHOT-jar-with-dependencies.jar org.RunSerialization -l /home/lmps2/projects/toy-project -c Person.java -m addRelative -p toy-project -att -fatt -b 60 -h abdc125,abdc156```.
+For example, consider calling the object serializer for this project: ```java -cp ObjectSerialization-1.0-SNAPSHOT-jar-with-dependencies.jar org.RunSerialization -l /home/lmps2/projects/toy-project -c Person.java -m addRelative -p toy-project -datt -dfatt -b 60 --commits abdc125,abdc156```.
 
 You may inform up to four (4) commit hashes.
 The first commit will be used to create the serialized objects; next, they will be deserialized in all commits previously informed.

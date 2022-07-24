@@ -23,6 +23,7 @@ public class ObjectSerializerMaven extends ObjectSerializer {
           assemblyFileSupporter.createNewDirectory(buildFileDirectory);
           pomFileInstrumentation = new PomFileInstrumentation(buildFileDirectory.getPath());
           pomFileInstrumentation.addPluginForJarWithAllDependencies();
+          pomFileInstrumentation.updateSourceOption(resourceFileSupporter.getProjectLocalPath());
         }
       }
       
@@ -65,15 +66,17 @@ public class ObjectSerializerMaven extends ObjectSerializer {
     }
 
     @Override
-    protected void generateJarFile() throws IOException, InterruptedException {
+    protected boolean generateJarFile() throws IOException, InterruptedException {
+      boolean successfulAction = true;
       if (!startProcess(buildFileDirectory.getAbsolutePath(), "mvn clean compile test-compile assembly:single", "Generating jar file with serialized objects", false)){
         startProcess(resourceFileSupporter.getProjectLocalPath().getPath(), "mvn clean compile", "Compiling the whole project", false);
         if (!startProcess(buildFileDirectory.getAbsolutePath(), "mvn compile assembly:single", "Generating jar file with serialized objects", false)){
-          startProcess(resourceFileSupporter.getProjectLocalPath().getPath(), "mvn clean compile assembly:single", "Generating jar file with serialized objects", false);
+          successfulAction &= startProcess(resourceFileSupporter.getProjectLocalPath().getPath(), "mvn clean compile assembly:single", "Generating jar file with serialized objects", false);
         }
       }
 
       generatedJarFile = JarManager.getJarFile(buildFileDirectory.getPath() + File.separator + "target");
+      return successfulAction;
     }
 
     @Override

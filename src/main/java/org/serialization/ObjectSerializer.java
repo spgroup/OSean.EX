@@ -35,6 +35,7 @@ public abstract class ObjectSerializer {
   public SerializedObjectAccessClassIntrumentation serializedObjectAccessClassIntrumentation;
   public String generatedJarFile;
   public ArrayList<String> testFilesNames = new ArrayList<>();
+  public ArrayList<String> transformedClasses = new ArrayList<>();
   
   protected abstract void createBuildFileSupporters() throws TransformerException;
   
@@ -46,7 +47,7 @@ public abstract class ObjectSerializer {
   
   protected abstract void createAndRunBuildFileInstrumentation(File projectLocalPath) throws TransformerException;
   
-  protected abstract void generateJarFile() throws IOException, InterruptedException;
+  protected abstract boolean generateJarFile() throws IOException, InterruptedException;
 
   public void startSerialization(MergeScenarioUnderAnalysis mergeScenarioUnderAnalysis)
   throws IOException, InterruptedException, TransformerException {
@@ -116,55 +117,59 @@ public abstract class ObjectSerializer {
               mergeScenarioUnderAnalysis.getTransformationOption().applyTransformations(),
               mergeScenarioUnderAnalysis.getTransformationOption().applyFullTransformations());
           applyTestabilityTransformationsTargetClasses(resourceFileSupporter, objectSerializerClassIntrumentation.getTargetClasses(), mergeScenarioUnderAnalysis.getTransformationOption());
-  
+            
           SerializedObjectAccessOutputClass serializedObjectAccessOutputClass = new SerializedObjectAccessOutputClass();
           ConverterSupporter converterSupporter = new ConverterSupporter();
-  
+          
           objectSerializerSupporter
-              .getOutputClass(resourceFileSupporter.getTargetClassLocalPath().getPath(),
-                  resourceFileSupporter
-                      .getResourceDirectoryPath(new File(buildFileDirectory.getPath())));
-  
+          .getOutputClass(resourceFileSupporter.getTargetClassLocalPath().getPath(),
+          resourceFileSupporter
+          .getResourceDirectoryPath(new File(buildFileDirectory.getPath())));
+          
           objectSerializerClassIntrumentation.runTransformation(new File(
-              resourceFileSupporter.getTargetClassLocalPath() + File.separator + mergeScenarioUnderAnalysis.getTargetClass()));
-  
+            resourceFileSupporter.getTargetClassLocalPath() + File.separator + mergeScenarioUnderAnalysis.getTargetClass()));
+            
           List<String> converterList = getConverterList(resourceFileSupporter, new File(buildFileDirectory.getPath()));
           if(converterList.size() > 0){
             converterSupporter.getOutputClass(converterList, resourceFileSupporter.getTargetClassLocalPath().getPath(),
-                objectSerializerSupporter.getFullSerializerSupporterClass());
+            objectSerializerSupporter.getFullSerializerSupporterClass());
           }
-  
+          
           objectDeserializerSupporter
-              .getOutputClass(resourceFileSupporter.getTargetClassLocalPath().getPath(),
-                  resourceFileSupporter
-                      .getResourceDirectoryPath(new File(buildFileDirectory.getPath())),
-                  converterSupporter.classesPathSignature);
-
-          generateJarFile();
+          .getOutputClass(resourceFileSupporter.getTargetClassLocalPath().getPath(),
+          resourceFileSupporter
+          .getResourceDirectoryPath(new File(buildFileDirectory.getPath())),
+          converterSupporter.classesPathSignature);
+          
+          if(hasAnyTransformationsWithCompilationError(mergeScenarioUnderAnalysis)){
+            generateJarFile();
+          }
           
           startProcess(resourceFileSupporter.getProjectLocalPath().getPath(), "java -cp " + generatedJarFile
-              + " " + getObjectDeserializerClassPathOnTargetProject(objectSerializerClassIntrumentation),
-              "Generating method list associated to serialized objects", false);
-  
+          + " " + getObjectDeserializerClassPathOnTargetProject(objectSerializerClassIntrumentation),
+          "Generating method list associated to serialized objects", false);
+          
           List<String> methodList = getMethodList(resourceFileSupporter, new File(buildFileDirectory.getPath()), mergeScenarioUnderAnalysis.getTransformationOption());
-  
+          
           objectSerializerClassIntrumentation.undoTransformations(new File(
-              resourceFileSupporter.getTargetClassLocalPath() + File.separator
-                  + mergeScenarioUnderAnalysis.getTargetClass()));
-          objectSerializerSupporter.deleteObjectSerializerSupporterClass(
+            resourceFileSupporter.getTargetClassLocalPath() + File.separator
+            + mergeScenarioUnderAnalysis.getTargetClass()));
+            objectSerializerSupporter.deleteObjectSerializerSupporterClass(
               resourceFileSupporter.getTargetClassLocalPath().getPath());
-          objectDeserializerSupporter.deleteObjectSerializerSupporterClass(resourceFileSupporter.getTargetClassLocalPath().getPath());
-          converterSupporter.deleteOldClassSupporter();
-  
+              objectDeserializerSupporter.deleteObjectSerializerSupporterClass(resourceFileSupporter.getTargetClassLocalPath().getPath());
+              converterSupporter.deleteOldClassSupporter();
+                
           if (methodList.size() > 0) {
             serializedObjectAccessOutputClass
-                .getOutputClass(methodList, resourceFileSupporter.getTargetClassLocalPath().getPath(),
-                    objectSerializerSupporter.getFullSerializerSupporterClass());
+            .getOutputClass(methodList, resourceFileSupporter.getTargetClassLocalPath().getPath(),
+            objectSerializerSupporter.getFullSerializerSupporterClass());
             serializedObjectAccessClassIntrumentation.addSupporterClassAsField(new File(
-                resourceFileSupporter.getTargetClassLocalPath() + File.separator + mergeScenarioUnderAnalysis.getTargetClass()));
+              resourceFileSupporter.getTargetClassLocalPath() + File.separator + mergeScenarioUnderAnalysis.getTargetClass()));
           }
-
-          generateJarFile();
+                  
+          if(hasAnyTransformationsWithCompilationError(mergeScenarioUnderAnalysis)){
+            generateJarFile();
+          }
           
           serializedObjectAccessOutputClass.deleteOldClassSupporter();
           serializedObjectAccessClassIntrumentation.undoTransformations(new File(
@@ -180,7 +185,15 @@ public abstract class ObjectSerializer {
       }
       return false;
   }
-  
+
+  // Check if any transformation created a compilation error. If it is the case, it reverts all transformations.
+  private boolean hasAnyTransformationsWithCompilationError(MergeScenarioUnderAnalysis mergeScenarioUnderAnalysis) throws IOException, InterruptedException {
+    if(!generateJarFile()){
+      revertTestabilityTransformationsTargetClasses();
+      return true;
+    }
+    return false;
+  }
 
   public void safeCheckout(GitProjectActions gitProjectActions, String mergeScenarioCommit) {
     gitProjectActions.addChanges();
@@ -306,6 +319,7 @@ public abstract class ObjectSerializer {
       Transformations.main(new String[]{new String(file.getPath()),
           String.valueOf(applyTransformations), String.valueOf(applyFully)});
       System.out.println("SUCCESSFUL");
+      transformedClasses.add(file.getAbsolutePath());
       return true;
     } catch (IOException e) {
       e.printStackTrace();
@@ -318,9 +332,16 @@ public abstract class ObjectSerializer {
     for(String targetClass: classes){
       File targetClassFile = resourceFileSupporter.searchForFileByName(targetClass+".java", resourceFileSupporter.getProjectLocalPath());
       if (targetClassFile != null){
+        transformedClasses.add(targetClassFile.getAbsolutePath());
         runTestabilityTransformations(targetClassFile, transformationOption.applyTransformations(), transformationOption.applyFullTransformations());
       }
     }
+  }
+
+  //TODO: This method should be done with jgit (even if this is hundred times faster than this diabolical API)
+  private void revertTestabilityTransformationsTargetClasses() throws IOException, InterruptedException{
+    String paths = String.join(" ", transformedClasses);
+    startProcess(buildFileDirectory.getAbsolutePath(), "git restore " + paths, "Reverting ALL Testability Transformations", false);
   }
 
   public boolean startProcess(String directoryPath, String command, String message, boolean isTestTask)

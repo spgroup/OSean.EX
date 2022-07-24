@@ -83,7 +83,7 @@ public class CommandLineParametersParserTest {
   }
 
   @Test
-  public void transformationsAreDisabledByDefault() {
+  public void transformationsAreEnabledByDefault() {
     String[] args = {
         "-l",
         TOY_PROJECT_LOCATION,
@@ -99,8 +99,8 @@ public class CommandLineParametersParserTest {
 
     MergeScenarioUnderAnalysis result = getCommandLineParametersParser().parse(args).get(0);
 
-    Assert.assertFalse(result.getTransformationOption().applyTransformations());
-    Assert.assertFalse(result.getTransformationOption().applyFullTransformations());
+    Assert.assertTrue(result.getTransformationOption().applyTransformations());
+    Assert.assertTrue(result.getTransformationOption().applyFullTransformations());
   }
 
   @Test
@@ -114,7 +114,6 @@ public class CommandLineParametersParserTest {
         "getName",
         "-p",
         "toy-project",
-        "-att",
         "--commits",
         "7810b85dd711ac2648675dcfe5e65539aec1ea1d"
     };
@@ -126,7 +125,7 @@ public class CommandLineParametersParserTest {
   }
 
   @Test
-  public void fullTransformationsAreDisabledByDefaultEvenIfTransformationsAreActive() {
+  public void fullTransformationsAreDisabledEvenIfTransformationsAreActive() {
     String[] args = {
         "-l",
         TOY_PROJECT_LOCATION,
@@ -136,7 +135,7 @@ public class CommandLineParametersParserTest {
         "getName",
         "-p",
         "toy-project",
-        "-att",
+        "-dfatt",
         "--commits",
         "7810b85dd711ac2648675dcfe5e65539aec1ea1d"
     };
@@ -158,7 +157,7 @@ public class CommandLineParametersParserTest {
         "getName",
         "-p",
         "toy-project",
-        "-att",
+        "-datt",
     };
 
     getCommandLineParametersParser().parse(args);
