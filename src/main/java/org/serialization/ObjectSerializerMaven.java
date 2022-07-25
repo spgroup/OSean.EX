@@ -2,6 +2,8 @@ package org.serialization;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 import javax.xml.transform.TransformerException;
 
@@ -60,7 +62,7 @@ public class ObjectSerializerMaven extends ObjectSerializer {
       pomFileInstrumentation.addResourcesForGeneratedJar();
       pomFileInstrumentation.addPluginForJarWithAllDependencies();
       pomFileInstrumentation.updateOldRepository();
-      pomFileInstrumentation.changeTagContent(pomFileInstrumentation.getPomFile(), "scope", "compile", "test");
+      pomFileInstrumentation.changeTagContent(pomFileInstrumentation.getPomFile(), "scope", "compile", new ArrayList<String>(Arrays.asList("test")));
       pomFileInstrumentation.removeAllEnforcedDependencies(projectDir);
       pomFileInstrumentation.updateSourceOption(projectDir);
     }
@@ -81,7 +83,7 @@ public class ObjectSerializerMaven extends ObjectSerializer {
 
     @Override
     protected void generateTestFilesJar() throws IOException, InterruptedException, TransformerException {
-      pomFileInstrumentation.changeTagContent(pomFileInstrumentation.getPomFile(), "descriptor", "src/main/assembly/assemblyTest.xml", "src/main/assembly/assembly.xml");
+      pomFileInstrumentation.changeTagContent(pomFileInstrumentation.getPomFile(), "descriptor", "src/main/assembly/assemblyTest.xml", new ArrayList<String>(Arrays.asList("src/main/assembly/assembly.xml")));
       startProcess(buildFileDirectory.getAbsolutePath(), "mvn clean compile test-compile", "Compiling target class module", false);
       
       String compiledSrcFilesPath = buildFileDirectory.getAbsolutePath() + File.separator + "target" + File.separator + "classes";
@@ -95,7 +97,7 @@ public class ObjectSerializerMaven extends ObjectSerializer {
       
       startProcess(buildFileDirectory.getAbsolutePath(), "mvn assembly:single", "Generating test files jar", false);
       generatedJarFile = JarManager.getJarFile(buildFileDirectory.getPath() + File.separator + "target");
-      pomFileInstrumentation.changeTagContent(pomFileInstrumentation.getPomFile(), "descriptor", "src/main/assembly/assembly.xml", "src/main/assembly/assemblyTest.xml");
+      pomFileInstrumentation.changeTagContent(pomFileInstrumentation.getPomFile(), "descriptor", "src/main/assembly/assembly.xml", new ArrayList<String>(Arrays.asList("src/main/assembly/assemblyTest.xml")));
     }
 
 }

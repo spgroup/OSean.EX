@@ -2,6 +2,8 @@ package org.instrumentation;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -16,6 +18,7 @@ import javax.xml.transform.stream.StreamResult;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
 import org.apache.commons.io.filefilter.RegexFileFilter;
+import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -138,12 +141,12 @@ public class PomFileInstrumentation {
           Node node = nList.item(temp);
           if (node.getParentNode().equals(root)) {
             Node xstream = getNode(document, "com.thoughtworks.xstream", "xstream", "1.4.15");
-            if (!isDependencyAlreadyAvailable(document.getElementsByTagName("dependency"), xstream)){
+            if (!isDependencyAlreadyAvailable(document, document.getElementsByTagName("dependency"), xstream)){
               node.appendChild(xstream);
               addedDependencies = true;
             }
             Node commons = getNode(document, "org.apache.commons", "commons-lang3", "3.12.0");
-            if (!isDependencyAlreadyAvailable(document.getElementsByTagName("dependency"), commons)) {
+            if (!isDependencyAlreadyAvailable(document, document.getElementsByTagName("dependency"), commons)) {
               node.appendChild(commons);
               addedDependencies = true;
             }
@@ -195,7 +198,7 @@ public class PomFileInstrumentation {
     return false;
   }
 
-  private boolean isDependencyAlreadyAvailable(NodeList nodeList, Node newDependency){
+  private boolean isDependencyAlreadyAvailable(Document document, NodeList nodeList, Node newDependency) throws DOMException, TransformerException{
     for (int temp = 0; temp < nodeList.getLength(); temp++) {
       Node node = nodeList.item(temp);
       //check if the groupId is already declared on the target dependency
@@ -206,7 +209,8 @@ public class PomFileInstrumentation {
       && (node.getFirstChild().getNextSibling().getNextSibling().getNextSibling().getFirstChild() != null &&
          node.getFirstChild().getNextSibling().getNextSibling().getNextSibling().getFirstChild().getTextContent().
              equals(newDependency.getFirstChild().getNextSibling().getFirstChild().getTextContent()))) {
-        return true;
+              updateVersionNode(document, node, newDependency.getFirstChild().getNextSibling().getNextSibling().getFirstChild().getTextContent());
+              return true;
       }
     }
     return false;
@@ -519,7 +523,7 @@ public class PomFileInstrumentation {
     }
   }
 
-  public void changeTagContent(File pomFile, String targetTag, String newValue, String oldValue) throws TransformerException{
+  public void changeTagContent(File pomFile, String targetTag, String newValue, ArrayList<String> oldValues) throws TransformerException{
     Document document = getPomFileAsDocument(pomFile);
 
     if (document != null){
@@ -530,7 +534,7 @@ public class PomFileInstrumentation {
       int numberPlugins = nList.getLength();
       for (int temp = 0; temp < numberPlugins; temp++) {
         Node node = nList.item(temp);
-        if(node.getFirstChild().getNodeValue().equals(oldValue)) {
+        if(oldValues.contains(node.getFirstChild().getNodeValue())) {
           node.getFirstChild().setNodeValue(newValue);
         }
       }
@@ -541,15 +545,17 @@ public class PomFileInstrumentation {
   public void removeAllEnforcedDependencies(File dir) throws TransformerException {
     Collection<File> files = getAllPomFiles(dir);
     for(File onePom: files){
-      changeTagContent(onePom, "goal", "display-info", "enforce");
+      ArrayList<String> oldValues = new ArrayList<String>(Arrays.asList("enforce"));
+      changeTagContent(onePom, "goal", "display-info", oldValues);
     }
   }
 
   public void updateSourceOption(File dir) throws TransformerException {
     Collection<File> files = getAllPomFiles(dir);
     for(File onePom: files){
-      changeTagContent(onePom, "source", "1.6", "1.5");
-      changeTagContent(onePom, "target", "1.6", "1.5");
+      ArrayList<String> oldValues = new ArrayList<String>(Arrays.asList("1.5", "1.6"));
+      changeTagContent(onePom, "source", "1.8", oldValues);
+      changeTagContent(onePom, "target", "1.8", oldValues);
     }
   }
 
@@ -574,21 +580,29 @@ public class PomFileInstrumentation {
       for (int temp = 0; temp < numberPlugins; temp++) {
         Node node = nList.item(temp);
         if(node.getFirstChild().getNodeValue().equals("mockito-core"))
-          updateVersionNode(node, "1.10.19");
+          updateVersionNode(document, node.getParentNode(), "1.10.19");
       }
-      saveChangesOnPomFiles(document);
     }
   }
 
-  private void updateVersionNode(Node node, String newValue){
-    NodeList nList = node.getParentNode().getChildNodes();
+  private void updateVersionNode(Document document, Node node, String newValue) throws TransformerException{
+    NodeList nList = node.getChildNodes();
     int numberPlugins = nList.getLength();
+    Boolean nodeWithoutVersionTag = true;
     for (int temp = 0; temp < numberPlugins; temp++) {
       Node nodeAux = nList.item(temp);
       String tagName = nodeAux.getNodeName();
-      if(tagName.equals("version"))
+      if(tagName.equals("version")){
+        nodeWithoutVersionTag = false;
         nodeAux.getFirstChild().setNodeValue(newValue);
+      }
     }
+    if(nodeWithoutVersionTag){
+      Node version = document.createElement("version");
+      version.setTextContent(newValue);
+      node.appendChild(version);
+    }
+    saveChangesOnPomFiles(document);
   }
 
 }
