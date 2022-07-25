@@ -64,10 +64,12 @@ public abstract class ObjectSerializer {
     if (buildFileDirectory != null) {
       resourceFileSupporter.createNewDirectory(buildFileDirectory);
 
-      generateTestFilesJar();
-      saveJarFile(generatedJarFile, mergeScenarioUnderAnalysis, mergeScenarioUnderAnalysis.getMergeScenarioCommits().get(0)+"-TestFiles.jar");
-      getTestClassesCompleteNames("", new File(buildFileDirectory.getAbsolutePath() + File.separator + "src" + File.separator + "test" + File.separator + "java"));
-      saveFile(testFilesNames, mergeScenarioUnderAnalysis, mergeScenarioUnderAnalysis.getMergeScenarioCommits().get(0)+"-TestFiles.txt");
+      if(!checkIfTestFilesJarAndTestFilesTxtExists(mergeScenarioUnderAnalysis, mergeScenarioUnderAnalysis.getMergeScenarioCommits().get(0)+"-TestFiles.jar", mergeScenarioUnderAnalysis.getMergeScenarioCommits().get(0)+"-TestFiles.txt")){
+        generateTestFilesJar();
+        saveJarFile(generatedJarFile, mergeScenarioUnderAnalysis, mergeScenarioUnderAnalysis.getMergeScenarioCommits().get(0)+"-TestFiles.jar");
+        getTestClassesCompleteNames("", new File(buildFileDirectory.getAbsolutePath() + File.separator + "src" + File.separator + "test" + File.separator + "java"));
+        saveFile(testFilesNames, mergeScenarioUnderAnalysis, mergeScenarioUnderAnalysis.getMergeScenarioCommits().get(0)+"-TestFiles.txt");
+      }
 
       createAndRunBuildFileInstrumentation(resourceFileSupporter.getProjectLocalPath());
 
@@ -104,6 +106,13 @@ public abstract class ObjectSerializer {
     }
   }
   
+  // Check if already created the jar with project tests and the txt with test classes names
+  private boolean checkIfTestFilesJarAndTestFilesTxtExists(MergeScenarioUnderAnalysis mergeScenarioUnderAnalysis, String jarFile, String txtFile) {
+    File dir = new File(mergeScenarioUnderAnalysis.getLocalProjectPath().split(mergeScenarioUnderAnalysis.getProjectName())[0] + File.separator + "GeneratedJars" + File.separator + mergeScenarioUnderAnalysis.getProjectName());
+    File[] files = dir.listFiles((dir1, name) -> name.endsWith(jarFile) || name.endsWith(txtFile));
+    return (files.length == 2);
+  }
+
   public boolean generateJarsForAllMergeScenarioCommits(MergeScenarioUnderAnalysis mergeScenarioUnderAnalysis){
     try {
         for (String mergeScenarioCommit : mergeScenarioUnderAnalysis.getMergeScenarioCommits()) {
