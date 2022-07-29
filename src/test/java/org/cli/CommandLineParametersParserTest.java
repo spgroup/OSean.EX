@@ -13,6 +13,8 @@ public class CommandLineParametersParserTest {
       "src", "test", "resources");
   protected static final String TOY_PROJECT_LOCATION = String.join(File.separator, BASE_RESOURCES_LOCATION,
       "toy-project");
+  protected static final String TOY_PROJECT_1_LOCATION = String.join(File.separator, BASE_RESOURCES_LOCATION,
+      "toy-project-1");
 
   private CommandLineParametersParser getCommandLineParametersParser() {
     return new CommandLineParametersParser();
@@ -179,5 +181,25 @@ public class CommandLineParametersParserTest {
     List<MergeScenarioUnderAnalysis> result = getCommandLineParametersParser().parse(args);
 
     Assert.assertTrue(result.isEmpty());
+  }
+
+  @Test
+  public void setGradleIfProjectDoesntUseMaven() {
+    String[] args = {
+        "-l",
+        TOY_PROJECT_1_LOCATION,
+        "-c",
+        "Person",
+        "-m",
+        "getName",
+        "-p",
+        "toy-project-1",
+        "--commits",
+        "c257474a8206e05d82a444bead4222d1dec9f60b"
+    };
+
+    MergeScenarioUnderAnalysis result = getCommandLineParametersParser().parse(args).get(0);
+
+    Assert.assertEquals("gradle", result.getBuildManager());
   }
 }
