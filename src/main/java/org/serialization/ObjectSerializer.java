@@ -107,10 +107,10 @@ public abstract class ObjectSerializer {
   }
   
   // Check if already created the jar with project tests and the txt with test classes names
-  private boolean checkIfTestFilesJarAndTestFilesTxtExists(MergeScenarioUnderAnalysis mergeScenarioUnderAnalysis, String jarFile, String txtFile) {
-    File dir = new File(mergeScenarioUnderAnalysis.getLocalProjectPath().split(mergeScenarioUnderAnalysis.getProjectName())[0] + File.separator + "GeneratedJars" + File.separator + mergeScenarioUnderAnalysis.getProjectName());
-    File[] files = dir.listFiles((dir1, name) -> name.endsWith(jarFile) || name.endsWith(txtFile));
-    return (files.length == 2);
+  private boolean checkIfTestFilesJarAndTestFilesTxtExists(MergeScenarioUnderAnalysis mergeScenarioUnderAnalysis, String jarFilePath, String txtFilePath) {
+    File jarFile = new File(mergeScenarioUnderAnalysis.getLocalProjectPath().split(mergeScenarioUnderAnalysis.getProjectName())[0] + File.separator + "GeneratedJars" + File.separator + mergeScenarioUnderAnalysis.getProjectName() + File.separator + jarFilePath);
+    File txtFile = new File(mergeScenarioUnderAnalysis.getLocalProjectPath().split(mergeScenarioUnderAnalysis.getProjectName())[0] + File.separator + "GeneratedJars" + File.separator + mergeScenarioUnderAnalysis.getProjectName() + File.separator + txtFilePath);
+    return (jarFile.exists() && txtFile.exists());
   }
 
   public boolean generateJarsForAllMergeScenarioCommits(MergeScenarioUnderAnalysis mergeScenarioUnderAnalysis){
