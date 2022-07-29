@@ -6,6 +6,7 @@ import java.util.List;
 import javax.xml.transform.TransformerException;
 
 import org.cli.CommandLineParametersParser;
+import org.file.BuildFileException;
 import org.serialization.ObjectSerializer;
 import org.serialization.ObjectSerializerGradle;
 import org.serialization.ObjectSerializerMaven;
@@ -26,7 +27,9 @@ public class RunSerialization {
     }
   }
 
-  private static ObjectSerializer getObjectSerializer(MergeScenarioUnderAnalysis mergeScenarioUnderAnalysis) {
+  public static ObjectSerializer getObjectSerializer(MergeScenarioUnderAnalysis mergeScenarioUnderAnalysis) throws BuildFileException {
+    if(mergeScenarioUnderAnalysis.getBuildManager() == null)
+      throw new BuildFileException("Can't find pom.xml or build.gradle for project " + mergeScenarioUnderAnalysis.getProjectName());
     return mergeScenarioUnderAnalysis.getBuildManager().equals("maven") ? new ObjectSerializerMaven()
         : new ObjectSerializerGradle();
   }

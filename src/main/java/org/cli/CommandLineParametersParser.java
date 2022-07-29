@@ -14,6 +14,7 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import org.util.DirUtils;
 import org.util.input.MergeScenarioUnderAnalysis;
 import org.util.input.TransformationOption;
 
@@ -126,7 +127,7 @@ public class CommandLineParametersParser {
           .targetMethod(cmd.getOptionValue("m"))
           .projectName(cmd.getOptionValue("p"))
           .transformationOption(transformationOption)
-          .buildManager(cmd.hasOption("gradle") ? "gradle" : "maven")
+          .buildManager(cmd.hasOption("gradle") ? "gradle" : DirUtils.findBuildFileInDir(cmd.getOptionValue("l")))
           .mergeScenarioCommits(List.of(cmd.getOptionValue("commits").split(",")))
           .build());
 
@@ -156,7 +157,7 @@ public class CommandLineParametersParser {
                     .applyFullTransformations(input[5].equals("true"))
                     .budget(Integer.parseInt(input[6]))
                     .build())
-            .buildManager(input[7].equals("true") ? "gradle" : "maven")
+            .buildManager(input[7].equals("true") ? "gradle" : DirUtils.findBuildFileInDir(input[0]))
             .mergeScenarioCommits(List.of(input[8].split(" ")))
             .build());
       }
