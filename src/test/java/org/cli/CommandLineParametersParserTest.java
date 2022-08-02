@@ -21,26 +21,6 @@ public class CommandLineParametersParserTest {
   }
 
   @Test
-  public void mavenIsTheDefaultBuildManager() {
-    String[] args = {
-        "-l",
-        TOY_PROJECT_LOCATION,
-        "-c",
-        "Person",
-        "-m",
-        "getName",
-        "-p",
-        "toy-project",
-        "--commits",
-        "7810b85dd711ac2648675dcfe5e65539aec1ea1d"
-    };
-
-    MergeScenarioUnderAnalysis result = getCommandLineParametersParser().parse(args).get(0);
-
-    Assert.assertEquals("maven", result.getBuildManager());
-  }
-
-  @Test
   public void gradeIsTheBuildManagerIfFlagIsProvided() {
     String[] args = {
         "-l",
@@ -181,25 +161,5 @@ public class CommandLineParametersParserTest {
     List<MergeScenarioUnderAnalysis> result = getCommandLineParametersParser().parse(args);
 
     Assert.assertTrue(result.isEmpty());
-  }
-
-  @Test
-  public void setGradleIfProjectDoesntUseMaven() {
-    String[] args = {
-        "-l",
-        TOY_PROJECT_1_LOCATION,
-        "-c",
-        "Person",
-        "-m",
-        "getName",
-        "-p",
-        "toy-project-1",
-        "--commits",
-        "c257474a8206e05d82a444bead4222d1dec9f60b"
-    };
-
-    MergeScenarioUnderAnalysis result = getCommandLineParametersParser().parse(args).get(0);
-
-    Assert.assertEquals("gradle", result.getBuildManager());
   }
 }

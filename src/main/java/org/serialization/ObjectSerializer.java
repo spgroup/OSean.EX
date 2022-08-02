@@ -25,7 +25,6 @@ import org.util.input.MergeScenarioUnderAnalysis;
 import org.util.input.TransformationOption;
 
 public abstract class ObjectSerializer {
-  public GitProjectActions gitProjectActions;
   public ResourceFileSupporter resourceFileSupporter;
   public File buildFileDirectory;
   public ProcessManager processManager;
@@ -49,13 +48,9 @@ public abstract class ObjectSerializer {
   
   protected abstract boolean generateJarFile() throws IOException, InterruptedException;
 
-  public void startSerialization(MergeScenarioUnderAnalysis mergeScenarioUnderAnalysis)
+  public void startSerialization(MergeScenarioUnderAnalysis mergeScenarioUnderAnalysis, GitProjectActions gitProjectActions)
   throws IOException, InterruptedException, TransformerException {
-    
-    gitProjectActions = new GitProjectActions(mergeScenarioUnderAnalysis.getLocalProjectPath());
 
-    gitProjectActions.checkoutCommit(mergeScenarioUnderAnalysis.getMergeScenarioCommits().get(0));
-    
     resourceFileSupporter = new ResourceFileSupporter(mergeScenarioUnderAnalysis.getLocalProjectPath(), mergeScenarioUnderAnalysis.getTargetClass());
     resourceFileSupporter.findTargetClassLocalPath(resourceFileSupporter.getTargetClassName(), resourceFileSupporter.getProjectLocalPath());
     createBuildFileSupporters();
@@ -96,7 +91,7 @@ public abstract class ObjectSerializer {
       
       gitProjectActions.undoCurrentChanges();
 
-      generateJarsForAllMergeScenarioCommits(mergeScenarioUnderAnalysis);
+      generateJarsForAllMergeScenarioCommits(mergeScenarioUnderAnalysis, gitProjectActions);
 
       gitProjectActions.undoCurrentChanges();
       gitProjectActions.cleanChanges();
@@ -113,7 +108,7 @@ public abstract class ObjectSerializer {
     return (jarFile.exists() && txtFile.exists());
   }
 
-  public boolean generateJarsForAllMergeScenarioCommits(MergeScenarioUnderAnalysis mergeScenarioUnderAnalysis){
+  public boolean generateJarsForAllMergeScenarioCommits(MergeScenarioUnderAnalysis mergeScenarioUnderAnalysis, GitProjectActions gitProjectActions){
     try {
         for (String mergeScenarioCommit : mergeScenarioUnderAnalysis.getMergeScenarioCommits()) {
   

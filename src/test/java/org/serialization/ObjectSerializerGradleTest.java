@@ -1,7 +1,5 @@
 package org.serialization;
 
-import static org.util.GitProjectActionsTest.getMainRepository;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -10,8 +8,6 @@ import java.util.Scanner;
 
 import javax.xml.transform.TransformerException;
 
-import org.eclipse.jgit.lib.Repository;
-import org.eclipse.jgit.submodule.SubmoduleWalk;
 import org.junit.Assert;
 import org.junit.Test;
 import org.util.GitProjectActions;
@@ -41,10 +37,8 @@ public class ObjectSerializerGradleTest extends ObjectSerializerTest {
         .mergeScenarioCommits(Arrays.asList("1d1562dc88008736fdaec9dfa9c8f4756d21da19"))
         .build();
 
-    getObjectSerializer().startSerialization(mergeScenarioUnderAnalysis);
-
-    Repository subRepo = SubmoduleWalk.getSubmoduleRepository(getMainRepository(), GitProjectActionsTest.projectPath);
-    GitProjectActions gitProjectActions = new GitProjectActions(subRepo);
+    GitProjectActions gitProjectActions = GitProjectActionsTest.getGitProjectActionsAndChangeCommit(mergeScenarioUnderAnalysis.getLocalProjectPath(), mergeScenarioUnderAnalysis.getMergeScenarioCommits().get(0));
+    getObjectSerializer().startSerialization(mergeScenarioUnderAnalysis, gitProjectActions);
     Assert.assertTrue(gitProjectActions.checkoutCommit("main"));
 
     assertJarFilesForScenarioExists(mergeScenarioUnderAnalysis);
@@ -66,11 +60,8 @@ public class ObjectSerializerGradleTest extends ObjectSerializerTest {
         .mergeScenarioCommits(Arrays.asList("bc55f776168214586ea7d5d58187df6719f940c2"))
         .build();
 
-    getObjectSerializer().startSerialization(mergeScenarioUnderAnalysis);
-
-    Repository subRepo = SubmoduleWalk.getSubmoduleRepository(getMainRepository(),
-        GitProjectActionsTest.projectPath);
-    GitProjectActions gitProjectActions = new GitProjectActions(subRepo);
+    GitProjectActions gitProjectActions = GitProjectActionsTest.getGitProjectActionsAndChangeCommit(mergeScenarioUnderAnalysis.getLocalProjectPath(), mergeScenarioUnderAnalysis.getMergeScenarioCommits().get(0));
+    getObjectSerializer().startSerialization(mergeScenarioUnderAnalysis, gitProjectActions);
     Assert.assertTrue(gitProjectActions.checkoutCommit("main"));
 
     assertJarFilesForScenarioExists(mergeScenarioUnderAnalysis);
@@ -96,10 +87,8 @@ public class ObjectSerializerGradleTest extends ObjectSerializerTest {
         .mergeScenarioCommits(Arrays.asList("c257474a8206e05d82a444bead4222d1dec9f60b"))
         .build();
 
-    getObjectSerializer().startSerialization(mergeScenarioUnderAnalysis);
-    Repository subRepo = SubmoduleWalk.getSubmoduleRepository(getMainRepository(),
-        GitProjectActionsTest.projectPath);
-    GitProjectActions gitProjectActions = new GitProjectActions(subRepo);
+    GitProjectActions gitProjectActions = GitProjectActionsTest.getGitProjectActionsAndChangeCommit(mergeScenarioUnderAnalysis.getLocalProjectPath(), mergeScenarioUnderAnalysis.getMergeScenarioCommits().get(0));
+    getObjectSerializer().startSerialization(mergeScenarioUnderAnalysis, gitProjectActions);
     Assert.assertTrue(gitProjectActions.checkoutCommit("main"));
 
     assertJarFilesForScenarioExists(mergeScenarioUnderAnalysis);
@@ -121,11 +110,8 @@ public class ObjectSerializerGradleTest extends ObjectSerializerTest {
         .mergeScenarioCommits(Arrays.asList("1d1562dc88008736fdaec9dfa9c8f4756d21da19"))
         .build();
 
-    getObjectSerializer().startSerialization(mergeScenarioUnderAnalysis);
-
-    Repository subRepo = SubmoduleWalk.getSubmoduleRepository(getMainRepository(),
-        GitProjectActionsTest.projectPath);
-    GitProjectActions gitProjectActions = new GitProjectActions(subRepo);
+    GitProjectActions gitProjectActions = GitProjectActionsTest.getGitProjectActionsAndChangeCommit(mergeScenarioUnderAnalysis.getLocalProjectPath(), mergeScenarioUnderAnalysis.getMergeScenarioCommits().get(0));
+    getObjectSerializer().startSerialization(mergeScenarioUnderAnalysis, gitProjectActions);
     Assert.assertTrue(gitProjectActions.checkoutCommit("main"));
 
     assertJarFilesForScenarioExists(mergeScenarioUnderAnalysis);

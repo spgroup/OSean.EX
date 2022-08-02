@@ -9,8 +9,6 @@ import java.util.Arrays;
 
 import javax.xml.transform.TransformerException;
 
-import org.eclipse.jgit.lib.Repository;
-import org.eclipse.jgit.submodule.SubmoduleWalk;
 import org.junit.Assert;
 import org.junit.Test;
 import org.util.GitProjectActions;
@@ -40,11 +38,8 @@ public class ObjectSerializerMavenTest extends ObjectSerializerTest {
         .mergeScenarioCommits(Arrays.asList("7810b85dd711ac2648675dcfe5e65539aec1ea1d"))
         .build();
 
-    getObjectSerializer().startSerialization(mergeScenarioUnderAnalysis);
-
-    Repository subRepo = SubmoduleWalk.getSubmoduleRepository(GitProjectActionsTest.getMainRepository(),
-        GitProjectActionsTest.projectPath);
-    GitProjectActions gitProjectActions = new GitProjectActions(subRepo);
+GitProjectActions gitProjectActions = GitProjectActionsTest.getGitProjectActionsAndChangeCommit(mergeScenarioUnderAnalysis.getLocalProjectPath(), mergeScenarioUnderAnalysis.getMergeScenarioCommits().get(0));
+    getObjectSerializer().startSerialization(mergeScenarioUnderAnalysis, gitProjectActions);
     Assert.assertTrue(gitProjectActions.checkoutCommit("main"));
 
     assertJarFilesForScenarioExists(mergeScenarioUnderAnalysis);
@@ -67,11 +62,8 @@ public class ObjectSerializerMavenTest extends ObjectSerializerTest {
         .mergeScenarioCommits(Arrays.asList("7810b85dd711ac2648675dcfe5e65539aec1ea1d"))
         .build();
 
-    getObjectSerializer().startSerialization(mergeScenarioUnderAnalysis);
-
-    Repository subRepo = SubmoduleWalk.getSubmoduleRepository(GitProjectActionsTest.getMainRepository(),
-        GitProjectActionsTest.projectPath);
-    GitProjectActions gitProjectActions = new GitProjectActions(subRepo);
+    GitProjectActions gitProjectActions = GitProjectActionsTest.getGitProjectActionsAndChangeCommit(mergeScenarioUnderAnalysis.getLocalProjectPath(), mergeScenarioUnderAnalysis.getMergeScenarioCommits().get(0));
+    getObjectSerializer().startSerialization(mergeScenarioUnderAnalysis, gitProjectActions);
     Assert.assertTrue(gitProjectActions.checkoutCommit("main"));
 
     assertJarFilesForScenarioExists(mergeScenarioUnderAnalysis);
@@ -93,11 +85,8 @@ public class ObjectSerializerMavenTest extends ObjectSerializerTest {
         .mergeScenarioCommits(Arrays.asList("85077377978f98e31e637c121b5987e01725f5fd"))
         .build();
 
-    getObjectSerializer().startSerialization(mergeScenarioUnderAnalysis);
-
-    Repository subRepo = SubmoduleWalk.getSubmoduleRepository(GitProjectActionsTest.getMainRepository(),
-        GitProjectActionsTest.projectPath);
-    GitProjectActions gitProjectActions = new GitProjectActions(subRepo);
+    GitProjectActions gitProjectActions = GitProjectActionsTest.getGitProjectActionsAndChangeCommit(mergeScenarioUnderAnalysis.getLocalProjectPath(), mergeScenarioUnderAnalysis.getMergeScenarioCommits().get(0));
+    getObjectSerializer().startSerialization(mergeScenarioUnderAnalysis, gitProjectActions);
     Assert.assertTrue(gitProjectActions.checkoutCommit("main"));
 
     assertJarFilesForScenarioExists(mergeScenarioUnderAnalysis);
@@ -120,11 +109,8 @@ public class ObjectSerializerMavenTest extends ObjectSerializerTest {
             Arrays.asList("85077377978f98e31e637c121b5987e01725f5fd", "5215c5d623a131ac94284be5c3c42c2124618e99"))
         .build();
 
-    getObjectSerializer().startSerialization(mergeScenarioUnderAnalysis);
-
-    Repository subRepo = SubmoduleWalk.getSubmoduleRepository(GitProjectActionsTest.getMainRepository(),
-        GitProjectActionsTest.projectPath);
-    GitProjectActions gitProjectActions = new GitProjectActions(subRepo);
+    GitProjectActions gitProjectActions = GitProjectActionsTest.getGitProjectActionsAndChangeCommit(mergeScenarioUnderAnalysis.getLocalProjectPath(), mergeScenarioUnderAnalysis.getMergeScenarioCommits().get(0));
+    getObjectSerializer().startSerialization(mergeScenarioUnderAnalysis, gitProjectActions);
     Assert.assertTrue(gitProjectActions.checkoutCommit("main"));
 
     assertJarFilesForScenarioExists(mergeScenarioUnderAnalysis);
@@ -146,11 +132,8 @@ public class ObjectSerializerMavenTest extends ObjectSerializerTest {
         .mergeScenarioCommits(Arrays.asList("7810b85dd711ac2648675dcfe5e65539aec1ea1d"))
         .build();
 
-    getObjectSerializer().startSerialization(mergeScenarioUnderAnalysis);
-
-    Repository subRepo = SubmoduleWalk.getSubmoduleRepository(GitProjectActionsTest.getMainRepository(),
-        GitProjectActionsTest.projectPath);
-    GitProjectActions gitProjectActions = new GitProjectActions(subRepo);
+    GitProjectActions gitProjectActions = GitProjectActionsTest.getGitProjectActionsAndChangeCommit(mergeScenarioUnderAnalysis.getLocalProjectPath(), mergeScenarioUnderAnalysis.getMergeScenarioCommits().get(0));
+    getObjectSerializer().startSerialization(mergeScenarioUnderAnalysis, gitProjectActions);
     Assert.assertTrue(gitProjectActions.checkoutCommit("main"));
 
     assertJarFilesForScenarioExists(mergeScenarioUnderAnalysis);
@@ -172,11 +155,8 @@ public class ObjectSerializerMavenTest extends ObjectSerializerTest {
         .mergeScenarioCommits(Arrays.asList("00c4a9fd0ae7587499f942cf2238fcf90b287baa"))
         .build();
 
-    getObjectSerializer().startSerialization(mergeScenarioUnderAnalysis);
-
-    Repository subRepo = SubmoduleWalk.getSubmoduleRepository(GitProjectActionsTest.getMainRepository(),
-        GitProjectActionsTest.projectPath);
-    GitProjectActions gitProjectActions = new GitProjectActions(subRepo);
+    GitProjectActions gitProjectActions = GitProjectActionsTest.getGitProjectActionsAndChangeCommit(mergeScenarioUnderAnalysis.getLocalProjectPath(), mergeScenarioUnderAnalysis.getMergeScenarioCommits().get(0));
+    getObjectSerializer().startSerialization(mergeScenarioUnderAnalysis, gitProjectActions);
     Assert.assertTrue(gitProjectActions.checkoutCommit("main"));
 
     assertJarFilesForScenarioExists(mergeScenarioUnderAnalysis);
@@ -199,11 +179,8 @@ public class ObjectSerializerMavenTest extends ObjectSerializerTest {
             Arrays.asList("00c4a9fd0ae7587499f942cf2238fcf90b287baa", "70fcc5af960e08ac057dfc5f3990225fafa9fd7d"))
         .build();
 
-    getObjectSerializer().startSerialization(mergeScenarioUnderAnalysis);
-
-    Repository subRepo = SubmoduleWalk.getSubmoduleRepository(GitProjectActionsTest.getMainRepository(),
-        GitProjectActionsTest.projectPath);
-    GitProjectActions gitProjectActions = new GitProjectActions(subRepo);
+    GitProjectActions gitProjectActions = GitProjectActionsTest.getGitProjectActionsAndChangeCommit(mergeScenarioUnderAnalysis.getLocalProjectPath(), mergeScenarioUnderAnalysis.getMergeScenarioCommits().get(0));
+    getObjectSerializer().startSerialization(mergeScenarioUnderAnalysis, gitProjectActions);
     Assert.assertTrue(gitProjectActions.checkoutCommit("main"));
 
     assertJarFilesForScenarioExists(mergeScenarioUnderAnalysis);
@@ -226,18 +203,16 @@ public class ObjectSerializerMavenTest extends ObjectSerializerTest {
             Arrays.asList("a7ceadcb1061874a72f950bdf48a691b68d0622b"))
         .build();
 
+    GitProjectActions gitProjectActions = GitProjectActionsTest.getGitProjectActionsAndChangeCommit(mergeScenarioUnderAnalysis.getLocalProjectPath(), mergeScenarioUnderAnalysis.getMergeScenarioCommits().get(0));
     ObjectSerializerMaven objectSerializer = new ObjectSerializerMaven();
     ObjectSerializerMaven spySerializer = spy(objectSerializer);
     doReturn(false).when(spySerializer).cleanResourceDirectory();
-    spySerializer.startSerialization(mergeScenarioUnderAnalysis);
+    spySerializer.startSerialization(mergeScenarioUnderAnalysis, gitProjectActions);
     Assert.assertFalse(new File(System.getProperty("user.dir")+File.separator+"src"+ File.separator+"test"
                       +File.separator+"resources"+File.separator+"toy-project-1"
                       +File.separator+"src"+File.separator+"main"+File.separator+"resources"
                       +File.separator+"serializedObjects"+File.separator+"Person3.xml").exists());
-    objectSerializer.startSerialization(mergeScenarioUnderAnalysis);
-    Repository subRepo = SubmoduleWalk.getSubmoduleRepository(GitProjectActionsTest.getMainRepository(),
-        GitProjectActionsTest.projectPath);
-    GitProjectActions gitProjectActions = new GitProjectActions(subRepo);
+    objectSerializer.startSerialization(mergeScenarioUnderAnalysis, gitProjectActions);
     Assert.assertTrue(gitProjectActions.checkoutCommit("main"));
   }
 
@@ -260,16 +235,14 @@ public class ObjectSerializerMavenTest extends ObjectSerializerTest {
 
     ObjectSerializerMaven objectSerializer = new ObjectSerializerMaven();
     ObjectSerializerMaven spySerializer = spy(objectSerializer);
+    GitProjectActions gitProjectActions = GitProjectActionsTest.getGitProjectActionsAndChangeCommit(mergeScenarioUnderAnalysis.getLocalProjectPath(), mergeScenarioUnderAnalysis.getMergeScenarioCommits().get(0));
     doReturn(false).when(spySerializer).cleanResourceDirectory();
-    spySerializer.startSerialization(mergeScenarioUnderAnalysis);
+    spySerializer.startSerialization(mergeScenarioUnderAnalysis, gitProjectActions);
     Assert.assertFalse(new File(System.getProperty("user.dir")+File.separator+"src"+ File.separator+"test"
                       +File.separator+"resources"+File.separator+"toy-project-1"
                       +File.separator+"src"+File.separator+"main"+File.separator+"resources"
                       +File.separator+"serializedObjects"+File.separator+"Person3.xml").exists());
-    objectSerializer.startSerialization(mergeScenarioUnderAnalysis);
-    Repository subRepo = SubmoduleWalk.getSubmoduleRepository(GitProjectActionsTest.getMainRepository(),
-        GitProjectActionsTest.projectPath);
-    GitProjectActions gitProjectActions = new GitProjectActions(subRepo);
+    objectSerializer.startSerialization(mergeScenarioUnderAnalysis, gitProjectActions);
     Assert.assertTrue(gitProjectActions.checkoutCommit("main"));
   }
 }

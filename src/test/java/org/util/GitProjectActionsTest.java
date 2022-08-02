@@ -148,6 +148,12 @@ public class GitProjectActionsTest {
         .build();
   }
 
+  public static GitProjectActions getGitProjectActionsAndChangeCommit(String repoPath, String commitHash) throws IOException{
+      GitProjectActions gitProjectActions = new GitProjectActions(repoPath);
+      gitProjectActions.checkoutCommit(commitHash);
+      return gitProjectActions;
+  }
+
   private boolean appendTextOnFile(String fileName){
     try {
       Files.write(Paths.get(fileName), "new text".getBytes(), StandardOpenOption.APPEND);
