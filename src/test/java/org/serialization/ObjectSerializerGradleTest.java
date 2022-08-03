@@ -34,6 +34,7 @@ public class ObjectSerializerGradleTest extends ObjectSerializerTest {
             .budget(60)
             .build())
         .buildManager("gradle")
+        .serialize(true)
         .mergeScenarioCommits(Arrays.asList("1d1562dc88008736fdaec9dfa9c8f4756d21da19"))
         .build();
 
@@ -57,6 +58,7 @@ public class ObjectSerializerGradleTest extends ObjectSerializerTest {
             .budget(60)
             .build())
         .buildManager("gradle")
+        .serialize(true)
         .mergeScenarioCommits(Arrays.asList("bc55f776168214586ea7d5d58187df6719f940c2"))
         .build();
 
@@ -84,6 +86,7 @@ public class ObjectSerializerGradleTest extends ObjectSerializerTest {
             .budget(60)
             .build())
         .buildManager("gradle")
+        .serialize(true)
         .mergeScenarioCommits(Arrays.asList("c257474a8206e05d82a444bead4222d1dec9f60b"))
         .build();
 
@@ -107,6 +110,7 @@ public class ObjectSerializerGradleTest extends ObjectSerializerTest {
             .budget(60)
             .build())
         .buildManager("gradle")
+        .serialize(true)
         .mergeScenarioCommits(Arrays.asList("1d1562dc88008736fdaec9dfa9c8f4756d21da19"))
         .build();
 

@@ -35,6 +35,7 @@ public class ObjectSerializerMavenTest extends ObjectSerializerTest {
             .budget(60)
             .build())
         .buildManager("maven")
+        .serialize(true)
         .mergeScenarioCommits(Arrays.asList("7810b85dd711ac2648675dcfe5e65539aec1ea1d"))
         .build();
 
@@ -59,6 +60,7 @@ GitProjectActions gitProjectActions = GitProjectActionsTest.getGitProjectActions
             .budget(60)
             .build())
         .buildManager("maven")
+        .serialize(true)
         .mergeScenarioCommits(Arrays.asList("7810b85dd711ac2648675dcfe5e65539aec1ea1d"))
         .build();
 
@@ -82,6 +84,7 @@ GitProjectActions gitProjectActions = GitProjectActionsTest.getGitProjectActions
             .budget(60)
             .build())
         .buildManager("maven")
+        .serialize(true)
         .mergeScenarioCommits(Arrays.asList("85077377978f98e31e637c121b5987e01725f5fd"))
         .build();
 
@@ -105,6 +108,7 @@ GitProjectActions gitProjectActions = GitProjectActionsTest.getGitProjectActions
             .budget(60)
             .build())
         .buildManager("maven")
+        .serialize(true)
         .mergeScenarioCommits(
             Arrays.asList("85077377978f98e31e637c121b5987e01725f5fd", "5215c5d623a131ac94284be5c3c42c2124618e99"))
         .build();
@@ -129,6 +133,7 @@ GitProjectActions gitProjectActions = GitProjectActionsTest.getGitProjectActions
             .budget(60)
             .build())
         .buildManager("maven")
+        .serialize(true)
         .mergeScenarioCommits(Arrays.asList("7810b85dd711ac2648675dcfe5e65539aec1ea1d"))
         .build();
 
@@ -152,6 +157,7 @@ GitProjectActions gitProjectActions = GitProjectActionsTest.getGitProjectActions
             .budget(60)
             .build())
         .buildManager("maven")
+        .serialize(true)
         .mergeScenarioCommits(Arrays.asList("00c4a9fd0ae7587499f942cf2238fcf90b287baa"))
         .build();
 
@@ -175,6 +181,7 @@ GitProjectActions gitProjectActions = GitProjectActionsTest.getGitProjectActions
             .budget(60)
             .build())
         .buildManager("maven")
+        .serialize(true)
         .mergeScenarioCommits(
             Arrays.asList("00c4a9fd0ae7587499f942cf2238fcf90b287baa", "70fcc5af960e08ac057dfc5f3990225fafa9fd7d"))
         .build();
@@ -199,6 +206,7 @@ GitProjectActions gitProjectActions = GitProjectActionsTest.getGitProjectActions
             .budget(60)
             .build())
         .buildManager("maven")
+        .serialize(true)
         .mergeScenarioCommits(
             Arrays.asList("a7ceadcb1061874a72f950bdf48a691b68d0622b"))
         .build();
@@ -229,6 +237,7 @@ GitProjectActions gitProjectActions = GitProjectActionsTest.getGitProjectActions
             .budget(50)
             .build())
         .buildManager("maven")
+        .serialize(true)
         .mergeScenarioCommits(
             Arrays.asList("916ac4231c0566c39a469bde5cbb8802782ec81b"))
         .build();

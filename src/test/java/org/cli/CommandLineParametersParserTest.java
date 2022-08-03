@@ -162,4 +162,43 @@ public class CommandLineParametersParserTest {
 
     Assert.assertTrue(result.isEmpty());
   }
+
+  @Test
+  public void serializationAreEnableByDefault(){
+    String[] args = {
+      "-l",
+      TOY_PROJECT_LOCATION,
+      "-c",
+      "Person",
+      "-m",
+      "getName",
+      "-p",
+      "toy-project",
+      "--commits",
+      "7810b85dd711ac2648675dcfe5e65539aec1ea1d"
+    };
+
+    MergeScenarioUnderAnalysis result = getCommandLineParametersParser().parse(args).get(0);
+    Assert.assertTrue(result.getSerialize());
+  }
+
+  @Test
+  public void serializationAreDisableIfFlagIsProvided(){
+    String[] args = {
+      "-l",
+      TOY_PROJECT_LOCATION,
+      "-c",
+      "Person",
+      "-m",
+      "getName",
+      "-p",
+      "toy-project",
+      "-ds",
+      "--commits",
+      "7810b85dd711ac2648675dcfe5e65539aec1ea1d"
+    };
+
+    MergeScenarioUnderAnalysis result = getCommandLineParametersParser().parse(args).get(0);
+    Assert.assertFalse(result.getSerialize());
+  }
 }

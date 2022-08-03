@@ -1,2 +1,2 @@
-/usr/local/toy-project,Person,getName,toy-project,true,true,60,false,123456
-/usr/local/toy-project-one,Product,getPrice,toy-project-one,false,false,0,false,123456 654321
+/usr/local/toy-project,Person,getName,toy-project,true,true,60,false,false,123456
+/usr/local/toy-project-one,Product,getPrice,toy-project-one,false,false,0,false,false,123456 654321

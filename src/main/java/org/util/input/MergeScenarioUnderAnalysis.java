@@ -13,6 +13,7 @@ public class MergeScenarioUnderAnalysis {
   private String buildManager;
   private List<String> mergeScenarioCommits;
   private TransformationOption transformationOption;
+  private boolean serialize;
 
   public String getLocalProjectPath() {
     return localProjectPath;
@@ -40,5 +41,9 @@ public class MergeScenarioUnderAnalysis {
 
   public TransformationOption getTransformationOption() {
     return transformationOption;
+  }
+
+  public boolean getSerialize(){
+    return serialize;
   }
 }

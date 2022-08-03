@@ -72,6 +72,11 @@ public class CommandLineParametersParser {
         .longOpt("help")
         .desc("Shows this help message")
         .build();
+    Option serialize = Option.builder()
+            .option("ds")
+            .longOpt("doesNotSerialize")
+            .desc("Indicates that serialized objects WON'T be generated")
+            .build();
 
     options
         .addOption(localProjectPath)
@@ -84,7 +89,8 @@ public class CommandLineParametersParser {
         .addOption(isGradle)
         .addOption(commits)
         .addOption(batchCsv)
-        .addOption(help);
+        .addOption(help)
+        .addOption(serialize);
 
     requiredOptions.add(localProjectPath);
     requiredOptions.add(targetClassName);
@@ -127,6 +133,7 @@ public class CommandLineParametersParser {
           .projectName(cmd.getOptionValue("p"))
           .transformationOption(transformationOption)
           .buildManager(cmd.hasOption("gradle") ? "gradle" : "")
+          .serialize(cmd.hasOption("doesNotSerialize") ? false : true)
           .mergeScenarioCommits(List.of(cmd.getOptionValue("commits").split(",")))
           .build());
 
@@ -157,7 +164,8 @@ public class CommandLineParametersParser {
                     .budget(Integer.parseInt(input[6]))
                     .build())
             .buildManager(input[7].equals("true") ? "gradle" : "")
-            .mergeScenarioCommits(List.of(input[8].split(" ")))
+            .serialize(input[8].equals("true") ? false : true)
+            .mergeScenarioCommits(List.of(input[9].split(" ")))
             .build());
       }
       csvReader.close();
