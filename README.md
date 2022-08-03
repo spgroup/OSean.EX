@@ -9,6 +9,7 @@ As a result, a list of serialized objects is generated as XML files.
 * Cloning the project: you must clone the repository using the recursive option: ```git clone --recurse-submodules https://github.com/leusonmario/OSean.EX```
 
 * Maven version: we use Maven as a build manager, so you must install Maven 3.6.0 or newer.
+* Java version: Java 9 or above.
 
 * Setting up dependencies: once the repository is available, you must add the jar file to your local Maven repository. 
 For that, you may use: ```mvn install:install-file -Dfile=${localRepositoryPath}/src/main/resources/testability-transformations.jar -DgroupId=com.org.testability-transformations -DartifactId=testability-transformations -Dversion=1.0 -Dpackaging=jar```
