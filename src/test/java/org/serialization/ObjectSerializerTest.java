@@ -4,8 +4,8 @@ import java.io.File;
 import java.io.IOException;
 
 import org.apache.commons.io.FileUtils;
+import org.junit.After;
 import org.junit.Assert;
-import org.junit.jupiter.api.AfterEach;
 import org.util.input.MergeScenarioUnderAnalysis;
 
 public abstract class ObjectSerializerTest {
@@ -13,7 +13,7 @@ public abstract class ObjectSerializerTest {
   protected static final String TOY_PROJECT_LOCATION = String.join(File.separator, BASE_RESOURCES_LOCATION, "toy-project");
   protected static final String TOY_PROJECT_ONE_LOCATION = String.join(File.separator, BASE_RESOURCES_LOCATION, "toy-project-1");
 
-  @AfterEach
+  @After
   public void deleteOldJar() {
     try {
       String generatedJarsDir = String.join(File.separator, BASE_RESOURCES_LOCATION, "GeneratedJars");
@@ -23,7 +23,7 @@ public abstract class ObjectSerializerTest {
     }
   }
 
-  @AfterEach
+  @After
   public void deleteTargetFolder() {
     try {
       String targetDir = String.join(File.separator, TOY_PROJECT_ONE_LOCATION, "target");
