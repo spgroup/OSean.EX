@@ -32,7 +32,8 @@ You can also provide these others options:
 - Doesn't apply testability transformations (-datt,--doesNotApplyTestabilityTransformations). By default, the application will apply all transformations.
 - Doesn't apply full testability transformations (-dfatt,--doesNotApplyFullTestabilityTransformations)
 - Serialization budget time in seconds (-b,--budgetTime). By default, a value of 60s is used.
-- Indicate usage of Gradle as build tool (-g, --gradle). If this flag is not provided, the application will use Maven as default.
+- Indicate usage of Gradle as build tool (-g, --gradle). If this flag is not provided, the application will look for a build tool based on the files present in the project root directory.
+- Indicates that serialized objects WON'T be generated (-ds, --doesNotSerialize). If this flag is provided, the application will generate JARs without serialized object for each commit given.
 
 For example, consider calling the object serializer for this project: ```java -cp ObjectSerialization-1.0-SNAPSHOT-jar-with-dependencies.jar org.RunSerialization -l /home/lmps2/projects/toy-project -c Person.java -m addRelative -p toy-project -datt -dfatt -b 60 --commits abdc125,abdc156```.
 
