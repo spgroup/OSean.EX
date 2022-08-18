@@ -10,7 +10,6 @@ import javax.xml.transform.TransformerException;
 import org.apache.commons.io.FileUtils;
 import org.file.AssembyFileSupporter;
 import org.instrumentation.PomFileInstrumentation;
-import org.util.DirUtils;
 import org.util.JarManager;
 
 public class ObjectSerializerMaven extends ObjectSerializer {
@@ -35,17 +34,15 @@ public class ObjectSerializerMaven extends ObjectSerializer {
         String message = "Creating Serialized Objects";
         boolean isTestTask = true;
 
-        startProcess(resourceFileSupporter.getProjectLocalPath().getPath(), command, message, isTestTask);
-        
-        if (DirUtils.isDirEmpty(new File(objectSerializerSupporter.getResourceDirectory()).toPath())){
+        if (!startProcess(resourceFileSupporter.getProjectLocalPath().getPath(), command, message, isTestTask)){
+          System.out.println("Updating Surefire and MockitoCore plugins...");
           pomFileInstrumentation.changeSurefirePlugin(objectSerializerSupporter.getClassPackage());
           pomFileInstrumentation.changeMockitoCore();
-          startProcess(resourceFileSupporter.getProjectLocalPath().getPath(), command, message, isTestTask);
-        }
-    
-        if (DirUtils.isDirEmpty(new File(objectSerializerSupporter.getResourceDirectory()).toPath())){
-          pomFileInstrumentation.updateOldDependencies();
-          startProcess(resourceFileSupporter.getProjectLocalPath().getPath(), command, message, isTestTask);
+          if(!startProcess(resourceFileSupporter.getProjectLocalPath().getPath(), command, message, isTestTask)){
+            System.out.println("Updating old dependencies...");
+            pomFileInstrumentation.updateOldDependencies();
+            startProcess(resourceFileSupporter.getProjectLocalPath().getPath(), command, message, isTestTask);
+          }
         }
     }
 
@@ -70,10 +67,10 @@ public class ObjectSerializerMaven extends ObjectSerializer {
     @Override
     protected boolean generateJarFile() throws IOException, InterruptedException {
       boolean successfulAction = true;
-      if (!startProcess(buildFileDirectory.getAbsolutePath(), "mvn clean compile test-compile assembly:single", "Generating jar file with serialized objects", false)){
+      if (!startProcess(buildFileDirectory.getAbsolutePath(), "mvn clean compile test-compile assembly:single", "Generating jar file with serialized objects and tests", false)){
         startProcess(resourceFileSupporter.getProjectLocalPath().getPath(), "mvn clean compile", "Compiling the whole project", false);
         if (!startProcess(buildFileDirectory.getAbsolutePath(), "mvn compile assembly:single", "Generating jar file with serialized objects", false)){
-          successfulAction &= startProcess(resourceFileSupporter.getProjectLocalPath().getPath(), "mvn clean compile assembly:single", "Generating jar file with serialized objects", false);
+          successfulAction &= startProcess(resourceFileSupporter.getProjectLocalPath().getPath(), "mvn clean compile assembly:single", "Generating jar file with serialized objects in root", false);
         }
       }
 

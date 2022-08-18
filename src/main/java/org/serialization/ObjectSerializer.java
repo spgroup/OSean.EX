@@ -5,8 +5,10 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Scanner;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.xml.transform.TransformerException;
@@ -34,7 +36,7 @@ public abstract class ObjectSerializer {
   public SerializedObjectAccessClassIntrumentation serializedObjectAccessClassIntrumentation;
   public String generatedJarFile;
   public ArrayList<String> testFilesNames = new ArrayList<>();
-  public ArrayList<String> transformedClasses = new ArrayList<>();
+  public Set<String> transformedClasses = new HashSet<>();
   
   protected abstract void createBuildFileSupporters() throws TransformerException;
   
@@ -86,6 +88,8 @@ public abstract class ObjectSerializer {
         serializedObjectAccessClassIntrumentation = new SerializedObjectAccessClassIntrumentation(
             mergeScenarioUnderAnalysis.getTargetMethod(), objectSerializerSupporter.getFullSerializerSupporterClass());
   
+        processManager.setSerializedObjectsDir(objectSerializerSupporter.getResourceDirectory());
+
         runSerializedObjectCreation();
   
         objectSerializerSupporter.deleteObjectSerializerSupporterClass(resourceFileSupporter.getTargetClassLocalPath().getPath());
@@ -178,6 +182,8 @@ public abstract class ObjectSerializer {
           saveJarFile(generatedJarFile, mergeScenarioUnderAnalysis, mergeScenarioCommit+"-"+mergeScenarioUnderAnalysis.getTargetMethod().split("\\(")[0]+".jar");
           
           gitProjectActions.undoCurrentChanges();
+          transformedClasses.clear();
+          System.out.println("Done with commit " + mergeScenarioCommit);
         }
         return true;
       }catch (Exception e){
@@ -305,7 +311,10 @@ public abstract class ObjectSerializer {
     }
         
   public boolean runTestabilityTransformations(File file, boolean applyTransformations, boolean applyFully){
-    System.out.print("Applying Testability Transformations : ");
+    if(transformedClasses.contains(file.getAbsolutePath())){
+      return true;
+    }
+    System.out.print("Applying Testability Transformations in " + file.getName() + " : ");
     try {
       Transformations.main(new String[]{new String(file.getPath()),
         String.valueOf(applyTransformations), String.valueOf(applyFully)});
@@ -323,7 +332,6 @@ public abstract class ObjectSerializer {
     for(String targetClass: classes){
       File targetClassFile = resourceFileSupporter.searchForFileByName(targetClass+".java", resourceFileSupporter.getProjectLocalPath());
       if (targetClassFile != null){
-        transformedClasses.add(targetClassFile.getAbsolutePath());
         runTestabilityTransformations(targetClassFile, transformationOption.applyTransformations(), transformationOption.applyFullTransformations());
       }
     }

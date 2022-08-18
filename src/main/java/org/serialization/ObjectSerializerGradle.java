@@ -6,7 +6,6 @@ import java.io.IOException;
 import javax.xml.transform.TransformerException;
 
 import org.instrumentation.GradleBuildFileInstrumentation;
-import org.util.DirUtils;
 import org.util.JarManager;
 
 
@@ -34,9 +33,8 @@ public class ObjectSerializerGradle extends ObjectSerializer{
         String message = "Creating Serialized Objects";
         boolean isTestTask = true;
 
-        startProcess(resourceFileSupporter.getProjectLocalPath().getPath(), command, message, isTestTask);
-
-        if (DirUtils.isDirEmpty(new File(objectSerializerSupporter.getResourceDirectory()).toPath())){
+        if (!startProcess(resourceFileSupporter.getProjectLocalPath().getPath(), command, message, isTestTask)){
+            System.out.println("Updating plugins and dependecies to new versions of Gradle...");
             gradleBuildFileInstrumentation.updateOldFatJarPlugin();
             gradleBuildFileInstrumentation.updateOldTestJarPlugin();
             gradleBuildFileInstrumentation.updateOldDependencies();
@@ -57,6 +55,7 @@ public class ObjectSerializerGradle extends ObjectSerializer{
     protected boolean generateJarFile() throws IOException, InterruptedException {
         boolean successfulAction = true;
         if(!startProcess(resourceFileSupporter.getProjectLocalPath().getPath(), "./gradlew clean fatJar", "Generating jar file with serialized objects", false)){
+            System.out.println("Updating plugins and dependecies to new versions of Gradle...");
             gradleBuildFileInstrumentation.updateOldFatJarPlugin();
             gradleBuildFileInstrumentation.updateOldDependencies();
             gradleBuildFileInstrumentation.saveChanges();
@@ -69,6 +68,7 @@ public class ObjectSerializerGradle extends ObjectSerializer{
     @Override
     protected void generateTestFilesJar() throws IOException, InterruptedException, TransformerException {
         if(!startProcess(resourceFileSupporter.getProjectLocalPath().getPath(), "./gradlew clean testJar", "Generating test files jar", false)){
+            System.out.println("Updating plugins and dependecies to new versions of Gradle...");
             gradleBuildFileInstrumentation.updateOldTestJarPlugin();
             gradleBuildFileInstrumentation.saveChanges();
             startProcess(resourceFileSupporter.getProjectLocalPath().getPath(), "./gradlew clean testJar", "Generating test files jar", false);
