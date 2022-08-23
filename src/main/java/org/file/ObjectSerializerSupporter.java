@@ -1,14 +1,10 @@
 package org.file;
 
-import static org.eclipse.jgit.lib.ObjectChecker.object;
-
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.Collections;
-import java.util.List;
 
 public class ObjectSerializerSupporter {
   protected String fullSerializerSupporterClass;
@@ -40,6 +36,7 @@ public class ObjectSerializerSupporter {
         + "import java.lang.reflect.Field;\n"
         + "import java.lang.reflect.InvocationTargetException;\n"
         + "import java.util.ArrayList;\n"
+        + "import java.util.Collections;\n"
         + "import java.util.HashMap;\n"
         + "import java.lang.reflect.Modifier;\n"
         + "import java.util.List;\n"
@@ -49,8 +46,7 @@ public class ObjectSerializerSupporter {
         + "public class ObjectSerializerSupporter {\n"
         + "\n"
         + "  private static File resourceDirectory = new File(\""+resourceDirectory+"\");\n"
-        + "  public static HashMap<String, Integer> count = new HashMap<String, Integer>();\n"
-        + "  public static HashMap<String, ArrayList<Object>> serializedObjects = new HashMap<String, ArrayList<Object>>();\n"
+        + "  public static Map<String, ArrayList<Object>> serializedObjects = Collections.synchronizedMap(new HashMap<String, ArrayList<Object>>());\n"
         + "  public static ArrayList<String> converters = new ArrayList<String>();\n"
         + "\n"
         + "  public static void serializeWithXtreamOut(Object request) throws UnsupportedEncodingException, IllegalAccessException {\n"
@@ -65,13 +61,12 @@ public class ObjectSerializerSupporter {
         + "            Object a = field.get(request);\n"
         + "            XStream xtream = new XStream();\n"
         + "            String xml = xtream.toXML(a);\n"
-        + "            if (!count.keySet().contains(getClassName(field))) {\n"
-        + "              count.put(getClassName(field), 1);\n"
-        + "              writeUsingFileWriter(xml, new File(\n"
-        + "                  resourceDirectory.getPath() + File.separator + getClassName(field) + \"\"\n"
-        + "                      + count.get(getClassName(field)) + \".xml\").getPath());\n"
+        + "            if (!serializedObjects.keySet().contains(getClassName(field))) {\n"
         + "              serializedObjects.put(getClassName(field), new ArrayList<Object>());\n"
         + "              serializedObjects.get(getClassName(field)).add(a);\n"
+        + "              writeUsingFileWriter(xml, new File(\n"
+        + "                  resourceDirectory.getPath() + File.separator + getClassName(field) + \"\"\n"
+        + "                      + serializedObjects.get(getClassName(field)).size() + \".xml\").getPath());\n"
         + "              if (!converters.contains(field.getType().getCanonicalName()) && !field.getType()\n"
         + "                  .isPrimitive() && !field.getType().toString().contains(\"[\")) {\n"
         + "                converters.add(field.getType().getCanonicalName());\n"
@@ -80,18 +75,17 @@ public class ObjectSerializerSupporter {
         + "              ArrayList<Object> aux = serializedObjects.get(getClassName(field));\n"
         + "              boolean isEqual = false;\n"
         + "              for (Object obj : aux) {\n"
-        + "                if (EqualsBuilder.reflectionEquals(obj, a, false)) {\n"
+        + "                if (EqualsBuilder.reflectionEquals(a, obj, true, null, true)) {\n"
         + "                  isEqual = true;\n"
         + "                  break;\n"
         + "                }\n"
         + "              }\n"
         + "              if (!isEqual) {\n"
-        + "                count.replace(getClassName(field), count.get(getClassName(field)) + 1);\n"
         + "                aux.add(a);\n"
         + "                serializedObjects.replace(getClassName(field), aux);\n"
         + "                writeUsingFileWriter(xml, new File(\n"
         + "                    resourceDirectory.getPath() + File.separator + getClassName(field) + \"\"\n"
-        + "                        + count.get(getClassName(field)) + \".xml\").getPath());\n"
+        + "                        + serializedObjects.get(getClassName(field)).size() + \".xml\").getPath());\n"
         + "              }\n"
         + "\n"
         + "            }\n"
@@ -101,15 +95,30 @@ public class ObjectSerializerSupporter {
         + "        }"
         + "      }\n"
         + "      if (!request.getClass().isPrimitive()){\n"
-        + "        if (count.keySet().contains(getClassName(request))){\n"
-        + "          count.replace(getClassName(request), count.get(getClassName(request))+1);\n"
-        + "        }else{\n"
-        + "          count.put(getClassName(request), 1);\n"
-        + "        }\n"
         + "        XStream xtream = new XStream();\n"
         + "        String xml = xtream.toXML(request);\n"
-        + "        writeUsingFileWriter(xml, new File(resourceDirectory.getPath()+File.separator+getClassName(request)+\"\"+count.get(getClassName(request))+\".xml\").getPath());\n"
-        + "        if (!converters.contains(getCanonicalClassName(request)) && !request.getClass().isPrimitive()){\n"
+        + "        if (serializedObjects.keySet().contains(getClassName(request))){\n"
+        + "              ArrayList<Object> aux = serializedObjects.get(getClassName(request));\n"
+        + "              boolean isEqual = false;\n"
+        + "              for (Object obj : aux) {\n"
+        + "                if (EqualsBuilder.reflectionEquals(request, obj, true, null, true)) {\n"
+        + "                  isEqual = true;\n"
+        + "                  break;\n"
+        + "                }\n"
+        + "              }\n"
+        + "              if (!isEqual) {\n"
+        + "                aux.add(request);\n"
+        + "                serializedObjects.replace(getClassName(request), aux);\n"
+        + "                writeUsingFileWriter(xml, new File(\n"
+        + "                    resourceDirectory.getPath() + File.separator + getClassName(request) + \"\"\n"
+        + "                        + aux.size() + \".xml\").getPath());\n"
+        + "              }\n"
+        + "        } else{\n"
+        + "           serializedObjects.put(getClassName(request), new ArrayList<Object>());\n"
+        + "           serializedObjects.get(getClassName(request)).add(request);\n"
+        + "           writeUsingFileWriter(xml, new File(resourceDirectory.getPath()+File.separator+getClassName(request)+\"\"+1+\".xml\").getPath());\n"
+        + "        }\n"
+        + "        if (!converters.contains(getCanonicalClassName(request))){\n"
         + "          converters.add(getCanonicalClassName(request));\n"
         + "        }\n"
         + "      }"
@@ -279,18 +288,6 @@ public class ObjectSerializerSupporter {
       e.printStackTrace();
     }
     return false;
-  }
-
-  public static String getClassNameMethodSignature(Object object) {
-    if (object.getClass().getEnclosingClass() != null && !object.getClass().getName().startsWith("java")) {
-      if (object.getClass().getCanonicalName().equals("java.util.Arrays.ArrayList")
-          || object.getClass().getCanonicalName().equals("java.util.Collections.UnmodifiableRandomAccessList")) {
-        return List.class.getCanonicalName();
-      } else if (object.getClass().getCanonicalName().equals("java.util.Collections.SynchronizedSet")) {
-        return Collections.class.getCanonicalName();
-      }
-    }
-      return object.getClass().getCanonicalName();
   }
 
   public boolean deleteObjectSerializerSupporterClass(String fileDirectory) {

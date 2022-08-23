@@ -1,3 +1,7 @@
 [submodule "src/test/resources/toy-project"]
 	path = src/test/resources/toy-project
 	url = https://github.com/leusonmario/toy-project
+[submodule "toy-project-1"]
+	path = src/test/resources/toy-project-1
+	url = https://github.com/ToniMaciel/toy-project-1
+	branch = main

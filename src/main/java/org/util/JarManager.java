@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
-import org.instrumentation.PomFileInstrumentation;
 
 public class JarManager {
 
@@ -39,8 +38,8 @@ public class JarManager {
     return false;
   }
 
-  public static String getJarFile(PomFileInstrumentation pomFileInstrumentation) {
+  public static String getJarFile(String jarFileDirectory) {
     return findJarFile(
-        new File(pomFileInstrumentation.getPomFileDirectory() + File.separator + "target"));
+        new File(jarFileDirectory));
   }
 }

@@ -2,44 +2,45 @@ package org;
 
 import java.io.IOException;
 import java.util.List;
+
 import javax.xml.transform.TransformerException;
+
+import org.cli.CommandLineParametersParser;
+import org.file.BuildFileException;
 import org.serialization.ObjectSerializer;
-import org.util.InputHandler;
+import org.serialization.ObjectSerializerGradle;
+import org.serialization.ObjectSerializerMaven;
+import org.util.DirUtils;
+import org.util.GitProjectActions;
 import org.util.input.MergeScenarioUnderAnalysis;
 
 public class RunSerialization {
-
-  public static void main(String[] args)
-      throws IOException, InterruptedException, TransformerException {
-    runAnalysis(args);
+  public static void main(String[] args) throws IOException, InterruptedException, TransformerException {
+    List<MergeScenarioUnderAnalysis> mergeScenarioUnderAnalysis = new CommandLineParametersParser().parse(args);
+    mergeScenarioUnderAnalysis.forEach(scenario -> runAnalysis(scenario));
   }
 
-  /***
-   * The values on args are used to drive the serialization process
-   * The first input is the local path of the project under analysis
-   * The second input is the class holding the method that the instrumentation will be applied
-   * The third input is the method where the instrumentation will be applied
-   * The fourth input is the project name
-   * The fifth input is generated java jar file name (optional)
-   */
-  public static void runAnalysis(String[] args)
-      throws IOException, InterruptedException, TransformerException {
-    List<MergeScenarioUnderAnalysis> mergeScenarioUnderAnalyses = InputHandler.splitInputInMergeScenarios(args);
-    if (mergeScenarioUnderAnalyses.size() > 0) {
-      ObjectSerializer objectSerializer = new ObjectSerializer();
-      objectSerializer.startSerialization(mergeScenarioUnderAnalyses);
-    }else{
-        System.out.println("Please inform all three inputs required to run the serialization process");
-        System.out.println("1º: local project path");
-        System.out.println("2º: class holding the target method");
-        System.out.println("3º: target method");
-        System.out.println("4º: project name");
-        System.out.println("5º: indication for applying testability transformations");
-        System.out.println("6º: indication for applying full testability transformations");
-        System.out.println("7º: budget for serialization");
-        System.out.println("8º: list of commit hashes");
+  public static void runAnalysis(MergeScenarioUnderAnalysis mergeScenarioUnderAnalysis) {
+    try {
+      GitProjectActions gitProjectActions = new GitProjectActions(mergeScenarioUnderAnalysis.getLocalProjectPath());
+      gitProjectActions.checkoutCommit(mergeScenarioUnderAnalysis.getMergeScenarioCommits().get(0));
+      ObjectSerializer objectSerializer = getObjectSerializer(mergeScenarioUnderAnalysis);
+      objectSerializer.startSerialization(mergeScenarioUnderAnalysis, gitProjectActions);
+    } catch (Exception e) {
+      e.printStackTrace();
     }
-
   }
 
+  public static ObjectSerializer getObjectSerializer(MergeScenarioUnderAnalysis mergeScenarioUnderAnalysis) throws BuildFileException {
+    if(mergeScenarioUnderAnalysis.getBuildManager() != null && mergeScenarioUnderAnalysis.getBuildManager().equals("gradle")){
+      return new ObjectSerializerGradle();
+    } else{
+      String buildManager = DirUtils.findBuildFileInDir(mergeScenarioUnderAnalysis.getLocalProjectPath());
+      if(buildManager == null){
+        throw new BuildFileException("Can't find pom.xml or build.gradle for project " + mergeScenarioUnderAnalysis.getProjectName());
+      }
+      return buildManager.equals("maven") ? new ObjectSerializerMaven()
+          : new ObjectSerializerGradle();
+    }
+  }
 }

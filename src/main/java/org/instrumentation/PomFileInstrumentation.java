@@ -2,7 +2,10 @@ package org.instrumentation;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -11,9 +14,11 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
 import org.apache.commons.io.filefilter.RegexFileFilter;
+import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -30,7 +35,7 @@ public class PomFileInstrumentation {
   }
 
   public File getPomFile() {
-    return pomFile;
+    return this.pomFile;
   }
 
   public File getPomFileDirectory() {
@@ -42,7 +47,6 @@ public class PomFileInstrumentation {
 
     TransformerFactory transformerFactory = TransformerFactory.newInstance();
     Transformer transformer = transformerFactory.newTransformer();
-    String aux = document.getDocumentURI();
     StreamResult result = new StreamResult(document.getDocumentURI());
     transformer.transform(source, result);
   }
@@ -122,7 +126,7 @@ public class PomFileInstrumentation {
       if (nList.getLength() < 1){
         Node dependencies = document.createElement("dependencies");
         Node xstream = getNode(document, "com.thoughtworks.xstream", "xstream", "1.4.15");
-        Node commons = getNode(document, "org.apache.commons", "commons-lang3", "3.0");
+        Node commons = getNode(document, "org.apache.commons", "commons-lang3", "3.12.0");
         Node mockitoCore = getNode(document, "org.mockito", "mockito-core", "2.8.9");
         Node mockito = getNode(document, "org.mockito", "mockito-all", "1.10.19");
         dependencies.appendChild(xstream);
@@ -137,12 +141,12 @@ public class PomFileInstrumentation {
           Node node = nList.item(temp);
           if (node.getParentNode().equals(root)) {
             Node xstream = getNode(document, "com.thoughtworks.xstream", "xstream", "1.4.15");
-            if (!isDependencyAlreadyAvailable(document.getElementsByTagName("dependency"), xstream)){
+            if (!isDependencyAlreadyAvailable(document, document.getElementsByTagName("dependency"), xstream)){
               node.appendChild(xstream);
               addedDependencies = true;
             }
-            Node commons = getNode(document, "org.apache.commons", "commons-lang3", "3.0");
-            if (!isDependencyAlreadyAvailable(document.getElementsByTagName("dependency"), commons)) {
+            Node commons = getNode(document, "org.apache.commons", "commons-lang3", "3.12.0");
+            if (!isDependencyAlreadyAvailable(document, document.getElementsByTagName("dependency"), commons)) {
               node.appendChild(commons);
               addedDependencies = true;
             }
@@ -181,19 +185,20 @@ public class PomFileInstrumentation {
     for (int temp = 0; temp < nodeList.getLength(); temp++) {
       Node node = nodeList.item(temp);
       if(node.getFirstChild() != null && node.getFirstChild().getNextSibling() != null && node.getFirstChild().getNextSibling().getFirstChild() != null &&
-            node.getFirstChild().getNextSibling().getFirstChild().getTextContent().equals(newDependency.getFirstChild().getFirstChild().getTextContent())
-        && (isNodeForJarWithDependenciesAvailable(descriptorRefs, newDependency))){
-          return true;
-      }else if (node.getFirstChild() != null && node.getFirstChild().getNextSibling() != null && node.getFirstChild().getNextSibling().getFirstChild() != null &&
-          node.getFirstChild().getNextSibling().getFirstChild().getTextContent().equals(newDependency.getFirstChild().getFirstChild().getTextContent())){
-          nodeList.item(temp).getParentNode().removeChild(node);
-          return false;
+            node.getFirstChild().getNextSibling().getFirstChild().getTextContent().equals(newDependency.getFirstChild().getFirstChild().getTextContent())){
+            
+            if (isNodeForJarWithDependenciesAvailable(descriptorRefs, newDependency))
+              return true;
+            else {
+              nodeList.item(temp).getParentNode().removeChild(node);
+              return false;
+            }
       }
     }
     return false;
   }
 
-  private boolean isDependencyAlreadyAvailable(NodeList nodeList, Node newDependency){
+  private boolean isDependencyAlreadyAvailable(Document document, NodeList nodeList, Node newDependency) throws DOMException, TransformerException{
     for (int temp = 0; temp < nodeList.getLength(); temp++) {
       Node node = nodeList.item(temp);
       //check if the groupId is already declared on the target dependency
@@ -204,7 +209,8 @@ public class PomFileInstrumentation {
       && (node.getFirstChild().getNextSibling().getNextSibling().getNextSibling().getFirstChild() != null &&
          node.getFirstChild().getNextSibling().getNextSibling().getNextSibling().getFirstChild().getTextContent().
              equals(newDependency.getFirstChild().getNextSibling().getFirstChild().getTextContent()))) {
-        return true;
+              updateVersionNode(document, node, newDependency.getFirstChild().getNextSibling().getNextSibling().getFirstChild().getTextContent());
+              return true;
       }
     }
     return false;
@@ -222,34 +228,6 @@ public class PomFileInstrumentation {
       }
     }
     return false;
-  }
-
-  private Node getPluginNode(Document document){
-    Node plugin = document.createElement("plugin");
-    Node artifactId = document.createElement("artifactId");
-    artifactId.setTextContent("maven-assembly-plugin");
-    Node version = document.createElement("version");
-    version.setTextContent("2.6");
-    Node configuration = document.createElement("configuration");
-    Node archive = document.createElement("archive");
-    Node manifest = document.createElement("manifest");
-    Node mainClass = document.createElement("mainClass");
-    mainClass.setTextContent("fully.qualified.MainClass");
-    manifest.appendChild(mainClass);
-    archive.appendChild(manifest);
-    configuration.appendChild(archive);
-
-    Node descriptorRefs = document.createElement("descriptorRefs");
-    Node descriptorRef = document.createElement("descriptorRef");
-    descriptorRef.setTextContent("jar-with-dependencies");
-    descriptorRefs.appendChild(descriptorRef);
-    configuration.appendChild(descriptorRefs);
-
-    plugin.appendChild(artifactId);
-    plugin.appendChild(configuration);
-    plugin.appendChild(version);
-
-    return plugin;
   }
 
   private Node getPluginMavenAssemblyPlugin(Document document){
@@ -498,6 +476,7 @@ public class PomFileInstrumentation {
     }
   }
 
+  // Method used to fix surefire plugin behavior in elasticsearch-river-mongodb project
   public void changeSurefirePlugin(String targetPackage) throws TransformerException{
     Document document = getPomFileAsDocument(this.pomFile);
 
@@ -524,7 +503,7 @@ public class PomFileInstrumentation {
           Node configurationNode = document.createElement("configuration");
           Node includes = document.createElement("includes");
           Node include = document.createElement("include");
-          if(target.equals("")){
+          if(targetPackage.equals("")){
             include.setTextContent("**/*Test.java");
           }else{
             include.setTextContent(targetPackage+".*");
@@ -537,15 +516,14 @@ public class PomFileInstrumentation {
           surefire.appendChild(version);
           surefire.appendChild(configurationNode);
           node.getParentNode().getParentNode().appendChild(surefire);
-          //node.getParentNode().getParentNode().removeChild(node.getParentNode());
+          node.getParentNode().getParentNode().removeChild(node.getParentNode());
         }
         saveChangesOnPomFiles(document);
       }
     }
-    changeTagContent(this.pomFile, "scope", "compile", "test");
   }
 
-  public void changeTagContent(File pomFile, String targetTag, String newValue, String oldValue) throws TransformerException{
+  public void changeTagContent(File pomFile, String targetTag, String newValue, ArrayList<String> oldValues) throws TransformerException{
     Document document = getPomFileAsDocument(pomFile);
 
     if (document != null){
@@ -556,7 +534,7 @@ public class PomFileInstrumentation {
       int numberPlugins = nList.getLength();
       for (int temp = 0; temp < numberPlugins; temp++) {
         Node node = nList.item(temp);
-        if(node.getFirstChild().getNodeValue().equals(oldValue)) {
+        if(oldValues.contains(node.getFirstChild().getNodeValue())) {
           node.getFirstChild().setNodeValue(newValue);
         }
       }
@@ -564,28 +542,20 @@ public class PomFileInstrumentation {
     }
   }
 
-  private Node getConfigurationNode(Node node){
-    if (node != null && node.getNextSibling() != null && node.getNextSibling().getNextSibling() != null &&
-        node.getNextSibling().getNextSibling().getNextSibling() != null &&
-        node.getNextSibling().getNextSibling().getNextSibling().getNextSibling() != null &&
-        node.getNextSibling().getNextSibling().getNextSibling().getNextSibling().getNodeName().equals("configuration")){
-      return node.getNextSibling().getNextSibling().getNextSibling().getNextSibling();
-    }
-    return null;
-  }
-
   public void removeAllEnforcedDependencies(File dir) throws TransformerException {
     Collection<File> files = getAllPomFiles(dir);
     for(File onePom: files){
-      changeTagContent(onePom, "goal", "display-info", "enforce");
+      ArrayList<String> oldValues = new ArrayList<String>(Arrays.asList("enforce"));
+      changeTagContent(onePom, "goal", "display-info", oldValues);
     }
   }
 
   public void updateSourceOption(File dir) throws TransformerException {
     Collection<File> files = getAllPomFiles(dir);
     for(File onePom: files){
-      changeTagContent(onePom, "source", "1.6", "1.5");
-      changeTagContent(onePom, "target", "1.6", "1.5");
+      ArrayList<String> oldValues = new ArrayList<String>(Arrays.asList("1.5", "1.6"));
+      changeTagContent(onePom, "source", "1.8", oldValues);
+      changeTagContent(onePom, "target", "1.8", oldValues);
     }
   }
 
@@ -597,6 +567,7 @@ public class PomFileInstrumentation {
     );
   }
 
+  //Method used to fix incompatibility in mockito plugins used in spring-boot project
   public void changeMockitoCore() throws TransformerException {
     Document document = getPomFileAsDocument(pomFile);
 
@@ -608,12 +579,30 @@ public class PomFileInstrumentation {
       int numberPlugins = nList.getLength();
       for (int temp = 0; temp < numberPlugins; temp++) {
         Node node = nList.item(temp);
-        if(node.getFirstChild().getNodeValue().equals("mockito-core")) {
-          node.getNextSibling().getFirstChild().setNodeValue("1.10.19");
-        }
+        if(node.getFirstChild().getNodeValue().equals("mockito-core"))
+          updateVersionNode(document, node.getParentNode(), "1.10.19");
       }
-      saveChangesOnPomFiles(document);
     }
+  }
+
+  private void updateVersionNode(Document document, Node node, String newValue) throws TransformerException{
+    NodeList nList = node.getChildNodes();
+    int numberPlugins = nList.getLength();
+    Boolean nodeWithoutVersionTag = true;
+    for (int temp = 0; temp < numberPlugins; temp++) {
+      Node nodeAux = nList.item(temp);
+      String tagName = nodeAux.getNodeName();
+      if(tagName.equals("version")){
+        nodeWithoutVersionTag = false;
+        nodeAux.getFirstChild().setNodeValue(newValue);
+      }
+    }
+    if(nodeWithoutVersionTag){
+      Node version = document.createElement("version");
+      version.setTextContent(newValue);
+      node.appendChild(version);
+    }
+    saveChangesOnPomFiles(document);
   }
 
 }
