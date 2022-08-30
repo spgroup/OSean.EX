@@ -3,23 +3,29 @@ package org.file;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.HashMap;
+
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.filefilter.TrueFileFilter;
 
 public class ResourceFileSupporter {
   protected File projectLocalPath;
   protected File targetClassLocalPath;
   protected File localPathResourceDirectory;
   protected String targetClassName;
+  protected HashMap<String, String> projectFilesPath;
 
   public ResourceFileSupporter(String pathFile){
     this.projectLocalPath = new File(pathFile);
     this.targetClassLocalPath = new File(pathFile);
+    buildFilesPath(this.projectLocalPath);
   }
   
   public ResourceFileSupporter(String pathFile, String targetClassName){
     this.projectLocalPath = new File(pathFile);
-    this.targetClassLocalPath = new File(pathFile);
     this.targetClassName = targetClassName;
+    buildFilesPath(this.projectLocalPath);
+    findTargetClassLocalPath(this.targetClassName, this.projectLocalPath);
   }
 
   public File getProjectLocalPath(){
@@ -46,21 +52,8 @@ public class ResourceFileSupporter {
   }
 
   public File searchForFileByName(String name,File file){
-    File[] list = file.listFiles();
-    if(list!=null)
-      for (File fil : list) {
-        if (fil.isDirectory()){
-          File aux = searchForFileByName(name,fil);
-          if (aux!=null){
-            return aux;
-          }
-        }else{
-          if (name.equalsIgnoreCase(fil.getName())){
-            return fil;
-          }
-        }
-      }
-    return null;
+    String filePath = projectFilesPath.get(name);
+    return (filePath != null ? new File(filePath) : null);
   }
 
   public File findBuildFileDirectory(File file, String buildFileName){
@@ -105,7 +98,11 @@ public class ResourceFileSupporter {
       e.printStackTrace();
     }
     return false;
+  }
 
+  public void buildFilesPath(File root){
+    this.projectFilesPath = new HashMap<>();
+    FileUtils.listFiles(root, TrueFileFilter.INSTANCE, TrueFileFilter.INSTANCE).stream().filter(file -> file.getName().contains(".java")).forEach(file -> projectFilesPath.put(file.getName(), file.getPath()));
   }
 
 }

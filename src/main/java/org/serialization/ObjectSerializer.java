@@ -54,7 +54,6 @@ public abstract class ObjectSerializer {
   throws IOException, InterruptedException, TransformerException {
 
     resourceFileSupporter = new ResourceFileSupporter(mergeScenarioUnderAnalysis.getLocalProjectPath(), mergeScenarioUnderAnalysis.getTargetClass());
-    resourceFileSupporter.findTargetClassLocalPath(resourceFileSupporter.getTargetClassName(), resourceFileSupporter.getProjectLocalPath());
     createBuildFileSupporters();
     processManager = new ProcessManager(mergeScenarioUnderAnalysis.getTransformationOption().getBudget());
 
@@ -110,9 +109,8 @@ public abstract class ObjectSerializer {
   public boolean generateJarsForAllMergeScenarioCommits(MergeScenarioUnderAnalysis mergeScenarioUnderAnalysis, GitProjectActions gitProjectActions){
     try {
         for (String mergeScenarioCommit : mergeScenarioUnderAnalysis.getMergeScenarioCommits()) {
-  
+          resourceFileSupporter.buildFilesPath(resourceFileSupporter.getProjectLocalPath());
           safeCheckout(gitProjectActions, mergeScenarioCommit);
-
           createAndRunBuildFileInstrumentation(resourceFileSupporter.getProjectLocalPath());
           
           runTestabilityTransformations(new File(
@@ -192,12 +190,17 @@ public abstract class ObjectSerializer {
       return false;
     }
     
-    public void safeCheckout(GitProjectActions gitProjectActions, String mergeScenarioCommit) {
-      gitProjectActions.addChanges();
+    public void safeCheckout(GitProjectActions gitProjectActions, String mergeScenarioCommit) throws IOException, InterruptedException {
+/*       gitProjectActions.addChanges();
     gitProjectActions.stashChanges();
     gitProjectActions.checkoutCommit(mergeScenarioCommit);
     gitProjectActions.stashPop();
-    gitProjectActions.restoreChanges();
+    gitProjectActions.restoreChanges(); */
+    startProcess(buildFileDirectory.getAbsolutePath(), "git add .", "Git add", false);
+    startProcess(buildFileDirectory.getAbsolutePath(), "git stash", "Git stash", false);
+    startProcess(buildFileDirectory.getAbsolutePath(), "git checkout " + mergeScenarioCommit, "Git checkout", false);
+    startProcess(buildFileDirectory.getAbsolutePath(), "git stash pop", "Git stash pop", false);
+    startProcess(buildFileDirectory.getAbsolutePath(), "git reset --mixed", "Git reset --mixed", false);
   }
 
   public ObjectSerializerClassIntrumentation createAndRunObjectSerializerInstrumentation(File file,
@@ -230,10 +233,9 @@ public abstract class ObjectSerializer {
   }
 
   public List<String> getMethodList(ResourceFileSupporter resourceFileSupporter, File pom, TransformationOption transformationOption){
-    String resourceDirectory =  resourceFileSupporter
-    .getResourceDirectoryPath(pom);
+    String resourceDirectory =  resourceFileSupporter.getResourceDirectoryPath(pom);
     List<String> methods = new ArrayList<>();
-    List<String> serializedObjectTypes = new ArrayList<>();
+    HashSet<File> serializedObjectClassesPath = new HashSet<>();
 
     Pattern pattern = Pattern.compile("public [0-9a-zA-Z\\.]* deserialize", Pattern.CASE_INSENSITIVE);
     Matcher matcher;
@@ -251,12 +253,10 @@ public abstract class ObjectSerializer {
             File classFile = resourceFileSupporter.searchForFileByName(objectType+".java", resourceFileSupporter.getProjectLocalPath());
             if(classFile != null && classFile.getCanonicalPath().contains("/src/test/")){
               for (int i = 0; i < 3; i++)
-              myReader.nextLine();
+                myReader.nextLine();
               continue;
-            }else {
-              if (!serializedObjectTypes.contains(objectType))
-                serializedObjectTypes.add(objectType);
             }
+            serializedObjectClassesPath.add(classFile);
           }
           methods.add(nextLine);
         } myReader.close();
@@ -264,7 +264,7 @@ public abstract class ObjectSerializer {
         e.printStackTrace();
       }
     }
-    runTestabilityTransformationsForSerializedObjectClasses(resourceFileSupporter, serializedObjectTypes, transformationOption);
+    runTestabilityTransformationsForSerializedObjectClasses(resourceFileSupporter, serializedObjectClassesPath, transformationOption);
     return methods;
   }
 
@@ -289,9 +289,8 @@ public abstract class ObjectSerializer {
   }
   
   public void runTestabilityTransformationsForSerializedObjectClasses(
-    ResourceFileSupporter resourceFileSupporter, List<String> serializedObjects, TransformationOption transformationOption){
-      for(String serializedObject: serializedObjects){
-        File serializedObjectFile = resourceFileSupporter.searchForFileByName(serializedObject+".java", resourceFileSupporter.getProjectLocalPath());
+    ResourceFileSupporter resourceFileSupporter, HashSet<File> serializedObjectsFiles, TransformationOption transformationOption){
+      for(File serializedObjectFile : serializedObjectsFiles){
         if (serializedObjectFile != null){
           runTestabilityTransformations(serializedObjectFile, transformationOption.applyTransformations(), transformationOption.applyFullTransformations());
         }
