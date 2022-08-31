@@ -313,17 +313,17 @@ public abstract class ObjectSerializer {
     if(transformedClasses.contains(file.getAbsolutePath())){
       return true;
     }
-    System.out.print("Applying Testability Transformations in " + file.getName() + " : ");
+    System.out.println("Applying Testability Transformations in " + file.getName());
     try {
       Transformations.main(new String[]{new String(file.getPath()),
         String.valueOf(applyTransformations), String.valueOf(applyFully)});
-        System.out.println("SUCCESSFUL");
+        System.out.println("SUCCESSFUL application");
         transformedClasses.add(file.getAbsolutePath());
         return true;
     } catch (IOException e) {
       e.printStackTrace();
     }
-    System.out.println("UNSUCCESSFUL");
+    System.out.println("FAILED application!");
     return false;
   }
   
