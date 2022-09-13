@@ -5,7 +5,7 @@ import java.io.IOException;
 
 import javax.xml.transform.TransformerException;
 
-import org.tranformations.instrumentation.GradleBuildFileInstrumentation;
+import org.transformations.instrumentation.GradleBuildFileInstrumentation;
 import org.util.JarManager;
 import org.util.ProcessManager;
 import org.util.input.MergeScenarioUnderAnalysis;

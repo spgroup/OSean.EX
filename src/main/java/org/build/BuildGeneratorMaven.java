@@ -9,7 +9,7 @@ import javax.xml.transform.TransformerException;
 
 import org.apache.commons.io.FileUtils;
 import org.file.AssembyFileSupporter;
-import org.tranformations.instrumentation.PomFileInstrumentation;
+import org.transformations.instrumentation.PomFileInstrumentation;
 import org.util.JarManager;
 import org.util.ProcessManager;
 import org.util.input.MergeScenarioUnderAnalysis;
