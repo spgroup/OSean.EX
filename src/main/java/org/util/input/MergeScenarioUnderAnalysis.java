@@ -30,7 +30,7 @@ public class MergeScenarioUnderAnalysis {
   public String getProjectName() {
     return projectName;
   }
-  
+
   public String getBuildManager() {
     return buildManager;
   }
@@ -43,7 +43,7 @@ public class MergeScenarioUnderAnalysis {
     return transformationOption;
   }
 
-  public boolean getSerialize(){
+  public boolean getSerialize() {
     return serialize;
   }
 }

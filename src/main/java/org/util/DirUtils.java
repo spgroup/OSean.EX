@@ -13,12 +13,13 @@ public class DirUtils {
     }
   }
 
-  public static String findBuildFileInDir(String dir){
-    if(new File(dir + File.separator + "pom.xml").exists()){
+  public static String findBuildFileInDir(String dir) {
+    if (new File(dir + File.separator + "pom.xml").exists()) {
       return "maven";
     }
 
-    if(new File(dir + File.separator + "build.gradle").exists() || new File(dir + File.separator + "gradlew").exists()){
+    if (new File(dir + File.separator + "build.gradle").exists()
+        || new File(dir + File.separator + "gradlew").exists()) {
       return "gradle";
     }
 

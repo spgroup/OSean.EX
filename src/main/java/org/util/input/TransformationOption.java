@@ -16,7 +16,7 @@ public class TransformationOption {
     return applyFullTransformations;
   }
 
-  public int getBudget(){
+  public int getBudget() {
     return this.budget;
   }
 }
