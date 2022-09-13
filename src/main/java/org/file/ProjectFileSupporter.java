@@ -8,76 +8,83 @@ import java.util.HashMap;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.TrueFileFilter;
 
-public class ResourceFileSupporter {
+public class ProjectFileSupporter {
   protected File projectLocalPath;
   protected File targetClassLocalPath;
   protected File localPathResourceDirectory;
   protected String targetClassName;
+  protected String targetClassFilePath;
   protected HashMap<String, String> projectFilesPath;
 
-  public ResourceFileSupporter(String pathFile){
+  public ProjectFileSupporter(String pathFile) {
     this.projectLocalPath = new File(pathFile);
     this.targetClassLocalPath = new File(pathFile);
     buildFilesPath(this.projectLocalPath);
   }
-  
-  public ResourceFileSupporter(String pathFile, String targetClassName){
+
+  public ProjectFileSupporter(String pathFile, String targetClassName) {
     this.projectLocalPath = new File(pathFile);
     this.targetClassName = targetClassName;
     buildFilesPath(this.projectLocalPath);
-    findTargetClassLocalPath(this.targetClassName, this.projectLocalPath);
+    findTargetClassLocalPath(this.targetClassName);
   }
 
-  public File getProjectLocalPath(){
+  public File getProjectLocalPath() {
     return this.projectLocalPath;
   }
 
   public File getTargetClassLocalPath() {
-    return targetClassLocalPath;
+    return this.targetClassLocalPath;
   }
 
-  public File getLocalPathResourceDirectory(){
+  public File getLocalPathResourceDirectory() {
     return this.localPathResourceDirectory;
   }
 
-  public String getTargetClassName(){
+  public String getTargetClassName() {
     return this.targetClassName;
   }
 
-  public void findTargetClassLocalPath(String name,File file){
-    File targetFile = searchForFileByName(name, file);
-    if (targetFile != null){
+  public String getTargetClassFilePath() {
+    return this.targetClassFilePath;
+  }
+
+  public void findTargetClassLocalPath(String name) {
+    File targetFile = searchForFileByName(name);
+    if (targetFile != null) {
+      this.targetClassFilePath = targetFile.getPath();
       this.targetClassLocalPath = new File(targetFile.getPath().split(name)[0]);
     }
   }
 
-  public File searchForFileByName(String name,File file){
-    String filePath = projectFilesPath.get(name);
+  public File searchForFileByName(String name) {
+    String filePath = this.projectFilesPath.get(name);
     return (filePath != null ? new File(filePath) : null);
   }
 
-  public File findBuildFileDirectory(File file, String buildFileName){
+  public File findBuildFileDirectory(File file, String buildFileName) {
+    if (outOfProject(file))
+      return null;
     File[] list = file.listFiles();
-    String name = buildFileName;
-    File aux = new File(this.projectLocalPath.getPath()).getParentFile();
-    if(list!=null && !aux.equals(file)) {
+    if (list != null) {
       for (File fil : list) {
-        if (name.equalsIgnoreCase(fil.getName())) {
+        if (buildFileName.equalsIgnoreCase(fil.getName())) {
           return fil.getParentFile();
         }
       }
       return findBuildFileDirectory(file.getParentFile(), buildFileName);
-    }else{
+    } else {
       return null;
     }
   }
 
-  public String getResourceDirectoryPath(File localPomDirectory){
-    return localPomDirectory+File.separator+"src"+File.separator+"main"+File.separator+"resources"
-        +File.separator+"serializedObjects";
+  public String getResourceDirectoryPath(File localPomDirectory) {
+    return localPomDirectory.getAbsolutePath() + File.separator + "src" + File.separator + "main" + File.separator
+        + "resources"
+        + File.separator + "serializedObjects";
   }
 
-  public boolean createNewDirectory(File localPomDirectory){
+  public boolean createNewDirectory(File localPomDirectory) {
     File resourceDirectory = new File(getResourceDirectoryPath(localPomDirectory));
     try {
       FileUtils.deleteDirectory(resourceDirectory);
@@ -90,19 +97,25 @@ public class ResourceFileSupporter {
     return false;
   }
 
-  public boolean deleteResourceDirectory(){
+  public boolean deleteResourceDirectory() {
     try {
       FileUtils.deleteDirectory(this.localPathResourceDirectory);
       return true;
-    }catch (Exception e){
+    } catch (Exception e) {
       e.printStackTrace();
     }
     return false;
   }
 
-  public void buildFilesPath(File root){
+  public void buildFilesPath(File root) {
     this.projectFilesPath = new HashMap<>();
-    FileUtils.listFiles(root, TrueFileFilter.INSTANCE, TrueFileFilter.INSTANCE).stream().filter(file -> file.getName().contains(".java")).forEach(file -> projectFilesPath.put(file.getName(), file.getPath()));
+    FileUtils.listFiles(root, TrueFileFilter.INSTANCE, TrueFileFilter.INSTANCE).stream()
+        .filter(file -> file.getName().contains(".java"))
+        .forEach(file -> projectFilesPath.put(file.getName(), file.getPath()));
   }
 
+  private boolean outOfProject(File file) {
+    File outOfProject = new File(this.projectLocalPath.getPath()).getParentFile();
+    return outOfProject.equals(file);
+  }
 }
