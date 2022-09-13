@@ -1,4 +1,4 @@
-package org.instrumentation;
+package org.transformations.instrumentation;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -25,12 +25,12 @@ import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.TryStatement;
 
-public class ObjectSerializerClassIntrumentation {
+public class ObjectSerializerClassInstrumentation {
   protected String packageName;
   protected String targetMethod;
   protected List<String> targetClasses;
 
-  public ObjectSerializerClassIntrumentation(String targetMethod, String packageName){
+  public ObjectSerializerClassInstrumentation(String targetMethod, String packageName) {
     this.packageName = packageName;
     this.targetMethod = targetMethod;
     this.targetClasses = new ArrayList<>();
@@ -44,8 +44,8 @@ public class ObjectSerializerClassIntrumentation {
     return targetMethod;
   }
 
-  public boolean undoTransformations(File file){
-    try{
+  public boolean undoTransformations(File file) {
+    try {
       final CompilationUnit cu = getCompilationUnitForFile(file);
 
       undoChanges(cu);
@@ -53,24 +53,24 @@ public class ObjectSerializerClassIntrumentation {
 
       saveTransformations(file, cu);
       return true;
-    }catch (Exception e){
+    } catch (Exception e) {
       e.printStackTrace();
     }
     return false;
   }
 
-  public boolean removeImport(CompilationUnit cu, String importedClass){
-    try{
+  public boolean removeImport(CompilationUnit cu, String importedClass) {
+    try {
       int i = 0;
-      for (Object importDeclaration: cu.imports()){
-        if(importDeclaration instanceof ImportDeclaration &&
-            ((ImportDeclaration) importDeclaration).getName().toString().contains(importedClass)){
+      for (Object importDeclaration : cu.imports()) {
+        if (importDeclaration instanceof ImportDeclaration &&
+            ((ImportDeclaration) importDeclaration).getName().toString().contains(importedClass)) {
           cu.imports().remove(i);
           return true;
         }
         i++;
       }
-    }catch (Exception e){
+    } catch (Exception e) {
       e.printStackTrace();
     }
     return false;
@@ -86,7 +86,7 @@ public class ObjectSerializerClassIntrumentation {
 
   protected String getClassPathToImport(String className) {
     return this.packageName.equals("") ? className
-        : this.packageName + "."+className;
+        : this.packageName + "." + className;
   }
 
   public boolean runTransformation(File file) throws IOException {
@@ -99,7 +99,7 @@ public class ObjectSerializerClassIntrumentation {
       saveTransformations(file, cu);
 
       return true;
-    }catch (Exception e){
+    } catch (Exception e) {
       e.printStackTrace();
     }
 
@@ -136,17 +136,19 @@ public class ObjectSerializerClassIntrumentation {
         return true;
       }
 
-      /*public boolean visit(ImportDeclaration node) {
-        return true;
-      }
-
-      public boolean visit(MethodInvocation node) {
-        return true;
-      }
-
-      public boolean visit(TryStatement node) {
-        return true;
-      }*/
+      /*
+       * public boolean visit(ImportDeclaration node) {
+       * return true;
+       * }
+       * 
+       * public boolean visit(MethodInvocation node) {
+       * return true;
+       * }
+       * 
+       * public boolean visit(TryStatement node) {
+       * return true;
+       * }
+       */
 
     });
 
@@ -169,30 +171,31 @@ public class ObjectSerializerClassIntrumentation {
 
   }
 
-  private void addMethodCallForSerialization(MethodDeclaration node){
-    if (isNodeTheTargetMethod(node)){
+  private void addMethodCallForSerialization(MethodDeclaration node) {
+    if (isNodeTheTargetMethod(node)) {
       createAstNodeWithMethodBody(node);
       getTargetClasses(node);
     }
   }
 
-  private void getTargetClasses(MethodDeclaration node){
-    for (Object parameter: node.parameters()) {
+  private void getTargetClasses(MethodDeclaration node) {
+    for (Object parameter : node.parameters()) {
       SingleVariableDeclaration parameterVariable = (SingleVariableDeclaration) parameter;
       this.targetClasses.add(parameterVariable.getType().toString());
     }
   }
 
-  private void removeMethodCallForSerialization(MethodDeclaration node){
-    if (isNodeTheTargetMethod(node)){
+  private void removeMethodCallForSerialization(MethodDeclaration node) {
+    if (isNodeTheTargetMethod(node)) {
       removeAstNode(node);
     }
   }
 
   private boolean isNodeTheTargetMethod(MethodDeclaration node) {
-    if (this.targetMethod.contains("(")){
+    if (this.targetMethod.contains("(")) {
       if (node.getName().toString().equals(this.targetMethod.split("\\(")[0])) {
-        String[] parameters = this.targetMethod.split(this.targetMethod.split("\\(")[0])[1].replace("(","").replace(")","").split(",");
+        String[] parameters = this.targetMethod.split(this.targetMethod.split("\\(")[0])[1].replace("(", "")
+            .replace(")", "").split(",");
         List parameterMethod = node.parameters();
         if (parameterMethod.size() == parameters.length) {
           int i = 0;
@@ -208,13 +211,12 @@ public class ObjectSerializerClassIntrumentation {
         }
       }
       return false;
-    }else {
+    } else {
       return node.getName().toString().equals(this.targetMethod);
     }
   }
 
-
-  private MethodInvocation getMethodInvocation(String methodName, ASTNode parameter, AST targetMethod){
+  private MethodInvocation getMethodInvocation(String methodName, ASTNode parameter, AST targetMethod) {
     MethodInvocation methodInvocation = targetMethod.newMethodInvocation();
     methodInvocation.setExpression(targetMethod.newSimpleName("ObjectSerializerSupporter"));
     methodInvocation.setName(targetMethod.newSimpleName(methodName));
@@ -245,13 +247,13 @@ public class ObjectSerializerClassIntrumentation {
 
     List<ASTNode> parameters = nodeMethod.parameters();
 
-    if (!isMethodStatic(nodeMethod)){
+    if (!isMethodStatic(nodeMethod)) {
       ThisExpression expression = ast.newThisExpression();
       body.statements().add(ast.newExpressionStatement(getMethodInvocation("serializeWithXtreamOut",
           expression, ast)));
     }
 
-    for(ASTNode parameter: parameters){
+    for (ASTNode parameter : parameters) {
       SingleVariableDeclaration aux = (SingleVariableDeclaration) parameter;
       SimpleName simpleName = ast.newSimpleName(aux.getName().getIdentifier());
       body.statements().add(ast.newExpressionStatement(getMethodInvocation(
@@ -262,16 +264,16 @@ public class ObjectSerializerClassIntrumentation {
     result.catchClauses().add(catchClause);
     if (nodeMethod.isConstructor()) {
       nodeMethod.getBody().statements().add(nodeMethod.getBody().statements().size(), result);
-    }else {
+    } else {
       nodeMethod.getBody().statements().add(0, result);
     }
 
     return nodeMethod;
   }
 
-  private boolean isMethodStatic(MethodDeclaration methodDeclaration){
-    for (Object modifier: methodDeclaration.modifiers()){
-      if (modifier instanceof Modifier && ((Modifier) modifier).isStatic()){
+  private boolean isMethodStatic(MethodDeclaration methodDeclaration) {
+    for (Object modifier : methodDeclaration.modifiers()) {
+      if (modifier instanceof Modifier && ((Modifier) modifier).isStatic()) {
         return true;
       }
     }
@@ -279,13 +281,14 @@ public class ObjectSerializerClassIntrumentation {
   }
 
   private boolean removeAstNode(MethodDeclaration nodeMethod) {
-    try{
+    try {
       int i = 0;
-      for(Object statement: nodeMethod.getBody().statements()){
-        if(statement instanceof TryStatement){
-          for (Object statementTryCatch: ((TryStatement) statement).getBody().statements()){
+      for (Object statement : nodeMethod.getBody().statements()) {
+        if (statement instanceof TryStatement) {
+          for (Object statementTryCatch : ((TryStatement) statement).getBody().statements()) {
             if (statementTryCatch instanceof ExpressionStatement &&
-                ((ExpressionStatement) statementTryCatch).getExpression().toString().contains("ObjectSerializerSupporter")){
+                ((ExpressionStatement) statementTryCatch).getExpression().toString()
+                    .contains("ObjectSerializerSupporter")) {
               nodeMethod.getBody().statements().remove(i);
               return true;
             }
@@ -294,13 +297,13 @@ public class ObjectSerializerClassIntrumentation {
         }
         i++;
       }
-    }catch (Exception e){
+    } catch (Exception e) {
       e.printStackTrace();
     }
     return false;
   }
 
-  public List<String> getTargetClasses(){
+  public List<String> getTargetClasses() {
     return this.targetClasses;
   }
 

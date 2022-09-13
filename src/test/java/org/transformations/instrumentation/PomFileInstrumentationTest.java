@@ -1,4 +1,4 @@
-package org.instrumentation;
+package org.transformations.instrumentation;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -36,7 +36,8 @@ public class PomFileInstrumentationTest {
   }
 
   private void updatePomFile(String str) throws IOException {
-    BufferedWriter writer = new BufferedWriter(new FileWriter(new File("src/test/resources/project/pom.xml").getPath()));
+    BufferedWriter writer = new BufferedWriter(
+        new FileWriter(new File("src/test/resources/project/pom.xml").getPath()));
     writer.write(str);
 
     writer.close();
@@ -44,7 +45,8 @@ public class PomFileInstrumentationTest {
 
   @Test
   public void expectTrueForAddingAllDependenciesOnPomFile() throws TransformerException {
-    PomFileInstrumentation pomFileInstrumentation = new PomFileInstrumentation(new File("src/test/resources/project").getPath());
+    PomFileInstrumentation pomFileInstrumentation = new PomFileInstrumentation(
+        new File("src/test/resources/project").getPath());
     Assert.assertTrue(pomFileInstrumentation.addRequiredDependenciesOnPOM());
   }
 
@@ -67,7 +69,8 @@ public class PomFileInstrumentationTest {
         + "\n"
         + "</project>");
 
-    PomFileInstrumentation pomFileInstrumentation = new PomFileInstrumentation(new File("src/test/resources/project").getPath());
+    PomFileInstrumentation pomFileInstrumentation = new PomFileInstrumentation(
+        new File("src/test/resources/project").getPath());
     Assert.assertTrue(pomFileInstrumentation.addRequiredDependenciesOnPOM());
     Assert.assertTrue(pomFileInstrumentation.addResourcesForGeneratedJar());
     Assert.assertTrue(pomFileInstrumentation.addPluginForJarWithAllDependencies());
@@ -129,7 +132,8 @@ public class PomFileInstrumentationTest {
         + " </build>\n"
         + "</project>");
 
-    PomFileInstrumentation pomFileInstrumentation = new PomFileInstrumentation(new File("src/test/resources/project").getPath());
+    PomFileInstrumentation pomFileInstrumentation = new PomFileInstrumentation(
+        new File("src/test/resources/project").getPath());
     Assert.assertTrue(pomFileInstrumentation.addPluginForJarWithAllDependencies());
   }
 
@@ -164,7 +168,8 @@ public class PomFileInstrumentationTest {
         + "\n"
         + "</project>");
 
-    PomFileInstrumentation pomFileInstrumentation = new PomFileInstrumentation(new File("src/test/resources/project").getPath());
+    PomFileInstrumentation pomFileInstrumentation = new PomFileInstrumentation(
+        new File("src/test/resources/project").getPath());
     Assert.assertTrue(pomFileInstrumentation.addRequiredDependenciesOnPOM());
   }
 
@@ -188,7 +193,8 @@ public class PomFileInstrumentationTest {
         + "<dependencies>\n"
         + "</project>");
 
-    PomFileInstrumentation pomFileInstrumentation = new PomFileInstrumentation(new File("src/test/resources/project").getPath());
+    PomFileInstrumentation pomFileInstrumentation = new PomFileInstrumentation(
+        new File("src/test/resources/project").getPath());
     Assert.assertFalse(pomFileInstrumentation.addRequiredDependenciesOnPOM());
     Assert.assertFalse(pomFileInstrumentation.addResourcesForGeneratedJar());
     Assert.assertFalse(pomFileInstrumentation.addPluginForJarWithAllDependencies());
@@ -215,7 +221,8 @@ public class PomFileInstrumentationTest {
         + "</dependencies>\n"
         + "</project>");
 
-    PomFileInstrumentation pomFileInstrumentation = new PomFileInstrumentation(new File("src/test/resources/project").getPath());
+    PomFileInstrumentation pomFileInstrumentation = new PomFileInstrumentation(
+        new File("src/test/resources/project").getPath());
     Assert.assertTrue(pomFileInstrumentation.addRequiredDependenciesOnPOM());
   }
 
@@ -251,7 +258,8 @@ public class PomFileInstrumentationTest {
         + "</dependencies>\n"
         + "</project>");
 
-    PomFileInstrumentation pomFileInstrumentation = new PomFileInstrumentation(new File("src/test/resources/project").getPath());
+    PomFileInstrumentation pomFileInstrumentation = new PomFileInstrumentation(
+        new File("src/test/resources/project").getPath());
     Assert.assertTrue(pomFileInstrumentation.addRequiredDependenciesOnPOM());
   }
 
@@ -282,7 +290,8 @@ public class PomFileInstrumentationTest {
         + "</dependencies>\n"
         + "</project>");
 
-    PomFileInstrumentation pomFileInstrumentation = new PomFileInstrumentation(new File("src/test/resources/project").getPath());
+    PomFileInstrumentation pomFileInstrumentation = new PomFileInstrumentation(
+        new File("src/test/resources/project").getPath());
     Assert.assertTrue(pomFileInstrumentation.addRequiredDependenciesOnPOM());
   }
 
@@ -313,13 +322,15 @@ public class PomFileInstrumentationTest {
         + "</dependencies>\n"
         + "</project>");
 
-    PomFileInstrumentation pomFileInstrumentation = new PomFileInstrumentation(new File("src/test/resources/project").getPath());
+    PomFileInstrumentation pomFileInstrumentation = new PomFileInstrumentation(
+        new File("src/test/resources/project").getPath());
     Assert.assertTrue(pomFileInstrumentation.addRequiredDependenciesOnPOM());
   }
 
   @Test
   public void expectTrueForAddingPluginForJarGeneration() throws TransformerException {
-    PomFileInstrumentation pomFileInstrumentation = new PomFileInstrumentation(new File("src/test/resources/project").getPath());
+    PomFileInstrumentation pomFileInstrumentation = new PomFileInstrumentation(
+        new File("src/test/resources/project").getPath());
     Assert.assertTrue(pomFileInstrumentation.addPluginForJarWithAllDependencies());
   }
 
@@ -327,12 +338,14 @@ public class PomFileInstrumentationTest {
   public void expectTrueForAddingPluginForJarGenerationWithBuildTagOn() throws IOException, TransformerException {
     updatePomFile(getPomWithBuildTagOn());
 
-    PomFileInstrumentation pomFileInstrumentation = new PomFileInstrumentation(new File("src/test/resources/project").getPath());
+    PomFileInstrumentation pomFileInstrumentation = new PomFileInstrumentation(
+        new File("src/test/resources/project").getPath());
     Assert.assertTrue(pomFileInstrumentation.addPluginForJarWithAllDependencies());
   }
 
   @Test
-  public void expectTrueForAddingPluginForJarGenerationWithBuildAndPluginTagsOn() throws IOException, TransformerException {
+  public void expectTrueForAddingPluginForJarGenerationWithBuildAndPluginTagsOn()
+      throws IOException, TransformerException {
     updatePomFile("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
         + "<project xmlns=\"http://maven.apache.org/POM/4.0.0\"\n"
         + "  xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n"
@@ -354,7 +367,8 @@ public class PomFileInstrumentationTest {
         + "</build>\n"
         + "</project>");
 
-    PomFileInstrumentation pomFileInstrumentation = new PomFileInstrumentation(new File("src/test/resources/project").getPath());
+    PomFileInstrumentation pomFileInstrumentation = new PomFileInstrumentation(
+        new File("src/test/resources/project").getPath());
     Assert.assertTrue(pomFileInstrumentation.addPluginForJarWithAllDependencies());
   }
 
@@ -402,7 +416,8 @@ public class PomFileInstrumentationTest {
         + "</build>\n"
         + "</project>");
 
-    PomFileInstrumentation pomFileInstrumentation = new PomFileInstrumentation(new File("src/test/resources/project").getPath());
+    PomFileInstrumentation pomFileInstrumentation = new PomFileInstrumentation(
+        new File("src/test/resources/project").getPath());
     Assert.assertTrue(pomFileInstrumentation.addPluginForJarWithAllDependencies());
   }
 
@@ -443,13 +458,15 @@ public class PomFileInstrumentationTest {
         + "</build>\n"
         + "</project>");
 
-    PomFileInstrumentation pomFileInstrumentation = new PomFileInstrumentation(new File("src/test/resources/project").getPath());
+    PomFileInstrumentation pomFileInstrumentation = new PomFileInstrumentation(
+        new File("src/test/resources/project").getPath());
     Assert.assertTrue(pomFileInstrumentation.addPluginForJarWithAllDependencies());
   }
 
   @Test
   public void expectTrueForAddingsResourcesForJarGeneration() throws TransformerException {
-    PomFileInstrumentation pomFileInstrumentation = new PomFileInstrumentation(new File("src/test/resources/project").getPath());
+    PomFileInstrumentation pomFileInstrumentation = new PomFileInstrumentation(
+        new File("src/test/resources/project").getPath());
     Assert.assertTrue(pomFileInstrumentation.addResourcesForGeneratedJar());
   }
 
@@ -457,12 +474,14 @@ public class PomFileInstrumentationTest {
   public void expectTrueForAddingsResourcesForJarGenerationWithBuildTagOn() throws IOException, TransformerException {
     updatePomFile(getPomWithBuildTagOn());
 
-    PomFileInstrumentation pomFileInstrumentation = new PomFileInstrumentation(new File("src/test/resources/project").getPath());
+    PomFileInstrumentation pomFileInstrumentation = new PomFileInstrumentation(
+        new File("src/test/resources/project").getPath());
     Assert.assertTrue(pomFileInstrumentation.addResourcesForGeneratedJar());
   }
 
   @Test
-  public void expectTrueForAddingsResourcesForJarGenerationWithBuildAndResourceTagsOn() throws IOException, TransformerException {
+  public void expectTrueForAddingsResourcesForJarGenerationWithBuildAndResourceTagsOn()
+      throws IOException, TransformerException {
     updatePomFile("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
         + "<project xmlns=\"http://maven.apache.org/POM/4.0.0\"\n"
         + "  xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n"
@@ -484,7 +503,8 @@ public class PomFileInstrumentationTest {
         + "</build>\n"
         + "</project>");
 
-    PomFileInstrumentation pomFileInstrumentation = new PomFileInstrumentation(new File("src/test/resources/project").getPath());
+    PomFileInstrumentation pomFileInstrumentation = new PomFileInstrumentation(
+        new File("src/test/resources/project").getPath());
     Assert.assertTrue(pomFileInstrumentation.addResourcesForGeneratedJar());
   }
 
@@ -510,7 +530,8 @@ public class PomFileInstrumentationTest {
         + "</build>\n"
         + "</project>");
 
-    PomFileInstrumentation pomFileInstrumentation = new PomFileInstrumentation(new File("src/test/resources/project").getPath());
+    PomFileInstrumentation pomFileInstrumentation = new PomFileInstrumentation(
+        new File("src/test/resources/project").getPath());
     Assert.assertFalse(pomFileInstrumentation.addResourcesForGeneratedJar());
   }
 
@@ -559,10 +580,11 @@ public class PomFileInstrumentationTest {
         + "  </build>\n"
         + "\n"
         + "</project>");
-    PomFileInstrumentation pomFileInstrumentation = new PomFileInstrumentation(new File("src/test/resources/project").getPath());
+    PomFileInstrumentation pomFileInstrumentation = new PomFileInstrumentation(
+        new File("src/test/resources/project").getPath());
     Assert.assertTrue(pomFileInstrumentation.changeAnimalSnifferPluginIfAdded());
   }
-  
+
   @Test
   public void expectTrueForUpdateOldRepository() throws IOException, TransformerException {
     updatePomFile("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
@@ -593,14 +615,14 @@ public class PomFileInstrumentationTest {
         + "</build>\n"
         + "</project>");
 
-    PomFileInstrumentation pomFileInstrumentation = new PomFileInstrumentation(new File("src/test/resources/project").getPath());
+    PomFileInstrumentation pomFileInstrumentation = new PomFileInstrumentation(
+        new File("src/test/resources/project").getPath());
     pomFileInstrumentation.updateOldRepository();
     String pomContent = new String(Files.readAllBytes(pomFileInstrumentation.getPomFile().toPath()));
     Assert.assertTrue(pomContent.contains("https://repo.osgeo.org/repository/release/"));
   }
 
-
-  public String getPomWithBuildTagOn(){
+  public String getPomWithBuildTagOn() {
     return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
         + "<project xmlns=\"http://maven.apache.org/POM/4.0.0\"\n"
         + "  xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n"
