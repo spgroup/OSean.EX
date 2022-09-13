@@ -73,10 +73,10 @@ public class CommandLineParametersParser {
         .desc("Shows this help message")
         .build();
     Option serialize = Option.builder()
-            .option("ds")
-            .longOpt("doesNotSerialize")
-            .desc("Indicates that serialized objects WON'T be generated")
-            .build();
+        .option("ds")
+        .longOpt("doesNotSerialize")
+        .desc("Indicates that serialized objects WON'T be generated")
+        .build();
 
     options
         .addOption(localProjectPath)
