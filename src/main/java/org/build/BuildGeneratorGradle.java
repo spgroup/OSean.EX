@@ -1,20 +1,27 @@
-package org.serialization;
+package org.build;
 
 import java.io.File;
 import java.io.IOException;
 
 import javax.xml.transform.TransformerException;
 
-import org.instrumentation.GradleBuildFileInstrumentation;
+import org.tranformations.instrumentation.GradleBuildFileInstrumentation;
 import org.util.JarManager;
+import org.util.ProcessManager;
+import org.util.input.MergeScenarioUnderAnalysis;
 
-
-public class ObjectSerializerGradle extends ObjectSerializer{
+public class BuildGeneratorGradle extends BuildGenerator {
     protected GradleBuildFileInstrumentation gradleBuildFileInstrumentation;
+
+    public BuildGeneratorGradle(MergeScenarioUnderAnalysis mergeScenarioUnderAnalysis, ProcessManager processManager)
+            throws TransformerException {
+        super(mergeScenarioUnderAnalysis, processManager);
+    }
 
     @Override
     protected void createBuildFileSupporters() throws TransformerException {
-        buildFileDirectory = resourceFileSupporter.findBuildFileDirectory(resourceFileSupporter.getTargetClassLocalPath(), "build.gradle");
+        buildFileDirectory = projectFileSupporter.findBuildFileDirectory(projectFileSupporter.getTargetClassLocalPath(),
+                "build.gradle");
         if (buildFileDirectory != null) {
             gradleBuildFileInstrumentation = new GradleBuildFileInstrumentation(buildFileDirectory.getPath());
             gradleBuildFileInstrumentation.addTestJarPlugin();
@@ -23,23 +30,20 @@ public class ObjectSerializerGradle extends ObjectSerializer{
     }
 
     @Override
-    protected boolean cleanResourceDirectory() {
-        return resourceFileSupporter.deleteResourceDirectory();
-    }
-
-    @Override
     protected void runSerializedObjectCreation() throws IOException, InterruptedException, TransformerException {
         String command = "./gradlew clean test -Dtest.ignoreFailures=true";
         String message = "Creating Serialized Objects";
         boolean isTestTask = true;
 
-        if (!startProcess(resourceFileSupporter.getProjectLocalPath().getPath(), command, message, isTestTask)){
+        if (!processManager.startProcess(projectFileSupporter.getProjectLocalPath().getPath(), command, message,
+                isTestTask, true)) {
             System.out.println("Updating plugins and dependecies to new versions of Gradle...");
             gradleBuildFileInstrumentation.updateOldFatJarPlugin();
             gradleBuildFileInstrumentation.updateOldTestJarPlugin();
             gradleBuildFileInstrumentation.updateOldDependencies();
             gradleBuildFileInstrumentation.saveChanges();
-            startProcess(resourceFileSupporter.getProjectLocalPath().getPath(), command, message, isTestTask);
+            processManager.startProcess(projectFileSupporter.getProjectLocalPath().getPath(), command, message,
+                    isTestTask, true);
         }
     }
 
@@ -54,26 +58,33 @@ public class ObjectSerializerGradle extends ObjectSerializer{
     @Override
     protected boolean generateJarFile() throws IOException, InterruptedException {
         boolean successfulAction = true;
-        if(!startProcess(resourceFileSupporter.getProjectLocalPath().getPath(), "./gradlew clean fatJar", "Generating jar file with serialized objects", false)){
+        if (!processManager.startProcess(projectFileSupporter.getProjectLocalPath().getPath(), "./gradlew clean fatJar",
+                "Generating jar file", false, true)) {
             System.out.println("Updating plugins and dependecies to new versions of Gradle...");
             gradleBuildFileInstrumentation.updateOldFatJarPlugin();
             gradleBuildFileInstrumentation.updateOldDependencies();
             gradleBuildFileInstrumentation.saveChanges();
-            successfulAction &= startProcess(resourceFileSupporter.getProjectLocalPath().getPath(), "./gradlew clean fatJar", "Generating jar file with serialized objects", false);
+            successfulAction &= processManager.startProcess(projectFileSupporter.getProjectLocalPath().getPath(),
+                    "./gradlew clean fatJar", "Generating jar file", false, true);
         }
-        generatedJarFile = JarManager.getJarFile(buildFileDirectory.getPath() + File.separator + "build" + File.separator + "libs");
+        generatedJarFile = JarManager
+                .getJarFile(buildFileDirectory.getPath() + File.separator + "build" + File.separator + "libs");
         return successfulAction;
     }
 
     @Override
     protected void generateTestFilesJar() throws IOException, InterruptedException, TransformerException {
-        if(!startProcess(resourceFileSupporter.getProjectLocalPath().getPath(), "./gradlew clean testJar", "Generating test files jar", false)){
+        if (!processManager.startProcess(projectFileSupporter.getProjectLocalPath().getPath(),
+                "./gradlew clean testJar",
+                "Generating test files jar", false, true)) {
             System.out.println("Updating plugins and dependecies to new versions of Gradle...");
             gradleBuildFileInstrumentation.updateOldTestJarPlugin();
             gradleBuildFileInstrumentation.saveChanges();
-            startProcess(resourceFileSupporter.getProjectLocalPath().getPath(), "./gradlew clean testJar", "Generating test files jar", false);
+            processManager.startProcess(projectFileSupporter.getProjectLocalPath().getPath(), "./gradlew clean testJar",
+                    "Generating test files jar", false, true);
         }
-        generatedJarFile = JarManager.getJarFile(buildFileDirectory.getPath() + File.separator + "build" + File.separator + "libs");
+        generatedJarFile = JarManager
+                .getJarFile(buildFileDirectory.getPath() + File.separator + "build" + File.separator + "libs");
     }
-    
+
 }
