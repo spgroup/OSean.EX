@@ -135,21 +135,6 @@ public class ObjectSerializerClassInstrumentation {
         addMethodCallForSerialization(node);
         return true;
       }
-
-      /*
-       * public boolean visit(ImportDeclaration node) {
-       * return true;
-       * }
-       * 
-       * public boolean visit(MethodInvocation node) {
-       * return true;
-       * }
-       * 
-       * public boolean visit(TryStatement node) {
-       * return true;
-       * }
-       */
-
     });
 
   }
