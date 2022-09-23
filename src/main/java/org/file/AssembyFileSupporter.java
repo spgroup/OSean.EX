@@ -9,7 +9,7 @@ import java.nio.file.Files;
 
 import org.apache.commons.io.FileUtils;
 
-public class AssembyFileSupporter extends ResourceFileSupporter{
+public class AssembyFileSupporter extends ProjectFileSupporter{
 
   public AssembyFileSupporter(String pathFile){
     super(pathFile);

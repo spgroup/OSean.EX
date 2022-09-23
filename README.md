@@ -21,7 +21,8 @@ For that, you may use: ```mvn install:install-file -Dfile=${localRepositoryPath}
 ## Serializing Objects
 Once you have the object serializer jar file, you can call it for a specific project using the CLI. For that, you must inform:
 
-- Local project path (-l,--localProjectPath).
+- Local project path (-l,--localProjectPath). 
+    - It is important that the path provided to this flag is absolute (e.g "/home/lmps2/projects/toy-project"), not a relative path (e.g "./projects/toy-project").
 - Target Class Name (-c,--targetClassName)
 - Target Method Name (-m,--targetMethodName).
 - Project name (-p,--projectName)
@@ -35,7 +36,7 @@ You can also provide these others options:
 - Indicate usage of Gradle as build tool (-g, --gradle). If this flag is not provided, the application will look for a build tool based on the files present in the project root directory.
 - Indicates that serialized objects WON'T be generated (-ds, --doesNotSerialize). If this flag is provided, the application will generate JARs without serialized object for each commit given.
 
-For example, consider calling the object serializer for this project: ```java -cp ObjectSerialization-1.0-SNAPSHOT-jar-with-dependencies.jar org.RunSerialization -l /home/lmps2/projects/toy-project -c Person.java -m addRelative -p toy-project -datt -dfatt -b 60 --commits abdc125,abdc156```.
+For example, consider calling the object serializer for this project: ```java -cp ObjectSerialization-1.0-SNAPSHOT-jar-with-dependencies.jar org.Main -l /home/lmps2/projects/toy-project -c Person.java -m addRelative -p toy-project -datt -dfatt -b 60 --commits abdc125,abdc156```.
 
 You may inform up to four (4) commit hashes.
 The first commit will be used to create the serialized objects; next, they will be deserialized in all commits previously informed.

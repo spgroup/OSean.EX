@@ -7,7 +7,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ProcessReport extends Thread{
+public class ProcessReport extends Thread {
 
   private InputStream is;
   private String type;
